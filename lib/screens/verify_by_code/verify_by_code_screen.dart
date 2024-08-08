@@ -1,14 +1,17 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:vibration/vibration.dart';
 
 import '../../../config/app_text.dart';
 import '../../../config/functions.dart';
 import '../../../config/palette.dart';
-import '../../../model/qr_code_model.dart';
 import '../../../widgets/all_sheet_header.dart';
 import '../../../widgets/custom_button.dart';
 import '../../draggable_menu.dart';
+import '../../model/agent_model.dart';
+import '../../model/visite_model.dart';
+import '../../remote_service/remote_service.dart';
 import '../scanner/widgets/error_sheet_container.dart';
 import '../scanner/widgets/infos_column.dart';
 import '../scanner/widgets/sheet_container.dart';
@@ -25,18 +28,36 @@ class VerifyByCodeSheet extends StatefulWidget {
 }
 
 class _VerifyByCodeSheetState extends State<VerifyByCodeSheet> {
+  AgentModel? _agent;
   ////////////////
   ///
-  AudioCache player = AudioCache();
+  final AudioPlayer player = AudioPlayer();
   ///////////////:
   ///
   bool showLabel1 = true;
-  final TextEditingController codeController = TextEditingController();
+  final TextEditingController _codeController = TextEditingController();
+
+  @override
+  void initState() {
+    _fetchAgent();
+    super.initState();
+  }
+
+  void _fetchAgent() async {
+    _agent = await Functions.fetchAgent();
+  }
+
+  @override
+  void dispose() {
+    player.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final String prefix = 'AG-';
+    final String prefix = 'AGL-';
     final Widget codeTextField = TextField(
-      controller: codeController,
+      controller: _codeController,
       keyboardType: TextInputType.text,
       style: const TextStyle(
         color: Colors.black,
@@ -113,65 +134,65 @@ class _VerifyByCodeSheetState extends State<VerifyByCodeSheet> {
                               height: 35,
                               radius: 5,
                               text: 'Vérifier',
-                              onPress: () {
-                                if (codeController.text.trim().isEmpty) {
+                              onPress: () async {
+                                if (_codeController.text.trim().isEmpty) {
                                   Functions.showToast(
                                     msg: 'Le champ code est obligatoire !',
                                   );
                                 } else {
-                                  final codePattern = RegExp(r'^AG-\d{2}-\d+$');
-                                  ;
-                                  String code = '$prefix${codeController.text}';
-                                  QrCodeModel? qrCodeModel;
-                                  if (codePattern.hasMatch(code)) {
-                                    for (QrCodeModel element
-                                        in QrCodeModel.qrCodeList) {
-                                      if (element.codeAssociate == code) {
-                                        qrCodeModel = element;
-                                      }
-                                    }
+                                  final codePattern =
+                                      RegExp(r'^AGL-\d{2}-\d+$');
+                                  String code =
+                                      '$prefix${_codeController.text}';
 
-                                    if (qrCodeModel != null) {
-                                      player.play('images/soung.mp3');
-                                      Functions.showBottomSheet(
-                                        ctxt: context,
-                                        widget: SheetContainer(
-                                          qrValue: qrCodeModel.id.toString(),
-                                        ),
-                                      );
-                                    } else {
-                                      ///////////////////////
-                                      ///sinon on fait vibrer le device
-                                      ///et on afficher un message d'erreur
-                                      ///
-                                      Vibration.vibrate(duration: 200);
-                                      Functions.showBottomSheet(
-                                        ctxt: context,
-                                        widget: Container(
-                                          height: MediaQuery.of(context)
-                                                  .size
-                                                  .height /
-                                              2,
-                                          decoration: BoxDecoration(
-                                            color: Palette.whiteColor,
-                                            borderRadius: BorderRadius.only(
-                                              topLeft: Radius.circular(15),
-                                              topRight: Radius.circular(15),
-                                            ),
+                                  if (codePattern.hasMatch(code)) {
+                                    EasyLoading.show(
+                                      status: 'Vérification en cours',
+                                    );
+                                    // fetch data
+                                    var postData = {
+                                      "code_visite":
+                                          '$prefix${_codeController.text}',
+                                    };
+                                    await RemoteService()
+                                        .postData(
+                                      endpoint: 'visiteurs/verifications',
+                                      postData: postData,
+                                    )
+                                        .then((response) async {
+                                      //EasyLoading.dismiss();
+                                      if (response.statusCode == 200 ||
+                                          response.statusCode == 201) {
+                                        //
+                                        VisiteModel visite =
+                                            visiteModelFromJson(
+                                          response.body,
+                                        );
+
+                                        // print(visite);
+
+                                        await player.play(
+                                          AssetSource('images/soung.mp3'),
+                                        );
+                                        Functions.showBottomSheet(
+                                          ctxt: context,
+                                          widget: SheetContainer(
+                                            visite: visite,
+                                            agent: _agent!,
                                           ),
-                                          child: Column(
-                                            children: [
-                                              AllSheetHeader(),
-                                              Functions.widget404(
-                                                size: size,
-                                                ctxt: context,
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      );
-                                    }
+                                        );
+                                        EasyLoading.dismiss();
+                                      } else {
+                                        print('object');
+                                        EasyLoading.dismiss();
+                                        _error(size: size);
+                                      }
+                                    });
+                                    //////////////
+                                    ///
+                                    EasyLoading.dismiss();
                                   } else {
+                                    EasyLoading.dismiss();
                                     ///////////////////////
                                     ///sinon on fait vibrer le device
                                     ///et on afficher un message d'erreur
@@ -197,6 +218,36 @@ class _VerifyByCodeSheetState extends State<VerifyByCodeSheet> {
           ),
           DraggableMenu()
         ],
+      ),
+    );
+  }
+
+  void _error({required Size size}) {
+    ///////////////////////
+    ///sinon on fait vibrer le device
+    ///et on afficher un message d'erreur
+    ///
+    Vibration.vibrate(duration: 200);
+    Functions.showBottomSheet(
+      ctxt: context,
+      widget: Container(
+        height: MediaQuery.of(context).size.height / 2,
+        decoration: BoxDecoration(
+          color: Palette.whiteColor,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(15),
+            topRight: Radius.circular(15),
+          ),
+        ),
+        child: Column(
+          children: [
+            AllSheetHeader(),
+            Functions.widget404(
+              size: size,
+              ctxt: context,
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -1,12 +1,12 @@
 import 'package:double_back_to_close_app/double_back_to_close_app.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:scanner/config/app_text.dart';
-import 'package:scanner/config/functions.dart';
-import 'package:scanner/screens/add_delivering/add_deli_screen.dart';
 
+import '../../config/app_text.dart';
+import '../../config/functions.dart';
 import '../../config/palette.dart';
 import '../../draggable_menu.dart';
+import '../add_delivering/add_deli_screen.dart';
 import '../delivering/widgets/deli_tab_bar_view_body.dart';
 import '../home/widgets/tab_bar_menu.dart';
 import '../search_by_date/deli_search_by_date_screen.dart';
@@ -136,6 +136,7 @@ class _InProcessDeliveryState extends State<InProcessDelivery> {
                       7,
                       (index) => DeliTabBarViewBody(
                         size: size,
+                        status: 'en cours',
                         date: today.subtract(
                           Duration(days: index),
                         ),
@@ -185,8 +186,13 @@ class _InProcessDeliveryState extends State<InProcessDelivery> {
                       onPressed: () {
                         // Navigation vers la page 2 avec la date sélectionnée
                         Navigator.pushNamed(
-                            context, DeliSearchByDateScreen.routeName,
-                            arguments: _selectedDate);
+                          context,
+                          DeliSearchByDateScreen.routeName,
+                          arguments: DeliSearchParams(
+                            date: _selectedDate,
+                            status: 'en cours',
+                          ),
+                        );
                       },
                       child: const Text(
                         'Voir',
@@ -233,9 +239,22 @@ class _InProcessDeliveryState extends State<InProcessDelivery> {
         });
 
         // Navigation vers la page 2 avec la date sélectionnée
-        Navigator.pushNamed(context, DeliSearchByDateScreen.routeName,
-            arguments: _selectedDate);
+        Navigator.pushNamed(
+          context,
+          DeliSearchByDateScreen.routeName,
+          arguments: DeliSearchParams(date: _selectedDate, status: 'en cours'),
+        );
       }
     }
   }
+}
+
+class DeliSearchParams {
+  DateTime date;
+  String status;
+
+  DeliSearchParams({
+    required this.date,
+    required this.status,
+  });
 }

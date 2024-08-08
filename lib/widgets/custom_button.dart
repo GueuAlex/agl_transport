@@ -33,6 +33,7 @@ class CustomButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: onPress,
         style: ElevatedButton.styleFrom(
+          splashFactory: NoSplash.splashFactory,
           elevation: 0,
           backgroundColor: color,
           shape: RoundedRectangleBorder(

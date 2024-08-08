@@ -4,17 +4,14 @@ import 'package:flutter/material.dart';
 import '../../../config/app_text.dart';
 import '../../../config/palette.dart';
 import '../../../model/members_model.dart';
-import '../../../model/qr_code_model.dart';
-import '../../../model/user.dart';
+import '../../../model/visite_model.dart';
 
 class SheetHeader extends StatelessWidget {
   const SheetHeader({
     super.key,
-    required this.user,
-    required this.qrCodeModel,
+    required this.visite,
   });
-  final User user;
-  final QrCodeModel qrCodeModel;
+  final VisiteModel visite;
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +35,7 @@ class SheetHeader extends StatelessWidget {
               color: Colors.black,
               border: Border.all(
                 width: 3,
-                color: Palette.secondaryColor,
+                color: Palette.primaryColor,
               ),
               shape: BoxShape.circle,
               image: DecorationImage(
@@ -51,16 +48,19 @@ class SheetHeader extends StatelessWidget {
             height: 5,
           ),
           AppText.large(
-            '${user.nom} ${user.prenoms}',
+            '${visite.nom} ${visite.prenoms}',
             fontSize: 14,
             color: Colors.black.withOpacity(0.7),
             textOverflow: TextOverflow.ellipsis,
           ),
           AppText.small(
-            '${user.motifVisite} \u2022 ${qrCodeModel.type}',
+            '${visite.motif.libelle.toLowerCase()}',
             textOverflow: TextOverflow.fade,
           ),
-          user.members.isNotEmpty
+          const SizedBox(
+            height: 10,
+          ),
+          /*  user.members.isNotEmpty
               ? Container(
                   margin: const EdgeInsets.only(top: 5, bottom: 8),
                   decoration: BoxDecoration(
@@ -78,7 +78,7 @@ class SheetHeader extends StatelessWidget {
                     ),
                   ),
                 )
-              : Container()
+              : Container() */
         ],
       ),
     );

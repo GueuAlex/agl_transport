@@ -2,12 +2,13 @@ import 'package:double_back_to_close_app/double_back_to_close_app.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:scanner/config/app_text.dart';
-import 'package:scanner/config/functions.dart';
-import 'package:scanner/screens/add_delivering/add_deli_screen.dart';
 
+import '../../config/app_text.dart';
+import '../../config/functions.dart';
 import '../../config/palette.dart';
 import '../../draggable_menu.dart';
+import '../add_delivering/add_deli_screen.dart';
+import '../in_process_delivery/in_process_delivery.dart';
 import '../search_by_date/deli_search_by_date_screen.dart';
 import '../side_bar/custom_side_bar.dart';
 import '../side_bar/open_side_dar.dart';
@@ -188,7 +189,10 @@ class _DeliveringScreenState extends State<DeliveringScreen> {
                         // Navigation vers la page 2 avec la date sélectionnée
                         Navigator.pushNamed(
                             context, DeliSearchByDateScreen.routeName,
-                            arguments: _selectedDate);
+                            arguments: DeliSearchParams(
+                              date: _selectedDate,
+                              status: 'terminée',
+                            ));
                       },
                       child: const Text(
                         'Voir',
@@ -235,8 +239,14 @@ class _DeliveringScreenState extends State<DeliveringScreen> {
         });
 
         // Navigation vers la page 2 avec la date sélectionnée
-        Navigator.pushNamed(context, DeliSearchByDateScreen.routeName,
-            arguments: _selectedDate);
+        Navigator.pushNamed(
+          context,
+          DeliSearchByDateScreen.routeName,
+          arguments: DeliSearchParams(
+            date: _selectedDate,
+            status: 'terminée',
+          ),
+        );
       }
     }
   }

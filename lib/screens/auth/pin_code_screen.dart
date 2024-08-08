@@ -2,12 +2,12 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
-import 'package:scanner/config/app_text.dart';
-import 'package:scanner/config/functions.dart';
-import 'package:scanner/screens/scanner/scan_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../config/app_text.dart';
+import '../../config/functions.dart';
 import '../../config/palette.dart';
+import '../scanner/scan_screen.dart';
 
 class PincodeScreen extends StatefulWidget {
   static String routeName = "pincode_screen";

@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:scanner/config/functions.dart';
+import '../config/functions.dart';
 
 ///////////////////////////////// single /////////////////////////////////////
 Livraison livraisonFromJson(String str) => Livraison.fromJson(json.decode(str));

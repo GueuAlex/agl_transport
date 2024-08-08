@@ -4,17 +4,17 @@ import 'package:intl/intl.dart';
 
 import '../../../config/app_text.dart';
 import '../../../config/palette.dart';
-import '../../../model/qr_code_model.dart';
 import '../../../model/user.dart';
+import '../../../model/visite_model.dart';
 import '../../scanner/widgets/infos_column.dart';
 
 class DetailsHeader extends StatelessWidget {
   final bool isQrcodeInfos;
   final User user;
-  final QrCodeModel qrCodeModel;
+  final VisiteModel visite;
   const DetailsHeader({
     this.isQrcodeInfos = false,
-    required this.qrCodeModel,
+    required this.visite,
     required this.user,
     super.key,
   });
@@ -28,7 +28,7 @@ class DetailsHeader extends StatelessWidget {
         height: 130,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(5),
-          color: Color.fromARGB(255, 124, 17, 20),
+          color: Colors.black.withOpacity(0.12),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -63,7 +63,7 @@ class DetailsHeader extends StatelessWidget {
             ),
             isQrcodeInfos
                 ? AppText.small(
-                    qrCodeModel.type,
+                    visite.codeVisite,
                     textOverflow: TextOverflow.fade,
                     color: Palette.whiteColor,
                   )
@@ -81,13 +81,13 @@ class DetailsHeader extends StatelessWidget {
                         Expanded(
                           child: InfosColumn(
                             opacity: 0.3,
-                            label: qrCodeModel.type == 'temporaire'
-                                ? 'Du'
-                                : 'Depuis',
+                            label: /* qrCodeModel.type == 'temporaire' */
+
+                                'Depuis',
                             widget: FittedBox(
                               child: AppText.medium(
                                 DateFormat('dd/MM/yyyy')
-                                    .format(qrCodeModel.dateDebut),
+                                    .format(visite.dateVisite),
                                 color: Palette.whiteColor,
                               ),
                             ),
@@ -96,21 +96,7 @@ class DetailsHeader extends StatelessWidget {
                         SizedBox(
                           width: 3,
                         ),
-                        qrCodeModel.type == 'temporaire'
-                            ? Expanded(
-                                child: InfosColumn(
-                                  opacity: 0.3,
-                                  label: 'Au',
-                                  widget: FittedBox(
-                                    child: AppText.medium(
-                                      DateFormat('dd/MM/yyyy')
-                                          .format(qrCodeModel.dateFin!),
-                                      color: Palette.whiteColor,
-                                    ),
-                                  ),
-                                ),
-                              )
-                            : Container()
+                        Container()
                       ],
                     ),
                   )

@@ -1,13 +1,19 @@
+import 'package:http/http.dart' as http;
+import 'package:path/path.dart';
+
 import 'package:double_back_to_close_app/double_back_to_close_app.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
-import 'package:scanner/config/functions.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sqflite/sqflite.dart';
 
 import '../../../config/app_text.dart';
+import '../../../config/functions.dart';
 import '../../../config/palette.dart';
+import '../../../local_service/local_service.dart';
+import '../../../model/agent_model.dart';
 import '../../../widgets/custom_button.dart';
 import '../../home/home.dart';
 import '../../scanner/widgets/infos_column.dart';
@@ -24,7 +30,7 @@ class _LoginScreenState extends State<LoginScreen> {
   bool showLabel1 = true;
   final TextEditingController loginController = TextEditingController();
 
-  bool isChecked = false;
+  bool isChecked = true;
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -186,8 +192,13 @@ class _LoginScreenState extends State<LoginScreen> {
                                 radius: 5,
                                 text: 'Connexion',
                                 onPress: () async {
+                                  await validateMatricule(
+                                    context,
+                                    loginController.text,
+                                    isChecked,
+                                  );
                                   //Functions.showLoadingSheet(ctxt: context);
-                                  EasyLoading.showProgress(
+                                  /*  EasyLoading.showProgress(
                                     0.3,
                                     status: 'chargement...',
                                   );
@@ -222,7 +233,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                         gravity: ToastGravity.TOP,
                                       );
                                     }
-                                  }
+                                  } */
                                 },
                               ),
                             )
@@ -239,4 +250,99 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
+}
+
+Future<void> validateMatricule(
+    BuildContext context, String matricule, bool isChecked) async {
+  if (matricule.trim().isEmpty) {
+    Functions.showToast(
+        msg: 'Veuillez renseigner votre numéro matricule',
+        gravity: ToastGravity.TOP);
+    return;
+  }
+  EasyLoading.showProgress(
+    0.3,
+    status: 'chargement...',
+  );
+  final response = await http.get(
+    Uri.parse('http://194.163.136.227:8079/api/users/$matricule'),
+  );
+  print(response.statusCode);
+
+  if (response.statusCode == 200 || response.statusCode == 201) {
+    var json = response.body;
+    AgentModel agent = agentModelFromJson(json);
+    // check if account is active
+    if (!agent.actif) {
+      EasyLoading.dismiss();
+      Functions.showToast(
+        msg: 'Votre compte est inactif veuillez contacter votre responsable',
+        gravity: ToastGravity.TOP,
+      );
+      return;
+    }
+
+    int result = await LocalService().createLocalAgent(agent: agent);
+    if (result != 0) {
+      // if user set remember me to true
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      if (isChecked) {
+        await prefs.setBool('isRemember', true);
+      }
+      EasyLoading.dismiss();
+      Get.offAllNamed(Home.routeName);
+    } else {
+      EasyLoading.dismiss();
+      Functions.showToast(
+        msg: 'Veuillez réessayer !',
+        gravity: ToastGravity.TOP,
+      );
+    }
+  } else {
+    EasyLoading.dismiss();
+    // Handle the error
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Matricule invalide')),
+    );
+  }
+}
+
+Future<int> createLocalAgent({required AgentModel agent}) async {
+  final databasePath = await getDatabasesPath();
+  final path = join(databasePath, 'user_database.db');
+
+  final database =
+      await openDatabase(path, version: 1, onCreate: (db, version) async {
+    await db.execute('''
+    CREATE TABLE user(
+      id INTEGER PRIMARY KEY,
+      name TEXT,
+      email TEXT,
+      telephone TEXT,
+      actif INTEGER,
+      matricule TEXT,
+      localisation_id INTEGER,
+      avatar TEXT,
+      localisation_name TEXT
+    )
+  ''');
+  });
+
+  int result = await database.insert(
+    'user',
+    {
+      'id': agent.id,
+      'name': agent.name,
+      'email': agent.email,
+      'telephone': agent.telephone,
+      'actif': agent.actif ? 1 : 0,
+      'matricule': agent.matricule,
+      'localisation_id': agent.localisation.id,
+      'avatar': agent.avatar,
+      'localisation_name': agent.localisation.libelle,
+    },
+    conflictAlgorithm: ConflictAlgorithm.replace,
+  );
+
+  return result;
 }

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:scanner/config/app_text.dart';
-import 'package:scanner/screens/scanner/widgets/infos_column.dart';
-import 'package:scanner/widgets/all_sheet_header.dart';
 
+import '../../../config/app_text.dart';
 import '../../../model/entreprise_model.dart';
+import '../../../widgets/all_sheet_header.dart';
 import '../../add_delivering/add_deli_screen.dart';
+import '../../scanner/widgets/infos_column.dart';
 
 class SearchBottomSheet extends StatefulWidget {
   @override

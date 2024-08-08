@@ -8,9 +8,9 @@ import 'package:intl/intl.dart';
 import '../../config/app_text.dart';
 import '../../config/palette.dart';
 import '../../model/order_by_date_and_hours.dart';
-import '../../model/qr_code_model.dart';
 import '../../model/scan_history_model.dart';
 import '../../model/user.dart';
+import '../../model/visite_model.dart';
 import '../scanner/widgets/infos_column.dart';
 import 'widgets/deatils.dart';
 import 'widgets/detail_header.dart';
@@ -21,15 +21,19 @@ class QrCodeDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final qrCodeModel =
-        ModalRoute.of(context)!.settings.arguments as QrCodeModel;
-    final User user = qrCodeModel.user;
-    final List<ScanHistoryModel> scanList = getThisQrCodeScanHistory(
-      qrCodeId: qrCodeModel.id,
-    );
-
-    List<OrderByDateAndHours<ScanHistoryModel>> data = getDataByDate(
-      scanList: scanList,
+    final visite = ModalRoute.of(context)!.settings.arguments as VisiteModel;
+    final User user = User(
+      id: visite.id,
+      genre: visite.genre,
+      nom: visite.nom,
+      prenoms: visite.prenoms,
+      entreprise: visite.entreprise,
+      numeroCni: visite.numeroCni,
+      plaqueVehicule: visite.plaqueVehicule,
+      email: visite.email,
+      number: visite.number,
+      entrepotVisite: "",
+      motifVisite: visite.motif.libelle,
     );
 
     return Scaffold(
@@ -45,94 +49,119 @@ class QrCodeDetailsScreen extends StatelessWidget {
         ),
         backgroundColor: Palette.primaryColor,
         title: AppText.medium(
-          'Detailles',
+          'Détails',
           color: Palette.whiteColor,
         ),
-        // elevation: 1,
       ),
       body: SafeArea(
-          child: Column(
-        children: [
-          Container(
-            width: double.infinity,
-            color: Palette.primaryColor,
-            padding: const EdgeInsets.all(8),
-            child: Row(
-              children: [
-                DetailsHeader(
-                  user: user,
-                  qrCodeModel: qrCodeModel,
-                ),
-                const SizedBox(
-                  width: 5,
-                ),
-                DetailsHeader(
-                  isQrcodeInfos: true,
-                  user: user,
-                  qrCodeModel: qrCodeModel,
-                ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8),
-            child: InfosColumn(
-                label: 'Historique',
-                widget: AppText.medium('Historiques des scans')),
-          ),
-          Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                children: data
-                    .map(
-                      (e) => GFAccordion(
-                        titleChild: AppText.medium(
-                          dateFormateur(dateTime: e.date),
-                        ),
-                        contentChild: GridView.builder(
-                          shrinkWrap: true,
-
-                          gridDelegate:
-                              SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2, // Nombre d'éléments par ligne
-                            childAspectRatio: 3.6,
-                          ),
-                          itemCount: e.data
-                              .length, // Nombre total d'éléments dans la grille
-                          itemBuilder: (context, index) {
-                            return Details(scanHistoryModel: e.data[index]);
-                          },
-                        ),
-                      ),
-                    )
-                    .toList(),
+        child: Column(
+          children: [
+            Container(
+              width: double.infinity,
+              color: Palette.primaryColor,
+              padding: const EdgeInsets.all(8),
+              child: Row(
+                children: [
+                  DetailsHeader(
+                    user: user,
+                    visite: visite,
+                  ),
+                  const SizedBox(
+                    width: 5,
+                  ),
+                  DetailsHeader(
+                    isQrcodeInfos: true,
+                    user: user,
+                    visite: visite,
+                  ),
+                ],
               ),
             ),
-          ),
-        ],
-      )),
+            Padding(
+              padding: const EdgeInsets.all(8),
+              child: InfosColumn(
+                label: 'Historique',
+                widget: AppText.medium('Historiques des scans'),
+              ),
+            ),
+            Expanded(
+              child: FutureBuilder<List<ScanHistoryModel>>(
+                future: getThisQrCodeScanHistory(qrCodeId: visite.id),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(
+                      child: AppText.medium('Erreur : ${snapshot.error}'),
+                    );
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return Center(
+                      child: AppText.medium('Aucun historique de scan trouvé.'),
+                    );
+                  } else {
+                    final List<ScanHistoryModel> scanList = snapshot.data!;
+                    List<OrderByDateAndHours<ScanHistoryModel>> data =
+                        getDataByDate(scanList: scanList);
+
+                    return SingleChildScrollView(
+                      child: Column(
+                        children: data
+                            .map(
+                              (e) => GFAccordion(
+                                titleChild: AppText.medium(
+                                  dateFormateur(dateTime: e.date),
+                                ),
+                                contentChild: GridView.builder(
+                                  shrinkWrap: true,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  gridDelegate:
+                                      const SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount:
+                                        2, // Nombre d'éléments par ligne
+                                    childAspectRatio: 3.6,
+                                  ),
+                                  itemCount: e.data.length,
+                                  itemBuilder: (context, index) {
+                                    return Details(
+                                      scanHistoryModel: e.data[index],
+                                    );
+                                  },
+                                ),
+                              ),
+                            )
+                            .toList(),
+                      ),
+                    );
+                  }
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
-  // retourne l'historique de scan d'un qr code
-  List<ScanHistoryModel> getThisQrCodeScanHistory({required int qrCodeId}) {
+  // Fonction asynchrone pour obtenir l'historique de scan d'un QR code
+  Future<List<ScanHistoryModel>> getThisQrCodeScanHistory(
+      {required int qrCodeId}) async {
     List<ScanHistoryModel> scanList = [];
-    scanList.clear();
-    ScanHistoryModel.scanHistories.forEach((element) {
-      if (element.qrCodeId == qrCodeId) {
+    List<ScanHistoryModel> allScanHistories =
+        await ScanHistoryModel.scanHistories;
+
+    for (var element in allScanHistories) {
+      if (element.visiteId == qrCodeId) {
         scanList.add(element);
       }
-    });
+    }
+
     return scanList;
   }
 
-////////////////
-  /// filtre l'historique de scan d'un qr code et ordonne
-  /// par date et heur
+  // Filtrer l'historique de scan d'un QR code et ordonner par date et heure
   List<OrderByDateAndHours<ScanHistoryModel>> getDataByDate({
     required List<ScanHistoryModel> scanList,
   }) {
-    // Triez la liste de ScanHistoryModel par date et heure
     scanList.sort((a, b) {
       final dateComparison = b.scandDate.compareTo(a.scandDate);
       if (dateComparison != 0) {
@@ -143,45 +172,39 @@ class QrCodeDetailsScreen extends StatelessWidget {
     });
 
     List<OrderByDateAndHours<ScanHistoryModel>> data = [];
-    DateTime currentDate =
-        DateTime(0); // Utilisé pour vérifier la date actuelle
+    DateTime currentDate = DateTime(0);
 
     for (var scan in scanList) {
-      // Vérifiez si la date est différente de la date actuelle
       if (!isSameDay(scan.scandDate, currentDate)) {
         currentDate = scan.scandDate;
-        // Créez un nouvel objet OrderByDateAndHours avec la date actuelle
         OrderByDateAndHours<ScanHistoryModel> orderByDateAndHours =
             OrderByDateAndHours<ScanHistoryModel>(data: [], date: currentDate);
         data.add(orderByDateAndHours);
       }
-
-      // Ajoutez le ScanHistoryModel à la liste correspondante
       data.last.data.add(scan);
     }
 
     return data;
   }
 
-// compraison de date
+  // Comparaison de date
   bool isSameDay(DateTime date1, DateTime date2) {
     return date1.year == date2.year &&
         date1.month == date2.month &&
         date1.day == date2.day;
   }
 
-  ///////////
-  /// formatage de date
+  // Formatage de date
   String dateFormateur({required DateTime dateTime}) {
     DateTime today = DateTime(
       DateTime.now().year,
       DateTime.now().month,
       DateTime.now().day,
     );
-    if (dateTime == today) {
+    if (isSameDay(dateTime, today)) {
       return "Aujourd'hui";
     }
-    if (today.subtract(const Duration(days: 1)) == dateTime) {
+    if (isSameDay(today.subtract(const Duration(days: 1)), dateTime)) {
       return "Hier";
     }
 

@@ -3,21 +3,20 @@ import 'package:flutter/material.dart';
 
 import '../../../config/app_text.dart';
 import '../../../config/palette.dart';
-import '../../../model/qr_code_model.dart';
-import '../../../model/user.dart';
+import '../../../model/visite_model.dart';
 import '../../../widgets/profil_picture_container.dart';
 import '../../qr_code_details/qr_code_details_screen.dart';
 
 class ScanHistoryCard extends StatelessWidget {
-  final QrCodeModel qrCodeModel;
+  final VisiteModel visite;
   const ScanHistoryCard({
     super.key,
-    required this.qrCodeModel,
+    required this.visite,
   });
 
   @override
   Widget build(BuildContext context) {
-    User user = qrCodeModel.user;
+    //User user = qrCodeModel.user;
     //final size = MediaQuery.of(context).size;
     return Card(
       elevation: 0.3,
@@ -28,17 +27,17 @@ class ScanHistoryCard extends StatelessWidget {
           onTap: () => Navigator.pushNamed(
             context,
             QrCodeDetailsScreen.routeName,
-            arguments: qrCodeModel,
+            arguments: visite,
           ),
           leading:
               ProfilPictureContaire(asset: 'assets/images/black-woman.png'),
           title: AppText.medium(
-            '${user.nom} ${user.prenoms}',
+            '${visite.nom} ${visite.prenoms}',
             textOverflow: TextOverflow.fade,
             fontSize: 12,
           ),
           subtitle: AppText.small(
-            '${user.motifVisite} \u2022 ${qrCodeModel.type}',
+            '${visite.motif.libelle} \u2022 ${visite.entreprise}',
             textOverflow: TextOverflow.fade,
           ),
           trailing: Icon(

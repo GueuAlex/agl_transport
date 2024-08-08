@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../screens/add_delivering/add_deli_screen.dart';
 import '../screens/delivering/deliverig_screen.dart';
 import '../screens/home/home.dart';
 import '../screens/in_process_delivery/in_process_delivery.dart';
 import '../screens/scanner/scan_screen.dart';
+import '../screens/stats_creen/stats_screen.dart';
 import '../screens/verify_by_code/verify_by_code_screen.dart';
 
 class DraggableMenuModel {
@@ -36,13 +38,20 @@ class DraggableMenuModel {
       route: VerifyByCodeSheet.routeName,
       color: Color.fromARGB(255, 1, 88, 120),
     ),
+    DraggableMenuModel(
+      title: 'Livraison',
+      subTitle: 'Vérifier une livraison',
+      icon: 'assets/icons/menu/controle-des-camions.svg',
+      route: AddDeliScree.routeName,
+      color: Color.fromARGB(255, 160, 0, 0),
+    ),
   ];
   static List<DraggableMenuModel> dragMenuList2 = [
     DraggableMenuModel(
       title: 'Vos Stats',
       subTitle: 'Une vue d\'ensemble de vos statistiques',
       icon: 'assets/icons/menu/chart-histogram.svg',
-      route: 'StatsScreen',
+      route: StatsScreen.routeName,
       color: Color.fromARGB(255, 0, 178, 163),
     ),
     DraggableMenuModel(
@@ -62,7 +71,7 @@ class DraggableMenuModel {
     DraggableMenuModel(
       title: 'Livraison',
       subTitle: 'Créer une nouvelle livraison',
-      icon: 'assets/icons/menu/person-carry-box.svg',
+      icon: 'assets/icons/menu/camion-medical.svg',
       route: 'CreateDeliveryScreen',
       color: Color.fromARGB(255, 255, 0, 221),
     ),

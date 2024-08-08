@@ -1,5 +1,4 @@
-import 'package:scanner/screens/delivering/deliverig_screen.dart';
-
+import '../screens/delivering/deliverig_screen.dart';
 import '../screens/home/home.dart';
 import '../screens/scanner/scan_screen.dart';
 

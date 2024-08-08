@@ -1,16 +1,21 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
-import 'package:scanner/model/entreprise_model.dart';
-import 'package:scanner/model/livraison_model.dart';
 
+import '../model/entreprise_model.dart';
+import '../model/livraison_model.dart';
+import '../model/motif_model.dart';
 import '../model/qr_code_model.dart';
 import '../model/scan_history_model.dart';
+import '../model/site_model.dart';
+import '../model/tracteur_modal.dart';
+import '../model/visite_model.dart';
 
 ///////////////// base uri//////////////
 //const baseUri = 'http://194.163.136.227:8087/api/';
 //const baseUri = 'https://agility.digifaz.com/api/';
 const baseUri = 'https://agility-app.com/api/';
+const testbaseUri = 'http://194.163.136.227:8079/api/';
 
 ///////////////////////////////////////
 ///
@@ -19,7 +24,95 @@ class RemoteService {
   ///initialisation du client http
   var client = http.Client();
   //////////////////////////////
-  ///
+  Future<List<MotifModel>> getMotifList() async {
+    var uri = Uri.parse(testbaseUri + 'motifs');
+    var response = await client.get(uri);
+    //print('my user Dans remote /////////////////////////// : ${response.body}');
+    //print('Dans remote////////////////////////////// : ${response.statusCode}');
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      var json = response.body;
+      print(response.body);
+      List<MotifModel> motifs = motifModelFromJson(json);
+      print('motif list : ${motifs.length}');
+      return motifs;
+    }
+    return [];
+  }
+
+  //post data
+  Future<http.Response> postData(
+      {required String endpoint,
+      required Map<String, dynamic> postData}) async {
+    final url = Uri.parse('$testbaseUri$endpoint');
+    print('$testbaseUri$endpoint');
+
+    final response = await client.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: jsonEncode(postData),
+    );
+    print(response.body);
+
+    return response;
+  }
+
+  ////////////////////////////////////////////////////////////
+  /// get all qr code in our BD
+  ///////
+  Future<List<TracteurModel>> getTracteurs() async {
+    var uri = Uri.parse(testbaseUri + 'tracteurs');
+    var response = await client.get(uri);
+    //print('my user Dans remote /////////////////////////// : ${response.body}');
+    //print('Dans remote////////////////////////////// : ${response.statusCode}');
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      var json = response.body;
+      //print(response.body);
+      List<TracteurModel> tracteurs = listTracteurFromJson(json);
+      //print('qr code list : ${tracteurs.length}');
+      return tracteurs;
+    }
+    return [];
+  }
+
+  ////////////////////////////////////////////////////////////
+  /// get all qr code in our BD
+  ///////
+  Future<List<VisiteModel>> getVisites() async {
+    var uri = Uri.parse(testbaseUri + 'visiteurs');
+    var response = await client.get(uri);
+    //print('my user Dans remote /////////////////////////// : ${response.body}');
+    //print('Dans remote////////////////////////////// : ${response.statusCode}');
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      var json = response.body;
+      print(response.body);
+      List<VisiteModel> qrCodeModel = listVisiteModelFromJson(json);
+      print('qr code list : ${qrCodeModel.length}');
+      return qrCodeModel;
+    }
+    return [];
+  }
+
+  ////////////////////////////////////////////////////////////
+  /// get all qr code in our BD
+  ///////
+  Future<List<SiteModel>> getSites() async {
+    var uri = Uri.parse(testbaseUri + 'localisations');
+    var response = await client.get(uri);
+    //print('my user Dans remote /////////////////////////// : ${response.body}');
+    //print('Dans remote////////////////////////////// : ${response.statusCode}');
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      var json = response.body;
+      print(response.body);
+      List<SiteModel> sites = siteModelFromJson(json);
+      print('site  list : ${sites.length}');
+      return sites;
+    }
+    return [];
+  }
+
   ////////////////////////////////////////////////////////////
   /// get all qr code in our BD
   ///////
@@ -44,10 +137,11 @@ class RemoteService {
   /// get all qr code in our BD
   ///////
   Future<List<ScanHistoryModel>> getScanHistories() async {
-    var uri = Uri.parse(baseUri + 'scanCounters');
+    var uri = Uri.parse(testbaseUri + 'scanCounters');
     var response = await client.get(uri);
     // print('my user Dans remote /////////////////////////// : ${response.body}');
     // print('Dans remote////////////////////////////// : ${response.statusCode}');
+    print('visits historique : ${response.body}');
     if (response.statusCode == 200 || response.statusCode == 201) {
       var json = response.body;
       //print(response.body);
@@ -175,7 +269,7 @@ class RemoteService {
     required Map<String, dynamic> data,
   }) async {
     ////////// parse our url /////////////////////
-    var url = Uri.parse(baseUri + api);
+    var url = Uri.parse(testbaseUri + api);
     //var postEmail = {"email": email};
     ///////////// encode email to json objet/////////
     var payload = jsonEncode(data);
@@ -192,7 +286,8 @@ class RemoteService {
       //Tontine tontine = tontineFromJson(response.body);
       var jsdecod = jsonDecode(response.body);
       //print('puuuuut : ${jsdecod['id']}');
-      return jsdecod['id'];
+      //return jsdecod['id'];
+      return jsdecod;
     } else {
       return null;
     }

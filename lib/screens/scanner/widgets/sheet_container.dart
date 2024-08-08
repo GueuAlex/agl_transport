@@ -1,40 +1,38 @@
-import 'dart:math';
+import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 import 'package:intl/intl.dart';
 
 import '../../../config/app_text.dart';
 import '../../../config/functions.dart';
 import '../../../config/palette.dart';
-import '../../../model/qr_code_model.dart';
-import '../../../model/scan_history_model.dart';
+import '../../../model/agent_model.dart';
 import '../../../model/user.dart';
+import '../../../model/visite_model.dart';
+import '../../../remote_service/remote_service.dart';
 import '../../../widgets/all_sheet_header.dart';
 import '../../../widgets/custom_button.dart';
 import 'infos_column.dart';
 import 'sheet_header.dart';
 
 class SheetContainer extends StatefulWidget {
-  ///:::::::::::///////////////////:
-  /// a utiliser pour l'api
-  /// on va utilise qrValue, pour une requet get dans notre api
-  /// pour obtenir toutes les infos du rqcode qu'on vient de scanné
-  final String qrValue;
+  ///::::::::::::::::::::::::::::::::::::::::::
+  ///Traitement de la visite
+
+  final VisiteModel visite;
+  final AgentModel agent;
   ////////:::::::::::::////////////////
-  const SheetContainer({
-    super.key,
-    required this.qrValue,
-  });
+  const SheetContainer({super.key, required this.visite, required this.agent});
 
   @override
   State<SheetContainer> createState() => _SheetContainerState();
 }
 
 class _SheetContainerState extends State<SheetContainer> {
-  bool showLabel1 = true;
-  bool showLabel2 = true;
-
   ////////////////
   ///nous permet d'afficher un gift de chargement
   ///mais je ne suis pas sûr de cette de methode
@@ -45,44 +43,36 @@ class _SheetContainerState extends State<SheetContainer> {
   final TextEditingController iDController = TextEditingController();
   final TextEditingController cariDController = TextEditingController();
   final TextEditingController cariDController2 = TextEditingController();
+  final TextEditingController _badgeController = TextEditingController();
   /////////////////////
   ///
   String alertCarIDValue = '';
 
-  User? user;
-  QrCodeModel? _qrCodeModel;
-
+  /////////////////////////////////////////////////
+  ///
   @override
   void initState() {
-    //getUser(id: int.parse(widget.qrValue));
-    getQrCode(qrCodeId: int.parse(widget.qrValue));
-    /////////
-    Future.delayed(const Duration(seconds: 4)).then((_) {
-      setState(() {
-        isLoading = false;
-      });
-    });
+    iDController.text = widget.visite.numeroCni;
+    cariDController.text = widget.visite.plaqueVehicule;
     super.initState();
-  }
-
-  ////////////////////////////////////
-  ///fonction qui nous permet de faire la requette get
-  ///sur notre api
-  getQrCode({required int qrCodeId}) async {
-    ////////////////////
-    /// eventualité de faire appel a api/qrcodes/id
-    /// si les données devient trop lourde a chargé
-    ///
-    QrCodeModel qrCodeModel = await QrCodeModel.qrCodeList.firstWhere(
-      (element) => element.id == qrCodeId, // ??
-    );
-    _qrCodeModel = qrCodeModel;
-    user = _qrCodeModel!.user;
-    //print(_qrCodeModel);
   }
 
   @override
   Widget build(BuildContext context) {
+    ////////////////:
+    ///text fields
+    final Widget badgeTextField = TextField(
+      controller: _badgeController,
+      style: const TextStyle(
+        color: Colors.black,
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
+      ),
+      cursorColor: Colors.black,
+      decoration: InputDecoration(
+        border: InputBorder.none,
+      ),
+    );
     /////////////////
     ///text fields
     final Widget idTextField = TextField(
@@ -92,15 +82,8 @@ class _SheetContainerState extends State<SheetContainer> {
         fontSize: 14,
         fontWeight: FontWeight.w600,
       ),
-      onTap: () {
-        setState(() {
-          showLabel1 = false;
-        });
-      },
       cursorColor: Colors.black,
       decoration: InputDecoration(
-        label:
-            showLabel1 ? AppText.medium('Entrez un n° de pièce') : Container(),
         border: InputBorder.none,
       ),
     );
@@ -114,18 +97,8 @@ class _SheetContainerState extends State<SheetContainer> {
         fontSize: 14,
         fontWeight: FontWeight.w600,
       ),
-      onTap: () {
-        setState(() {
-          showLabel2 = false;
-        });
-      },
       cursorColor: Colors.black,
       decoration: InputDecoration(
-        label: showLabel2
-            ? AppText.medium(
-                'Entrez un n° d\'immatriculation de véhicule',
-              )
-            : Container(),
         border: InputBorder.none,
       ),
     );
@@ -151,35 +124,22 @@ class _SheetContainerState extends State<SheetContainer> {
           children: [
             const AllSheetHeader(),
             Expanded(
-              child: !isLoading
-                  ? SingleChildScrollView(
-                      child: user != null
-                          ? Column(
-                              children: [
-                                SheetHeader(
-                                  user: user!,
-                                  qrCodeModel: _qrCodeModel!,
-                                ),
-                                Padding(
-                                    padding: const EdgeInsets.all(10),
-                                    child: getWidget(
-                                      qrCodeModel: _qrCodeModel!,
-                                      idTextField: idTextField,
-                                      cardIddTextField: cardIddTextField,
-                                    )),
-                              ],
-                            )
-                          : Functions.widget404(size: size, ctxt: context),
-                    )
-                  : Center(
-                      child: Container(
-                        height: 70,
-                        width: double.infinity,
-                        child: Center(
-                          child: Image.asset('assets/images/loading.gif'),
-                        ),
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    SheetHeader(visite: widget.visite),
+                    Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: getWidget(
+                        visite: widget.visite,
+                        idTextField: idTextField,
+                        cardIddTextField: cardIddTextField,
+                        badgeTextField: badgeTextField,
                       ),
                     ),
+                  ],
+                ),
+              ),
             )
           ],
         ),
@@ -192,8 +152,7 @@ class _SheetContainerState extends State<SheetContainer> {
 
 // widget retourné si un qr code a deja été scané
   Widget isAlreadyScanWidget({
-    required User user,
-    required QrCodeModel qrCodeModel,
+    required VisiteModel visite,
   }) {
     return Column(
       children: [
@@ -233,8 +192,24 @@ class _SheetContainerState extends State<SheetContainer> {
         const SizedBox(
           height: 20,
         ),
+        AppText.medium('Attention'),
+        AppText.small(
+          'Rassurez vous que le visiteur a bien reçu un badge s\il s\'agit d\'une entrée ou s\'il a rendu son badge s\il s\'agit d\'une sortie',
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 10),
+        InfosColumn(
+          opacity: 0.12,
+          label: 'Entrer le n° du badge',
+          widget: Expanded(
+            child: Functions.getTextField(
+              controller: _badgeController,
+            ),
+          ),
+        ),
+        const SizedBox(height: 20),
         CustomButton(
-          color: Color.fromARGB(255, 57, 143, 77),
+          color: Palette.primaryColor,
           width: double.infinity,
           height: 35,
           radius: 5,
@@ -247,16 +222,9 @@ class _SheetContainerState extends State<SheetContainer> {
               DateTime.now(),
             );
 
-            ScanHistoryModel scanHistoryModel = ScanHistoryModel(
-              id: 1,
-              qrCodeId: qrCodeModel.id,
-              scandDate: Functions.getToday(),
-              scanHour: hours,
-              motif: 'Entrée',
-            );
-            setState(() {
-              cariDController2.text = user.plaqueVehicule;
-            });
+            /*  setState(() {
+              cariDController2.text = visite.plaqueVehicule;
+            }); */
             /////////////////////////////////////////////////
             /// on affiche une alerte modale pour la
             /// confirmation
@@ -266,11 +234,24 @@ class _SheetContainerState extends State<SheetContainer> {
                 //hintext: user.plaqueVehicule,
               ),
               ctxt: context,
-              user: user,
-              confirm: () => upDateScanHistory(
-                carID: cariDController2.text,
-                scanHistoryModel: scanHistoryModel,
-              ),
+              visite: visite,
+              confirm: () {
+                ////////////
+                ///scan_history
+                Map<String, dynamic> scanHistoryData = {
+                  "visite_id": visite.id,
+                  "user_id": widget.agent.id,
+                  "scan_date": DateTime.now().toIso8601String(),
+                  "scan_hour": hours,
+                  "motif": "Entrée",
+                  "numero_badge": _badgeController.text,
+                  "plaque_immatriculation": cariDController2.text,
+                };
+                upDateScanHistory(
+                  // carID: cariDController2.text,
+                  scanHistoryData: scanHistoryData,
+                );
+              },
               cancel: () => Navigator.pop(
                   context), // sinon Navigator.pop(context) si c'est annuler
             );
@@ -289,10 +270,11 @@ class _SheetContainerState extends State<SheetContainer> {
           },
         ),
         const SizedBox(
-          height: 10,
+          height: 25,
         ),
         CustomButton(
-          color: Palette.secondaryColor,
+          textColor: Palette.secondaryColor,
+          color: Palette.secondaryColor.withOpacity(0.05),
           width: double.infinity,
           height: 35,
           radius: 5,
@@ -305,16 +287,18 @@ class _SheetContainerState extends State<SheetContainer> {
               DateTime.now(),
             );
 
-            ScanHistoryModel scanHistoryModel = ScanHistoryModel(
-              id: 309,
-              qrCodeId: qrCodeModel.id,
-              scandDate: Functions.getToday(),
-              scanHour: hours,
-              motif: 'Sortie',
-            );
-            setState(() {
+            Map<String, dynamic> scanHistoryData = {
+              "visite_id": visite.id,
+              "user_id": widget.agent.id,
+              "scan_date": DateTime.now().toIso8601String(),
+              "scan_hour": hours,
+              "motif": "Sortie",
+              "numero_badge": _badgeController.text,
+              "plaque_immatriculation": cariDController2.text,
+            };
+            /*  setState(() {
               cariDController2.text = '';
-            });
+            }); */
             /////////////////////////////////////////////////
             /// on affiche une alerte modale pour la
             /// confirmation
@@ -325,11 +309,11 @@ class _SheetContainerState extends State<SheetContainer> {
               ),
               ctxt: context,
               isEntree: false,
-              user: user,
+              visite: visite,
               confirm: () => upDateScanHistory(
                 // on appel upDateScanHistory() si c'est confirmé
-                carID: cariDController2.text,
-                scanHistoryModel: scanHistoryModel,
+                // carID: cariDController2.text,
+                scanHistoryData: scanHistoryData,
                 isEntree: false,
               ),
               cancel: () => Navigator.pop(
@@ -437,50 +421,87 @@ class _SheetContainerState extends State<SheetContainer> {
     bool isEntree = true,
     required Function() confirm,
     required Function() cancel,
-    required User user,
-    //required TextField carIdField,
+    required VisiteModel visite,
   }) async {
     return showDialog(
       barrierDismissible: false,
       context: ctxt,
-      builder: (BuildContext ctxt) {
-        return AlertDialog(
-          backgroundColor: Colors.white,
-          title: AppText.medium('Confirmation'),
-          content: AppText.small(
-            isEntree
-                ? 'Enregistrer une entrée pour ${user.nom} ${user.prenoms} ?'
-                : 'Enregistrer une sortie pour ${user.nom} ${user.prenoms} ?',
-            textAlign: TextAlign.left,
-          ),
-          contentPadding: const EdgeInsets.only(
-            top: 5.0,
-            right: 15.0,
-            left: 15.0,
-          ),
-          titlePadding: const EdgeInsets.only(
-            top: 10,
-            left: 15,
-          ),
-          actions: [
-            TextButton(
-              onPressed: confirm,
-              child: AppText.small(
-                'Confirmer',
-                fontWeight: FontWeight.w500,
-                color: Palette.primaryColor,
-              ),
+      builder: (BuildContext context) {
+        if (Platform.isIOS) {
+          return CupertinoAlertDialog(
+            title: Text('Confirmation'),
+            content: Text(
+              isEntree
+                  ? 'Enregistrer une entrée pour ${visite.nom} ${visite.prenoms} ?'
+                  : 'Enregistrer une sortie pour ${visite.nom} ${visite.prenoms} ?',
+              textAlign: TextAlign.left,
             ),
-            TextButton(
-              onPressed: cancel,
-              child: AppText.small(
-                'Annuler',
-                fontWeight: FontWeight.w500,
-                color: Palette.primaryColor,
+            actions: [
+              CupertinoDialogAction(
+                onPressed: confirm,
+                child: Text(
+                  'Confirmer',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w500,
+                    color: CupertinoColors.activeBlue,
+                  ),
+                ),
               ),
-            )
-          ],
-        );
+              CupertinoDialogAction(
+                onPressed: cancel,
+                child: Text(
+                  'Annuler',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w500,
+                    color: CupertinoColors.destructiveRed,
+                  ),
+                ),
+              )
+            ],
+          );
+        } else {
+          return AlertDialog(
+            backgroundColor: Colors.white,
+            title: Text('Confirmation'),
+            content: Text(
+              isEntree
+                  ? 'Enregistrer une entrée pour ${visite.nom} ${visite.prenoms} ?'
+                  : 'Enregistrer une sortie pour ${visite.nom} ${visite.prenoms} ?',
+              textAlign: TextAlign.left,
+            ),
+            contentPadding: const EdgeInsets.only(
+              top: 5.0,
+              right: 15.0,
+              left: 15.0,
+            ),
+            titlePadding: const EdgeInsets.only(
+              top: 10,
+              left: 15,
+            ),
+            actions: [
+              TextButton(
+                onPressed: confirm,
+                child: Text(
+                  'Confirmer',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w500,
+                    color: Theme.of(context).primaryColor,
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: cancel,
+                child: Text(
+                  'Annuler',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w500,
+                    color: Theme.of(context).primaryColor,
+                  ),
+                ),
+              )
+            ],
+          );
+        }
       },
     );
   }
@@ -490,31 +511,36 @@ class _SheetContainerState extends State<SheetContainer> {
 
 //met a jour l'historique des scans de l'api
   Future<void> upDateScanHistory({
-    required String carID,
+    //required String carID,
     bool isEntree = true,
-    required ScanHistoryModel scanHistoryModel,
+    required Map<String, dynamic> scanHistoryData,
   }) async {
-    Functions.showLoadingSheet(ctxt: context);
+    Navigator.pop(context);
+    EasyLoading.show();
+    // print(scanHistoryData);
+    //Functions.showLoadingSheet(ctxt: context);
     ///////////////////////////////////
     /// update via APIs here
-    scanHistoryModel.carId = carID;
-    Functions.postScanHistory(scanHistoryModel: scanHistoryModel);
+    await RemoteService()
+        .postData(
+      endpoint: 'scanCounters',
+      postData: scanHistoryData,
+    )
+        .whenComplete(() {
+      EasyLoading.dismiss();
+      Navigator.pop(context);
+
+      Functions.showToast(
+        msg: isEntree ? 'Entrée enregistrée !' : 'Sortie enregistrée !',
+      );
+    });
 
     /// //////////////////////////////////
     /// if update via APIs is done
-    ScanHistoryModel.scanHistories.add(scanHistoryModel);
-    Future.delayed(const Duration(seconds: 3)).then((value) {
-      Navigator.pop(context);
-      Navigator.pop(context);
-      Navigator.pop(context);
-      Functions.showSnackBar(
-        ctxt: context,
-        messeage: isEntree ? 'Entrée enregistrée !' : 'Sortie enregistrée !',
-      );
-    });
+    //ScanHistoryModel.scanHistories.add(scanHistoryModel);
   }
 
-  //met a jour l'historique des scans de l'api
+  /*  //met a jour l'historique des scans de l'api
   Future<void> upDateScanHistoryAndDesableQrCode({
     required ScanHistoryModel scanHistoryModel,
     required QrCodeModel qrCodeModel,
@@ -525,7 +551,7 @@ class _SheetContainerState extends State<SheetContainer> {
     ///////////////////////////////////
     /// update via APIs here
     Functions.postScanHistory(scanHistoryModel: scanHistoryModel);
-    Functions.updateQrcode(data: data, qrCodeId: scanHistoryModel.qrCodeId);
+    Functions.updateQrcode(data: data, qrCodeId: scanHistoryModel.visiteId);
 
     /// //////////////////////////////////
     /// if update via APIs is done
@@ -536,14 +562,14 @@ class _SheetContainerState extends State<SheetContainer> {
       ctxt: context,
       messeage: 'Sortie enregistrée et qr code desactivé !',
     );
-  }
+  } */
 
 // widget retourné si un qr code est scané pour la premiere fois
-  Widget fisrtScanWidget({
+  Widget firstScanWidget({
     required Widget idTextField,
     required Widget cardIddTextField,
-    required User user,
-    required QrCodeModel qrCodeModel,
+    required Widget badgeTextField,
+    required VisiteModel visite,
   }) {
     DateTime today = DateTime(
       DateTime.now().year,
@@ -563,7 +589,7 @@ class _SheetContainerState extends State<SheetContainer> {
                     'dd MMM yyyy',
                     'fr_FR',
                   ).format(
-                    qrCodeModel.dateDebut,
+                    visite.dateVisite,
                   ),
                 ),
               ),
@@ -578,21 +604,42 @@ class _SheetContainerState extends State<SheetContainer> {
             ),
           ],
         ),
-        InfosColumn(
-          opacity: 0.3,
-          label: 'n° de pièce',
-          widget: Expanded(
-            child: idTextField,
-          ),
+        Row(
+          children: [
+            Expanded(
+              child: InfosColumn(
+                radius: 0,
+                opacity: 0.12,
+                label: 'n° de pièce',
+                widget: Expanded(
+                  child: idTextField,
+                ),
+              ),
+            ),
+            Expanded(
+              child: InfosColumn(
+                radius: 0,
+                opacity: 0.12,
+                label: 'n° d\'immatriculation véhicule',
+                widget: Expanded(
+                  child: cardIddTextField,
+                ),
+              ),
+            ),
+          ],
         ),
-        const SizedBox(
-          height: 4.0,
+        Container(
+          width: double.infinity,
+          height: 0.8,
+          color: Palette.separatorColor,
         ),
+        //const SizedBox(height: 4.0),
         InfosColumn(
-          opacity: 0.3,
-          label: 'n° d\'immatriculation véhicule',
+          radius: 0,
+          opacity: 0.12,
+          label: 'Entrer le n° du badge',
           widget: Expanded(
-            child: cardIddTextField,
+            child: badgeTextField,
           ),
         ),
         const SizedBox(
@@ -608,64 +655,79 @@ class _SheetContainerState extends State<SheetContainer> {
           ///on a besoin update le n° CNI et le n° d'immatricule du user
           ///anisi l'attribut iSAlreadyScanned du qr code qu'on vient de scanné
           onPress: () {
-            int iid = Random().nextInt(99999);
+            if (widget.agent.localisationId != visite.localisation.id) {
+              Functions.showToast(
+                msg: 'Cette visite n\'a pas lieu ici !',
+                gravity: ToastGravity.TOP,
+              );
+              return;
+            }
+            if (iDController.text.isEmpty) {
+              Functions.showToast(
+                msg: 'Le n° de pièce d\'identité est obligatoire !',
+                gravity: ToastGravity.TOP,
+              );
+              return;
+            }
+
             ////////////////////////////////////////////////////////////
-            //préparation des données pour update les tables qr_code et visiteur
+            //préparation des données pour update les tables visiteurs et scan_history
             ///
-            Map<String, dynamic> qrcodeData = {
+            ///PUT VISITE DATA
+            Map<String, dynamic> visitData = {
               "is_already_scanned": 1,
+              "numero_cni": iDController.text,
+              "heure_visite": hours
             };
             /////////////////////////
             ///
-            Map<String, dynamic> userData = {
-              "numero_cni": iDController.text,
-              "plaque_vehicule": cariDController.text,
+
+            ////////////
+            ///SCAN HISTORY DATA
+            Map<String, dynamic> scanHistoryData = {
+              "visite_id": visite.id,
+              "user_id": widget.agent.id,
+              "scan_date": today.toIso8601String(),
+              "scan_hour": hours,
+              "motif": "Entrée",
+              "numero_badge": _badgeController.text,
+              "plaque_immatriculation": cariDController.text,
             };
 
-            ScanHistoryModel scanHistoryModel = new ScanHistoryModel(
-              id: iid,
-              qrCodeId: qrCodeModel.id,
-              scandDate: today,
-              scanHour: hours,
-              motif: 'Entrée',
-            );
-
             alert(
-                ctxt: context,
-                confirm: () {
-                  Functions.showLoadingSheet(ctxt: context);
-                  Functions.updateQrcode(
-                    data: qrcodeData,
-                    qrCodeId: qrCodeModel.id,
-                  );
-                  //updateQrcode(data: data, qrCodeId: qrCodeId)
-                  Functions.updateUser(data: userData, userId: user.id);
-                  Functions.postScanHistory(scanHistoryModel: scanHistoryModel);
+              ctxt: context,
+              visite: visite,
+              confirm: () async {
+                // Functions.showLoadingSheet(ctxt: context);
+                EasyLoading.show(status: 'sauvegarde en cours...');
+                await Functions.upDateVisit(
+                  data: visitData,
+                  visiteId: visite.id,
+                ).whenComplete(() async {
+                  await RemoteService()
+                      .postData(
+                          endpoint: 'scanCounters', postData: scanHistoryData)
+                      .then((res) {
+                    //visite.plaqueVehicule = cariDController.text;
 
-                  //////////////////////
-                  ///pour le test
-                  ///mise des infos du user et du qr code
-                  qrCodeModel.isAlreadyScanned = true;
-                  user.numeroCni = iDController.text;
-                  user.plaqueVehicule = cariDController.text;
-
-                  ScanHistoryModel.scanHistories.add(scanHistoryModel);
-                  //////////////////////////////////fin test ////////////////
-                  ///
-                  Future.delayed(const Duration(seconds: 3)).then(
-                    (_) {
-                      Navigator.pop(context);
-                      Navigator.pop(context);
-                      Navigator.pop(context);
-                      Functions.showSnackBar(
-                        ctxt: context,
-                        messeage: 'Scan sauvegardé !',
-                      );
-                    },
-                  );
-                },
-                cancel: () => Navigator.pop(context),
-                user: user);
+                    Future.delayed(const Duration(seconds: 2)).then(
+                      (_) {
+                        widget.visite.isAlreadyScanned = true;
+                        widget.visite.numeroCni = iDController.text;
+                        EasyLoading.dismiss();
+                        Navigator.pop(context);
+                        Navigator.pop(context);
+                        Functions.showToast(
+                          msg: 'Scan sauvegardé !',
+                          gravity: ToastGravity.TOP,
+                        );
+                      },
+                    );
+                  });
+                });
+              },
+              cancel: () => Navigator.pop(context),
+            );
           },
         ),
         const SizedBox(
@@ -724,12 +786,12 @@ class _SheetContainerState extends State<SheetContainer> {
       child: Center(
         child: Column(
           children: [
-            AppText.medium('Qr code expiré !'),
+            AppText.medium('La date de visite passée !'),
             const SizedBox(
               height: 5,
             ),
             AppText.small(
-              'Ce code a expiré depuis le\n${DateFormat('EEEE dd MMMM yyyy', 'fr_FR').format(dateFin)}',
+              'Cette visite a expirée depuis le\n${DateFormat('EEEE dd MMMM yyyy', 'fr_FR').format(dateFin)}',
               textAlign: TextAlign.center,
             ),
             const SizedBox(
@@ -797,29 +859,30 @@ class _SheetContainerState extends State<SheetContainer> {
   ///
   ///
   Widget getWidget({
-    required QrCodeModel qrCodeModel,
+    required VisiteModel visite,
     required Widget idTextField,
     required Widget cardIddTextField,
+    required Widget badgeTextField,
   }) {
     ////////////// formatage de la date début et la date d'experemption du qr
     DateTime dateDebut = DateTime(
-      qrCodeModel.dateDebut.year,
-      qrCodeModel.dateDebut.month,
-      qrCodeModel.dateDebut.day,
+      visite.dateVisite.year,
+      visite.dateVisite.month,
+      visite.dateVisite.day,
     );
 
     ////////////////////////////////////////
     /// 3. si la date visite est passée
-    if (qrCodeModel.dateFin != null) {
-      DateTime dateFin = DateTime(
-        qrCodeModel.dateFin!.year,
-        qrCodeModel.dateFin!.month,
-        qrCodeModel.dateFin!.day,
-      );
-      if (dateFin.isBefore(Functions.getToday())) {
-        return dateExpiree(dateFin: dateFin);
-      }
+    //if (visite.dateVisite != null) {
+    DateTime dateFin = DateTime(
+      visite.dateVisite.year,
+      visite.dateVisite.month,
+      visite.dateVisite.day,
+    );
+    if (dateFin.isBefore(Functions.getToday())) {
+      return dateExpiree(dateFin: dateFin);
     }
+    // }
 
     ////////////////////////////////////////////////////
     ///   1. la date de visite n'est pas encre arrivé
@@ -829,24 +892,25 @@ class _SheetContainerState extends State<SheetContainer> {
 
     ///////////////////////////////////////////////////
     ///   2. si le code actif
-    if (qrCodeModel.isActive) {
+    if (visite.isActive) {
       //////////////////////////////////////////////////////
       ///   2.1 s'il est actif et s'il n'a pas déjà été scanné
       ///       alors on return fisrtScanWidget()
-      if (!qrCodeModel.isAlreadyScanned) {
-        return fisrtScanWidget(
+      if (!visite.isAlreadyScanned) {
+        return firstScanWidget(
           idTextField: idTextField,
           cardIddTextField: cardIddTextField,
-          user: qrCodeModel.user,
-          qrCodeModel: qrCodeModel,
+          visite: visite,
+          badgeTextField: badgeTextField,
         );
       }
       //////////////////////////////////////////////////
       ///   2.2. s'il est actif et a déjà été scanné
       ///       alors on return isAlreadyScanWidget()
-      if (qrCodeModel.isAlreadyScanned) {
+      if (visite.isAlreadyScanned) {
         return isAlreadyScanWidget(
-            qrCodeModel: qrCodeModel, user: qrCodeModel.user);
+          visite: visite,
+        );
       }
     }
 

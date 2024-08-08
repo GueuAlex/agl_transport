@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import '../../config/app_text.dart';
 import '../../config/functions.dart';
 import '../../config/palette.dart';
+import '../../draggable_menu.dart';
 import '../search_by_date/search_by_date_screen.dart';
 import '../side_bar/custom_side_bar.dart';
 import '../side_bar/open_side_dar.dart';
@@ -170,14 +171,7 @@ class _HomeState extends State<Home> {
                 size: 29,
                 color: Palette.greyColor,
               ),
-              onPressed: () {
-                //print(today);
-                /* Functions.showSnackBar(
-                  ctxt: context,
-                  messeage: 'Selecteur de période',
-                ); */
-                _dateSelector(context);
-              },
+              onPressed: () => _dateSelector(context),
             ),
             SizedBox(
               width: 8,
@@ -192,17 +186,26 @@ class _HomeState extends State<Home> {
               color: Colors.grey,
             ),
           ),
-          child: TabBarView(
-            children: List.generate(
-              7,
-              (index) => TabBarViewBody(
-                size: size,
-                date: today.subtract(
-                  Duration(days: index),
+          child: Stack(children: [
+            LayoutBuilder(
+              builder: (context, constraints) => SizedBox(
+                width: constraints.maxWidth,
+                height: constraints.maxHeight,
+                child: TabBarView(
+                  children: List.generate(
+                    7,
+                    (index) => TabBarViewBody(
+                      size: size,
+                      date: today.subtract(
+                        Duration(days: index),
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
-          ),
+            DraggableMenu(),
+          ]),
         ),
       ),
     );

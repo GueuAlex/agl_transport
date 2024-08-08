@@ -4,10 +4,13 @@ import 'dart:developer' as developer;
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../config/app_text.dart';
+import '../../config/palette.dart';
+import '../../local_service/local_service.dart';
 import '../auth/login/login.dart';
+import '../on_boarding/on_boarding_screen.dart';
 import '../scanner/scan_screen.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -82,21 +85,28 @@ class _SplashScreenState extends State<SplashScreen> {
 
     Future.delayed(const Duration(seconds: 10)).then((_) async {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      bool? isFirstTime = await prefs.getBool('isRemember');
-      if (isFirstTime != null && isFirstTime) {
+      LocalService localService = LocalService();
+      var deviceData = await localService.getDevice();
+      //print(deviceData);
+      if (deviceData == null) {
         Navigator.of(context).pushNamedAndRemoveUntil(
-          ScanScreen.routeName,
+          OnBoardingScreen.routeName,
           (route) => false,
         );
       } else {
-        Navigator.of(context).pushNamedAndRemoveUntil(
-          LoginScreen.routeName,
-          (route) => false,
-        );
+        bool? isFirstTime = await prefs.getBool('isRemember');
+        if (isFirstTime != null && isFirstTime) {
+          Navigator.of(context).pushNamedAndRemoveUntil(
+            ScanScreen.routeName,
+            (route) => false,
+          );
+        } else {
+          Navigator.of(context).pushNamedAndRemoveUntil(
+            LoginScreen.routeName,
+            (route) => false,
+          );
+        }
       }
-      /* Navigator.push(context, MaterialPageRoute(builder: (context) {
-        return SampleApp();
-      })); */
     });
 
     super.initState();
@@ -127,37 +137,21 @@ class _SplashScreenState extends State<SplashScreen> {
               const SizedBox(height: 1),
               Column(
                 children: [
-                  IsConnec
-                      ? Container(
-                          padding: const EdgeInsets.all(50),
-                          width: 250,
-                          height: 200,
-                          child: Image.asset('assets/images/agl-logo-max.webp'),
-                        )
-                      : Column(
-                          children: [
-                            Container(
-                              width: 180,
-                              height: 150,
-                              child: Image.asset(
-                                'assets/images/disconnect.jpg',
-                              ),
-                            ),
-                            AppText.medium('Oops'),
-                            AppText.small(
-                              'Veuillez vérifier votre connexion internet\net réessayer',
-                              textAlign: TextAlign.center,
-                            )
-                          ],
-                        ),
-                  IsConnec
-                      ? Container(
-                          width: 100,
-                          height: 50,
-                          padding: const EdgeInsets.all(5),
-                          child: Image.asset('assets/images/loading.gif'),
-                        )
-                      : Container(),
+                  Container(
+                    padding: const EdgeInsets.all(50),
+                    width: 250,
+                    height: 200,
+                    child: Image.asset('assets/images/agl-logo-max.webp'),
+                  ),
+                  Container(
+                    width: 100,
+                    height: 50,
+                    padding: const EdgeInsets.all(5),
+                    child: LoadingAnimationWidget.newtonCradle(
+                      color: Palette.primaryColor,
+                      size: 70,
+                    ),
+                  )
                 ],
               ),
               //const CopyRight()

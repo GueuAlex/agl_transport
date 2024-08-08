@@ -8,6 +8,7 @@ class InfosColumn extends StatelessWidget {
     this.height = 45,
     this.width = double.infinity,
     required this.label,
+    this.radius = 5,
     //required this.text,
     required this.widget,
     this.opacity = 0,
@@ -18,6 +19,7 @@ class InfosColumn extends StatelessWidget {
   //final String text;
   final Widget widget;
   final double opacity;
+  final double radius;
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +29,7 @@ class InfosColumn extends StatelessWidget {
       width: width,
       decoration: BoxDecoration(
         color: Colors.grey.withOpacity(opacity),
-        borderRadius: BorderRadius.circular(5),
+        borderRadius: BorderRadius.circular(radius),
       ),
       child: Column(
         //mainAxisAlignment: MainAxisAlignment.start,

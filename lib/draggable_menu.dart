@@ -20,6 +20,9 @@ class DraggableMenu extends StatefulWidget {
 class _DraggableMenuState extends State<DraggableMenu> {
   final DraggableScrollableController _scrollController =
       DraggableScrollableController();
+
+  final TextEditingController _entrepriseNameControler =
+      TextEditingController();
   //
   late double screenHeight;
   bool isMaxHeight = false;
@@ -27,13 +30,20 @@ class _DraggableMenuState extends State<DraggableMenu> {
   void initState() {
     super.initState();
     _scrollController.addListener(() {
-      print(_scrollController.size);
+      // print(_scrollController.size);
       double currentExtent = _scrollController.size;
       double maxExtent = 1.0;
       setState(() {
         isMaxHeight = currentExtent >= maxExtent * 0.8;
       });
     });
+  }
+
+  @override
+  void dispose() {
+    _entrepriseNameControler.dispose();
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -108,7 +118,7 @@ class _DraggableMenuState extends State<DraggableMenu> {
                 children: [
                   Container(
                     width: double.infinity,
-                    height: 150,
+                    height: 290,
                     child: GridView.builder(
                       padding: const EdgeInsets.all(10.0),
                       gridDelegate:
@@ -118,7 +128,7 @@ class _DraggableMenuState extends State<DraggableMenu> {
                         mainAxisSpacing: 15.0, // Espacement entre les lignes
                         childAspectRatio: 3 / 2, // Ratio des enfants du grid
                       ),
-                      itemCount: 2,
+                      itemCount: 3,
                       itemBuilder: (context, index) {
                         final item = DraggableMenuModel.dragMenuList1[index];
                         return _menuCard(context, item, contextRouteName);
@@ -160,6 +170,12 @@ class _DraggableMenuState extends State<DraggableMenu> {
       BuildContext context, DraggableMenuModel item, String contextRouteName) {
     return GestureDetector(
       onTap: () {
+        /*  if (item.route == "add_deli_screen") {
+          Functions.showBottomSheet(
+            ctxt: context,
+            widget: _formSheet(),
+          );
+        } else  */
         if (contextRouteName == item.route) {
           _setDraggableToMinSize();
         } else {
@@ -185,7 +201,7 @@ class _DraggableMenuState extends State<DraggableMenu> {
         }
       },
       child: Container(
-        padding: const EdgeInsets.all(10),
+        padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 10),
         decoration: BoxDecoration(
           color: item.color.withOpacity(0.06),
           borderRadius: BorderRadius.circular(8),
@@ -197,13 +213,13 @@ class _DraggableMenuState extends State<DraggableMenu> {
             // Utilisez une image ou une icône ici
             SvgPicture.asset(
               item.icon,
-              height: 28,
+              height: 20,
               colorFilter: ColorFilter.mode(
                 item.color,
                 BlendMode.srcIn,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 4),
             Text(
               item.title,
               style: TextStyle(
@@ -216,7 +232,7 @@ class _DraggableMenuState extends State<DraggableMenu> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 2),
             Text(
               item.subTitle,
               style: TextStyle(
@@ -235,6 +251,92 @@ class _DraggableMenuState extends State<DraggableMenu> {
       ),
     );
   }
+
+  // form sheet
+/* 
+  Container _formSheet() => Container(
+        width: double.infinity,
+        height: 270 + MediaQuery.of(context).viewInsets.bottom,
+        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(5),
+            topRight: Radius.circular(5),
+          ),
+        ),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(),
+                Container(
+                  width: 35,
+                  height: 35,
+                  decoration: BoxDecoration(
+                    color: Palette.separatorColor,
+                    shape: BoxShape.circle,
+                  ),
+                  child: InkWell(
+                    onTap: () => Navigator.pop(context),
+                    child: Icon(
+                      Icons.close,
+                      size: 16,
+                      color: Color.fromARGB(255, 124, 124, 124),
+                    ),
+                  ),
+                )
+              ],
+            ),
+            //
+            const SizedBox(height: 25),
+            Expanded(
+              child: Column(
+                children: [
+                  AppText.small(
+                    'Veuillez renseigner le bon de commande pour  cette livraison.',
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 15),
+                  InfosColumn(
+                    opacity: 0.12,
+                    label: 'Nom de l\'entreprise',
+                    widget: Expanded(
+                      child: Functions.getTextField(
+                        controller: _bonCommandeController,
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            ),
+            const SizedBox(height: 15),
+            SafeArea(
+              child: CustomButton(
+                  color: Palette.primaryColor,
+                  width: double.infinity,
+                  height: 35,
+                  radius: 5,
+                  text: 'Continuer',
+                  onPress: () {
+                    if (_entrepriseNameControler.text.trim().isEmpty) {
+                      Functions.showToast(
+                        msg: 'Veuillez renseigner le nom de l\'entreprise',
+                        gravity: ToastGravity.TOP,
+                      );
+                      return;
+                    }
+                    Navigator.pushNamed(
+                      context,
+                      AddDeliScree.routeName,
+                      arguments: _entrepriseNameControler.text,
+                    );
+                  }),
+            ),
+          ],
+        ),
+      ); */
 
   Column _minChild() {
     return Column(

@@ -11,16 +11,20 @@ import 'package:workmanager/workmanager.dart';
 import 'bloc/internet_bloc/internet_bloc.dart';
 import 'dependency_injection.dart';
 import 'screens/add_delivering/add_deli_screen.dart';
+import 'screens/add_visite_screen/add_visite_screen.dart';
 import 'screens/auth/login/login.dart';
 import 'screens/auth/pin_code_screen.dart';
+import 'screens/create_delivery/create_delivery_screen.dart';
 import 'screens/delivering/deliverig_screen.dart';
 import 'screens/home/home.dart';
 import 'screens/in_process_delivery/in_process_delivery.dart';
+import 'screens/on_boarding/on_boarding_screen.dart';
 import 'screens/qr_code_details/qr_code_details_screen.dart';
 import 'screens/scanner/scan_screen.dart';
 import 'screens/search_by_date/deli_search_by_date_screen.dart';
 import 'screens/search_by_date/search_by_date_screen.dart';
 import 'screens/splash/splash_screen.dart';
+import 'screens/stats_creen/stats_screen.dart';
 import 'screens/verify_by_code/verify_by_code_screen.dart';
 
 @pragma('vm:entry-point')
@@ -44,7 +48,7 @@ Future<void> main() async {
     callbackDispatcher,
     isInDebugMode: true,
   );
-  /* Timer.periodic(Duration(minutes: 1), (timer) {
+  /*  Timer.periodic(Duration(minutes: 1), (timer) {
     Functions.getQrcodesFromApi();
     Functions.getScanHistoriesFromApi();
     Functions.allEntrepise();
@@ -113,6 +117,10 @@ class MyApp extends StatelessWidget {
             const DeliSearchByDateScreen(),
         PincodeScreen.routeName: (ctxt) => const PincodeScreen(),
         InProcessDelivery.routeName: (ctxt) => const InProcessDelivery(),
+        StatsScreen.routeName: (ctxt) => const StatsScreen(),
+        AddVisiteScreen.routeName: (ctxt) => const AddVisiteScreen(),
+        CreateDeliveryScreen.routeName: (ctxt) => const CreateDeliveryScreen(),
+        OnBoardingScreen.routeName: (ctxt) => const OnBoardingScreen(),
       },
       builder: EasyLoading.init(),
     );
