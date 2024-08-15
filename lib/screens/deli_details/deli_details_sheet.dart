@@ -36,163 +36,179 @@ class _DeliDetailSheetState extends State<DeliDetailSheet> {
     bool isFinish =
         widget.deli.livraison.status.trim().toLowerCase() == 'terminée';
 
-    return Container(
-      height: size.height / 1.4,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(5),
-          topRight: Radius.circular(5),
-        ),
-      ),
-      child: Column(
-        children: [
-          SheetCloser(),
-          ShippingInfo(
-            tracteurNum: widget.deli.numeroTracteur,
-            remorqueNum: widget.deli.livraison.numeroRemorque,
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      resizeToAvoidBottomInset: true,
+      body: Container(
+        margin: EdgeInsets.only(top: size.height - size.height / 1.4),
+        height: size.height / 1.4,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(5),
+            topRight: Radius.circular(5),
           ),
-          Expanded(
-            child: !isRegisterProcess
-                ? Container(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 5,
-                      horizontal: 10,
-                    ),
-                    child: SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 15),
-                            child: AppText.medium(
-                              'Colis, Entreprise & Lieu',
-                              color: Color.fromARGB(255, 40, 40, 40),
-                            ),
-                          ),
-                          SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: BoxRow(
-                              deli: widget.deli,
-                            ),
-                          ),
-                          const SizedBox(height: 5),
-                          FullDetails(deli: widget.deli),
-                          const SizedBox(height: 25),
-                          !isFinish
-                              ? CustomButton(
-                                  color: Palette.primaryColor,
-                                  width: double.infinity,
-                                  height: 35,
-                                  radius: 5,
-                                  text: 'Livraison terminée ?',
-                                  onPress: () {
-                                    setState(
-                                      () {
-                                        isRegisterProcess = true;
-                                      },
-                                    );
-                                  },
-                                )
-                              : Container(),
-                        ],
+        ),
+        child: Column(
+          children: [
+            SheetCloser(),
+            ShippingInfo(
+              tracteurNum: widget.deli.numeroTracteur,
+              remorqueNum: widget.deli.livraison.numeroRemorque,
+            ),
+            Expanded(
+              child: !isRegisterProcess
+                  ? Container(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 5,
+                        horizontal: 10,
                       ),
-                    ),
-                  )
-                : Container(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 5,
-                      horizontal: 10,
-                    ),
-                    child: SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          AppText.medium('Quelque chose à noter ?'),
-                          AppText.small(
-                            'Le lorem ipsum est, en imprimerie, une suite de mots sans signification utilisée à titre provisoire pour calibrer une mise en page ',
-                          ),
-                          const SizedBox(height: 15),
-                          InfosColumn(
-                            height: 95,
-                            opacity: 0.12,
-                            label: 'Écrire une note',
-                            widget: Expanded(
-                              child: Functions.getTextField(
-                                maxLines: 5,
-                                controller: _noteController,
+                      child: SingleChildScrollView(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 15),
+                              child: AppText.medium(
+                                'Colis, Entreprise & Lieu',
+                                color: Color.fromARGB(255, 40, 40, 40),
                               ),
                             ),
-                          ),
-                          const SizedBox(height: 35),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: CustomButton(
-                                  color: Colors.red.withOpacity(0.05),
-                                  width: double.infinity,
-                                  height: 35,
-                                  radius: 5,
-                                  text: 'Annuler',
-                                  textColor: Colors.red,
-                                  onPress: () => setState(() {
-                                    isRegisterProcess = false;
-                                  }),
-                                ),
+                            SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: BoxRow(
+                                deli: widget.deli,
                               ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: CustomButton(
+                            ),
+                            const SizedBox(height: 5),
+                            FullDetails(deli: widget.deli),
+                            const SizedBox(height: 25),
+                            !isFinish
+                                ? CustomButton(
                                     color: Palette.primaryColor,
                                     width: double.infinity,
                                     height: 35,
                                     radius: 5,
-                                    text: 'Valider',
+                                    text: 'Livraison terminée ?',
                                     onPress: () {
-                                      //Navigator.pop(context);
-                                      Functions.showPlatformDialog(
-                                        context: context,
-                                        onCancel: () => Navigator.pop(context),
-                                        onConfirme: () {
-                                          _handleDeliOut();
+                                      setState(
+                                        () {
+                                          isRegisterProcess = true;
                                         },
-                                        title: AppText.medium(
-                                          'Confirmation',
-                                          textAlign: TextAlign.center,
-                                        ),
-                                        content: Padding(
-                                          padding: const EdgeInsets.all(10),
-                                          child: Column(
-                                            children: [
-                                              AppText.small(
-                                                'Veuillez saisir le numéro du badge si le livreur en dispose',
-                                                textAlign: TextAlign.center,
-                                              ),
-                                              const SizedBox(height: 5),
-                                              InfosColumn(
-                                                opacity: 0.12,
-                                                label: 'N° badge',
-                                                widget: Expanded(
-                                                  child: Functions.getTextField(
-                                                    controller:
-                                                        _badgeController,
-                                                  ),
-                                                ),
-                                              )
-                                            ],
-                                          ),
-                                        ),
                                       );
-                                    }),
+                                    },
+                                  )
+                                : Container(),
+                          ],
+                        ),
+                      ),
+                    )
+                  : Container(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 5,
+                        horizontal: 10,
+                      ),
+                      child: SingleChildScrollView(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            AppText.medium('Quelque chose à noter ?'),
+                            AppText.small(
+                              'Le lorem ipsum est, en imprimerie, une suite de mots sans signification utilisée à titre provisoire pour calibrer une mise en page ',
+                            ),
+                            const SizedBox(height: 15),
+                            InfosColumn(
+                              height: 95,
+                              opacity: 0.12,
+                              label: 'Écrire une note',
+                              widget: Expanded(
+                                child: Functions.getTextField(
+                                  maxLines: 5,
+                                  controller: _noteController,
+                                ),
                               ),
-                            ],
-                          ),
-                        ],
+                            ),
+                            const SizedBox(height: 35),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: CustomButton(
+                                    color: Colors.red.withOpacity(0.05),
+                                    width: double.infinity,
+                                    height: 35,
+                                    radius: 5,
+                                    text: 'Annuler',
+                                    textColor: Colors.red,
+                                    onPress: () => setState(() {
+                                      isRegisterProcess = false;
+                                    }),
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: CustomButton(
+                                      color: Palette.primaryColor,
+                                      width: double.infinity,
+                                      height: 35,
+                                      radius: 5,
+                                      text: 'Valider',
+                                      onPress: () {
+                                        //Navigator.pop(context);
+                                        Functions.showPlatformDialog(
+                                          context: context,
+                                          onCancel: () =>
+                                              Navigator.pop(context),
+                                          onConfirme: () {
+                                            _handleDeliOut();
+                                          },
+                                          title: AppText.medium(
+                                            'Confirmation',
+                                            textAlign: TextAlign.center,
+                                          ),
+                                          content: Container(
+                                            padding: const EdgeInsets.all(10),
+                                            constraints: BoxConstraints(
+                                              maxHeight: MediaQuery.of(context)
+                                                      .size
+                                                      .height *
+                                                  0.5,
+                                            ),
+                                            child: SingleChildScrollView(
+                                              child: Column(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  AppText.small(
+                                                    'Veuillez saisir le numéro du badge si le livreur en dispose',
+                                                    textAlign: TextAlign.center,
+                                                  ),
+                                                  const SizedBox(height: 5),
+                                                  InfosColumn(
+                                                    opacity: 0.12,
+                                                    label: 'N° badge',
+                                                    widget: Expanded(
+                                                      child: Functions
+                                                          .getTextField(
+                                                        controller:
+                                                            _badgeController,
+                                                      ),
+                                                    ),
+                                                  )
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                      }),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }

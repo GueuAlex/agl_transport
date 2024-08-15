@@ -438,6 +438,16 @@ class _SheetContainerState extends State<SheetContainer> {
             ),
             actions: [
               CupertinoDialogAction(
+                onPressed: cancel,
+                child: Text(
+                  'Annuler',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w500,
+                    color: CupertinoColors.destructiveRed,
+                  ),
+                ),
+              ),
+              CupertinoDialogAction(
                 onPressed: confirm,
                 child: Text(
                   'Confirmer',
@@ -447,16 +457,6 @@ class _SheetContainerState extends State<SheetContainer> {
                   ),
                 ),
               ),
-              CupertinoDialogAction(
-                onPressed: cancel,
-                child: Text(
-                  'Annuler',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w500,
-                    color: CupertinoColors.destructiveRed,
-                  ),
-                ),
-              )
             ],
           );
         } else {
@@ -480,25 +480,25 @@ class _SheetContainerState extends State<SheetContainer> {
             ),
             actions: [
               TextButton(
-                onPressed: confirm,
-                child: Text(
-                  'Confirmer',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w500,
-                    color: Theme.of(context).primaryColor,
-                  ),
-                ),
-              ),
-              TextButton(
                 onPressed: cancel,
                 child: Text(
                   'Annuler',
                   style: TextStyle(
                     fontWeight: FontWeight.w500,
-                    color: Theme.of(context).primaryColor,
+                    color: const Color.fromARGB(255, 198, 51, 41),
                   ),
                 ),
-              )
+              ),
+              TextButton(
+                onPressed: confirm,
+                child: Text(
+                  'Confirmer',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w500,
+                    color: Palette.primaryColor,
+                  ),
+                ),
+              ),
             ],
           );
         }
@@ -786,12 +786,12 @@ class _SheetContainerState extends State<SheetContainer> {
       child: Center(
         child: Column(
           children: [
-            AppText.medium('La date de visite passée !'),
+            AppText.medium('La date de visite est passée !'),
             const SizedBox(
               height: 5,
             ),
             AppText.small(
-              'Cette visite a expirée depuis le\n${DateFormat('EEEE dd MMMM yyyy', 'fr_FR').format(dateFin)}',
+              'Cette visite a expiré depuis le\n${DateFormat('EEEE dd MMMM yyyy', 'fr_FR').format(dateFin)}',
               textAlign: TextAlign.center,
             ),
             const SizedBox(

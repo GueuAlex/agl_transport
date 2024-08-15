@@ -298,6 +298,16 @@ class Functions {
               ),
               actions: [
                 CupertinoDialogAction(
+                  onPressed: cancel,
+                  child: Text(
+                    'Annuler',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w500,
+                      color: CupertinoColors.destructiveRed,
+                    ),
+                  ),
+                ),
+                CupertinoDialogAction(
                   onPressed: confirm,
                   child: Text(
                     'Confirmer',
@@ -307,16 +317,6 @@ class Functions {
                     ),
                   ),
                 ),
-                CupertinoDialogAction(
-                  onPressed: cancel,
-                  child: Text(
-                    'Annuler',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w500,
-                      color: CupertinoColors.destructiveRed,
-                    ),
-                  ),
-                )
               ],
             );
           } else {
@@ -375,6 +375,14 @@ class Functions {
               ),
               actions: [
                 TextButton(
+                  onPressed: cancel,
+                  child: AppText.small(
+                    'Annuler',
+                    fontWeight: FontWeight.w500,
+                    color: const Color.fromARGB(255, 187, 49, 39),
+                  ),
+                ),
+                TextButton(
                   onPressed: confirm,
                   child: AppText.small(
                     'Confirmer',
@@ -382,14 +390,6 @@ class Functions {
                     color: Palette.primaryColor,
                   ),
                 ),
-                TextButton(
-                  onPressed: cancel,
-                  child: AppText.small(
-                    'Annuler',
-                    fontWeight: FontWeight.w500,
-                    color: Palette.primaryColor,
-                  ),
-                )
               ],
             );
           }

@@ -123,24 +123,30 @@ class _AddDeliScreeState extends State<AddDeliScree> {
                           'Confirmation',
                           textAlign: TextAlign.center,
                         ),
-                        content: Padding(
+                        content: Container(
                           padding: const EdgeInsets.all(10),
-                          child: Column(
-                            children: [
-                              AppText.small(
-                                'Veuillez saisir le numéro du badge si le livreur en dispose',
-                                textAlign: TextAlign.center,
-                              ),
-                              const SizedBox(height: 5),
-                              InfosColumn(
-                                opacity: 0.12,
-                                label: 'N° badge',
-                                widget: Expanded(
-                                  child: Functions.getTextField(
-                                      controller: _badgeController),
+                          constraints: BoxConstraints(
+                            maxHeight: MediaQuery.of(context).size.height * 0.5,
+                          ),
+                          child: SingleChildScrollView(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                AppText.small(
+                                  'Veuillez saisir le numéro du badge si le livreur en dispose',
+                                  textAlign: TextAlign.center,
                                 ),
-                              )
-                            ],
+                                const SizedBox(height: 5),
+                                InfosColumn(
+                                  opacity: 0.12,
+                                  label: 'N° badge',
+                                  widget: Expanded(
+                                    child: Functions.getTextField(
+                                        controller: _badgeController),
+                                  ),
+                                )
+                              ],
+                            ),
                           ),
                         ),
                       );
@@ -475,25 +481,32 @@ class _AddDeliScreeState extends State<AddDeliScree> {
                           'Confirmation',
                           textAlign: TextAlign.center,
                         ),
-                        content: Padding(
+                        content: Container(
+                          // Limiter la hauteur maximale du contenu
+                          constraints: BoxConstraints(
+                            maxHeight: MediaQuery.of(context).size.height * 0.5,
+                          ),
                           padding: const EdgeInsets.all(10),
-                          child: Column(
-                            children: [
-                              AppText.small(
-                                'Veuillez saisir le numéro du badge si le livreur en dispose',
-                                textAlign: TextAlign.center,
-                              ),
-                              const SizedBox(height: 5),
-                              InfosColumn(
-                                opacity: 0.12,
-                                label: 'N° badge',
-                                widget: Expanded(
-                                  child: Functions.getTextField(
-                                    controller: _badgeController,
-                                  ),
+                          child: SingleChildScrollView(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                AppText.small(
+                                  'Veuillez saisir le numéro du badge si le livreur en dispose',
+                                  textAlign: TextAlign.center,
                                 ),
-                              )
-                            ],
+                                const SizedBox(height: 5),
+                                InfosColumn(
+                                  opacity: 0.12,
+                                  label: 'N° badge',
+                                  widget: Expanded(
+                                    child: Functions.getTextField(
+                                      controller: _badgeController,
+                                    ),
+                                  ),
+                                )
+                              ],
+                            ),
                           ),
                         ),
                       );

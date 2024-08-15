@@ -57,9 +57,11 @@ class _AddVisiteScreenState extends State<AddVisiteScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset:
-          false, // Prevent keyboard from resizing the content
+          true, // Prevent keyboard from resizing the content
       appBar: AppBar(
         title: AppText.medium('Nouvelle visite'),
+        leading: Container(),
+        centerTitle: true,
       ),
       body: Stack(
         children: [
@@ -108,10 +110,10 @@ class _AddVisiteScreenState extends State<AddVisiteScreen> {
 
   Widget _buildPageView({required BoxConstraints constraints}) {
     return SizedBox(
-      height: constraints.maxHeight *
-          0.7, // Hauteur fixe pour le PageView, à ajuster si nécessaire
+      height: constraints.maxHeight * 0.7,
       child: PageView(
         controller: _pageController,
+        physics: NeverScrollableScrollPhysics(),
         onPageChanged: (index) {
           setState(() {
             activeIndex = index;
@@ -129,111 +131,113 @@ class _AddVisiteScreenState extends State<AddVisiteScreen> {
   Widget _visiteDetails() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 15),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          AppText.large('Détails de la visite'),
-          AppText.small(
-            'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt.',
-          ),
-          const SizedBox(height: 10),
-          _cardContainer(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                AppText.medium('Date et heure de la visite'),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    Expanded(
-                      child: InfosColumn(
-                        label: 'Date début',
-                        widget: Expanded(
-                          child: AppText.medium(
-                            DateFormat('EE dd MMM yyyy', 'fr')
-                                .format(_startDate),
-                          ),
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: InfosColumn(
-                        label: 'Heure',
-                        widget: Expanded(
-                          child: AppText.medium(
-                            DateFormat('HH:mm:ss').format(DateTime.now()),
-                          ),
-                        ),
-                      ),
-                    )
-                  ],
-                ),
-                const SizedBox(height: 10),
-                CustomButton(
-                  color: Palette.primaryColor.withOpacity(0.06),
-                  textColor: Palette.primaryColor,
-                  width: double.infinity,
-                  height: 35,
-                  radius: 5,
-                  text: 'Changer les dates',
-                  //onPress: () => _pickDateRange(context),
-                  onPress: () => Functions.showToast(
-                    msg:
-                        'Veuillez contacter votre responsable pour la création d\'une visite planifiée',
-                    gravity: ToastGravity.TOP,
-                  ),
-                )
-              ],
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            AppText.large('Détails de la visite'),
+            AppText.small(
+              'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt.',
             ),
-          ),
-          const SizedBox(height: 10),
-          _cardContainer(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                AppText.medium('Entreprise & motif'),
-                InfosColumn(
-                  label: 'Entreprise',
-                  opacity: 0.12,
-                  widget: Expanded(
-                    child: Functions.getTextField(
-                        controller: _entrepriseController),
-                  ),
-                ),
-                Container(
-                  width: double.infinity,
-                  height: 0.8,
-                  color: Palette.separatorColor,
-                ),
-                InkWell(
-                  onTap: () => Functions.showBottomSheet(
-                    ctxt: context,
-                    widget: _motifSelector(),
-                  ),
-                  child: InfosColumn(
-                    // height: 80,
-                    label: 'Motif de la visitée',
-                    opacity: 0.12,
-                    widget: Expanded(
-                      child: Row(
-                        children: [
-                          Expanded(
+            const SizedBox(height: 10),
+            _cardContainer(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  AppText.medium('Date et heure de la visite'),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: InfosColumn(
+                          label: 'Date début',
+                          widget: Expanded(
                             child: AppText.medium(
-                              _selectedMotif != null
-                                  ? _selectedMotif!.libelle
-                                  : "Selectionner un motif",
+                              DateFormat('EE dd MMM yyyy', 'fr')
+                                  .format(_startDate),
                             ),
                           ),
-                          Icon(Icons.arrow_drop_down),
-                        ],
+                        ),
                       ),
+                      Expanded(
+                        child: InfosColumn(
+                          label: 'Heure',
+                          widget: Expanded(
+                            child: AppText.medium(
+                              DateFormat('HH:mm:ss').format(DateTime.now()),
+                            ),
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  CustomButton(
+                    color: Palette.primaryColor.withOpacity(0.06),
+                    textColor: Palette.primaryColor,
+                    width: double.infinity,
+                    height: 35,
+                    radius: 5,
+                    text: 'Changer les dates',
+                    //onPress: () => _pickDateRange(context),
+                    onPress: () => Functions.showToast(
+                      msg:
+                          'Veuillez contacter votre responsable pour la création d\'une visite planifiée',
+                      gravity: ToastGravity.TOP,
+                    ),
+                  )
+                ],
+              ),
+            ),
+            const SizedBox(height: 10),
+            _cardContainer(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  AppText.medium('Entreprise & motif'),
+                  InfosColumn(
+                    label: 'Entreprise',
+                    opacity: 0.12,
+                    widget: Expanded(
+                      child: Functions.getTextField(
+                          controller: _entrepriseController),
                     ),
                   ),
-                )
-              ],
-            ),
-          )
-        ],
+                  Container(
+                    width: double.infinity,
+                    height: 0.8,
+                    color: Palette.separatorColor,
+                  ),
+                  InkWell(
+                    onTap: () => Functions.showBottomSheet(
+                      ctxt: context,
+                      widget: _motifSelector(),
+                    ),
+                    child: InfosColumn(
+                      // height: 80,
+                      label: 'Motif de la visitée',
+                      opacity: 0.12,
+                      widget: Expanded(
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: AppText.medium(
+                                _selectedMotif != null
+                                    ? _selectedMotif!.libelle
+                                    : "Selectionner un motif",
+                              ),
+                            ),
+                            Icon(Icons.arrow_drop_down),
+                          ],
+                        ),
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            )
+          ],
+        ),
       ),
     );
   }
@@ -294,81 +298,85 @@ class _AddVisiteScreenState extends State<AddVisiteScreen> {
   Padding _coordonnees() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 15),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          AppText.large('Coordonnées'),
-          AppText.small(
-            'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt.',
-          ),
-          const SizedBox(height: 10),
-          _cardContainer(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                AppText.medium('Email et/ou numéro de téléphone'),
-                const SizedBox(height: 10),
-                InfosColumn(
-                  label: 'Email',
-                  widget: Expanded(
-                    child: Functions.getTextField(controller: _emailController),
-                  ),
-                  opacity: 0.12,
-                ),
-                Container(
-                  width: double.infinity,
-                  height: 0.8,
-                  color: Palette.separatorColor,
-                ),
-                InfosColumn(
-                  label: 'n° de téléphone',
-                  widget: Expanded(
-                    child: Functions.getTextField(controller: _phoneController),
-                  ),
-                  opacity: 0.12,
-                )
-              ],
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            AppText.large('Coordonnées'),
+            AppText.small(
+              'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt.',
             ),
-          ),
-          const SizedBox(height: 10),
-          _cardContainer(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                AppText.medium('Identifiants'),
-                const SizedBox(height: 10),
-                InfosColumn(
-                  label: 'n° CNI',
-                  widget: Expanded(
-                    child:
-                        Functions.getTextField(controller: _idcardController),
+            const SizedBox(height: 10),
+            _cardContainer(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  AppText.medium('Email et/ou numéro de téléphone'),
+                  const SizedBox(height: 10),
+                  InfosColumn(
+                    label: 'Email',
+                    widget: Expanded(
+                      child:
+                          Functions.getTextField(controller: _emailController),
+                    ),
+                    opacity: 0.12,
                   ),
-                  opacity: 0.12,
-                ),
-                Container(
-                  width: double.infinity,
-                  height: 0.8,
-                  color: Palette.separatorColor,
-                ),
-                InfosColumn(
-                  label: 'Palaque d\'immatriculation',
-                  widget: Expanded(
-                    child:
-                        Functions.getTextField(controller: _cardIdController),
+                  Container(
+                    width: double.infinity,
+                    height: 0.8,
+                    color: Palette.separatorColor,
                   ),
-                  opacity: 0.12,
-                )
-              ],
+                  InfosColumn(
+                    label: 'n° de téléphone',
+                    widget: Expanded(
+                      child:
+                          Functions.getTextField(controller: _phoneController),
+                    ),
+                    opacity: 0.12,
+                  )
+                ],
+              ),
             ),
-          )
-        ],
+            const SizedBox(height: 10),
+            _cardContainer(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  AppText.medium('Identifiants'),
+                  const SizedBox(height: 10),
+                  InfosColumn(
+                    label: 'n° CNI',
+                    widget: Expanded(
+                      child:
+                          Functions.getTextField(controller: _idcardController),
+                    ),
+                    opacity: 0.12,
+                  ),
+                  Container(
+                    width: double.infinity,
+                    height: 0.8,
+                    color: Palette.separatorColor,
+                  ),
+                  InfosColumn(
+                    label: 'Palaque d\'immatriculation',
+                    widget: Expanded(
+                      child:
+                          Functions.getTextField(controller: _cardIdController),
+                    ),
+                    opacity: 0.12,
+                  )
+                ],
+              ),
+            )
+          ],
+        ),
       ),
     );
   }
 
-  Center _generaInfo() => Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 15),
+  Padding _generaInfo() => Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 15),
+        child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -678,8 +686,7 @@ class _AddVisiteScreenState extends State<AddVisiteScreen> {
                     InfosColumn(
                       label: 'Email',
                       widget: Expanded(
-                        child: Functions.getTextField(
-                            controller: _emailController),
+                        child: AppText.medium(_emailController.text),
                       ),
                       // opacity: 0.12,
                     ),
@@ -691,8 +698,7 @@ class _AddVisiteScreenState extends State<AddVisiteScreen> {
                     InfosColumn(
                       label: 'n° de téléphone',
                       widget: Expanded(
-                        child: Functions.getTextField(
-                            controller: _phoneController),
+                        child: AppText.medium(_phoneController.text),
                       ),
                       // opacity: 0.12,
                     ),
@@ -704,8 +710,8 @@ class _AddVisiteScreenState extends State<AddVisiteScreen> {
                     InfosColumn(
                       label: 'n° CNI',
                       widget: Expanded(
-                        child: Functions.getTextField(
-                          controller: _idcardController,
+                        child: AppText.medium(
+                          _idcardController.text,
                         ),
                       ),
                       //opacity: 0.12,
@@ -718,8 +724,8 @@ class _AddVisiteScreenState extends State<AddVisiteScreen> {
                     InfosColumn(
                       label: 'n° d\'immatriculation',
                       widget: Expanded(
-                        child: Functions.getTextField(
-                          controller: _cardIdController,
+                        child: AppText.medium(
+                          _cardIdController.text,
                         ),
                       ),
                       //opacity: 0.12,

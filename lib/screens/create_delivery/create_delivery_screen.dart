@@ -70,10 +70,11 @@ class _CreateDeliveryScreenState extends State<CreateDeliveryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset:
-          false, // Prevent keyboard from resizing the content
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         title: AppText.medium('Nouvelle livraison'),
+        leading: Container(),
+        centerTitle: true,
       ),
       body: Stack(
         children: [
@@ -237,248 +238,252 @@ class _CreateDeliveryScreenState extends State<CreateDeliveryScreen> {
     );
   }
 
-  Column _deliBoyInfos() => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          AppText.large('Informations du livreur'),
-          AppText.small(
-            'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt.',
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-          _cardContainer(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                AppText.medium('Générales'),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    Expanded(
-                      child: InfosColumn(
-                        opacity: 0.12,
-                        label: 'Nom',
-                        widget: Expanded(
-                          child: Functions.getTextField(
-                            controller: _nameController,
-                          ),
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: InfosColumn(
-                        opacity: 0.12,
-                        label: 'Prénoms',
-                        widget: Expanded(
-                          child: Functions.getTextField(
-                            controller: _prenomsController,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                Container(
-                  width: double.infinity,
-                  height: 0.8,
-                  color: Palette.separatorColor,
-                ),
-                InfosColumn(
-                  opacity: 0.12,
-                  label: 'N° CNI',
-                  widget: Expanded(
-                    child: Functions.getTextField(
-                      controller: _idCardController,
-                    ),
-                  ),
-                ),
-              ],
+  SingleChildScrollView _deliBoyInfos() => SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            AppText.large('Informations du livreur'),
+            AppText.small(
+              'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt.',
             ),
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-          _cardContainer(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                AppText.medium('Coordonnées'),
-                const SizedBox(height: 10),
-                InfosColumn(
-                  opacity: 0.12,
-                  label: 'Portable',
-                  widget: Expanded(
-                    child: Container(
-                      child: Row(
-                        children: [
-                          AppText.medium('+225 '),
-                          Expanded(
+            const SizedBox(
+              height: 10,
+            ),
+            _cardContainer(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  AppText.medium('Générales'),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: InfosColumn(
+                          opacity: 0.12,
+                          label: 'Nom',
+                          widget: Expanded(
                             child: Functions.getTextField(
-                              controller: _phoneController,
+                              controller: _nameController,
                             ),
                           ),
-                        ],
+                        ),
+                      ),
+                      Expanded(
+                        child: InfosColumn(
+                          opacity: 0.12,
+                          label: 'Prénoms',
+                          widget: Expanded(
+                            child: Functions.getTextField(
+                              controller: _prenomsController,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Container(
+                    width: double.infinity,
+                    height: 0.8,
+                    color: Palette.separatorColor,
+                  ),
+                  InfosColumn(
+                    opacity: 0.12,
+                    label: 'N° CNI',
+                    widget: Expanded(
+                      child: Functions.getTextField(
+                        controller: _idCardController,
                       ),
                     ),
                   ),
-                ),
-                Container(
-                  width: double.infinity,
-                  height: 0.8,
-                  color: Palette.separatorColor,
-                ),
-                InfosColumn(
-                  opacity: 0.12,
-                  label: 'Courriel',
-                  widget: Expanded(
-                    child: Functions.getTextField(
-                      controller: _emailController,
+                ],
+              ),
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            _cardContainer(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  AppText.medium('Coordonnées'),
+                  const SizedBox(height: 10),
+                  InfosColumn(
+                    opacity: 0.12,
+                    label: 'Portable',
+                    widget: Expanded(
+                      child: Container(
+                        child: Row(
+                          children: [
+                            AppText.medium('+225 '),
+                            Expanded(
+                              child: Functions.getTextField(
+                                controller: _phoneController,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ],
+                  Container(
+                    width: double.infinity,
+                    height: 0.8,
+                    color: Palette.separatorColor,
+                  ),
+                  InfosColumn(
+                    opacity: 0.12,
+                    label: 'Courriel',
+                    widget: Expanded(
+                      child: Functions.getTextField(
+                        controller: _emailController,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       );
 
-  Column _deliGeneraleInfos() => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          AppText.large('Informations de livraison'),
-          AppText.small(
-            'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt.',
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-          _cardContainer(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                AppText.medium('Date et heure de la visite'),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    Expanded(
-                      child: InfosColumn(
-                        label: 'Date',
-                        widget: Expanded(
-                          child: AppText.medium(
-                            DateFormat('EE dd MMM yyyy', 'fr')
-                                .format(_startDate),
-                          ),
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: InfosColumn(
-                        label: 'Heure',
-                        widget: Expanded(
-                          child: AppText.medium(
-                            DateFormat('HH:mm:ss', 'fr').format(
-                              DateTime.now(),
+  SingleChildScrollView _deliGeneraleInfos() => SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            AppText.large('Informations de livraison'),
+            AppText.small(
+              'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt.',
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            _cardContainer(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  AppText.medium('Date et heure de la visite'),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: InfosColumn(
+                          label: 'Date',
+                          widget: Expanded(
+                            child: AppText.medium(
+                              DateFormat('EE dd MMM yyyy', 'fr')
+                                  .format(_startDate),
                             ),
                           ),
                         ),
                       ),
-                    )
-                  ],
-                ),
-                const SizedBox(height: 10),
-                CustomButton(
-                  color: Palette.primaryColor.withOpacity(0.06),
-                  textColor: Palette.primaryColor,
-                  width: double.infinity,
-                  height: 35,
-                  radius: 5,
-                  text: 'Changer les dates',
-                  // onPress: () => _pickDateRange(context),
-                  onPress: () => Functions.showToast(
-                    msg:
-                        'Veuillez contacter votre responsable pour la création d\'une livraison planifiée',
-                    gravity: ToastGravity.TOP,
+                      Expanded(
+                        child: InfosColumn(
+                          label: 'Heure',
+                          widget: Expanded(
+                            child: AppText.medium(
+                              DateFormat('HH:mm:ss', 'fr').format(
+                                DateTime.now(),
+                              ),
+                            ),
+                          ),
+                        ),
+                      )
+                    ],
                   ),
-                )
-              ],
+                  const SizedBox(height: 10),
+                  CustomButton(
+                    color: Palette.primaryColor.withOpacity(0.06),
+                    textColor: Palette.primaryColor,
+                    width: double.infinity,
+                    height: 35,
+                    radius: 5,
+                    text: 'Changer les dates',
+                    // onPress: () => _pickDateRange(context),
+                    onPress: () => Functions.showToast(
+                      msg:
+                          'Veuillez contacter votre responsable pour la création d\'une livraison planifiée',
+                      gravity: ToastGravity.TOP,
+                    ),
+                  )
+                ],
+              ),
             ),
-          ),
-          const SizedBox(height: 10),
-          _cardContainer(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                AppText.medium('Type de colis et Entreprise'),
-                const SizedBox(height: 10),
-                InfosColumn(
-                  opacity: 0.12,
-                  label: 'Type de colis',
-                  widget: Expanded(
-                    child: InkWell(
-                      onTap: () => Functions.showBottomSheet(
-                        ctxt: context,
-                        widget: _colisSelector(),
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: AppText.medium(_selectedColis),
-                          ),
-                          Icon(
-                            Icons.arrow_drop_down,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                Container(
-                  width: double.infinity,
-                  height: 0.8,
-                  color: Palette.separatorColor,
-                ),
-                InfosColumn(
-                  opacity: 0.12,
-                  label: 'Entreprise',
-                  widget: Expanded(
-                    child: Functions.getTextField(
-                      controller: _entrepriseController,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                AppText.medium('Tracteur & Remorque (conteneur)'),
-                Row(
-                  children: [
-                    Expanded(
-                      child: InfosColumn(
-                        opacity: 0.12,
-                        label: 'N° tracteur',
-                        widget: Expanded(
-                          child: Functions.getTextField(
-                            controller: _numtracteurController,
-                          ),
+            const SizedBox(height: 10),
+            _cardContainer(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  AppText.medium('Type de colis et Entreprise'),
+                  const SizedBox(height: 10),
+                  InfosColumn(
+                    opacity: 0.12,
+                    label: 'Type de colis',
+                    widget: Expanded(
+                      child: InkWell(
+                        onTap: () => Functions.showBottomSheet(
+                          ctxt: context,
+                          widget: _colisSelector(),
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: AppText.medium(_selectedColis),
+                            ),
+                            Icon(
+                              Icons.arrow_drop_down,
+                            ),
+                          ],
                         ),
                       ),
                     ),
-                    const SizedBox(width: 5),
-                    Expanded(
-                      child: InfosColumn(
-                        opacity: 0.12,
-                        label: 'N° remorque',
-                        widget: Expanded(
-                          child: Functions.getTextField(
-                              controller: _numremorqueController),
-                        ),
+                  ),
+                  Container(
+                    width: double.infinity,
+                    height: 0.8,
+                    color: Palette.separatorColor,
+                  ),
+                  InfosColumn(
+                    opacity: 0.12,
+                    label: 'Entreprise',
+                    widget: Expanded(
+                      child: Functions.getTextField(
+                        controller: _entrepriseController,
                       ),
                     ),
-                  ],
-                ),
-              ],
-            ),
-          )
-        ],
+                  ),
+                  const SizedBox(height: 10),
+                  AppText.medium('Tracteur & Remorque (conteneur)'),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: InfosColumn(
+                          opacity: 0.12,
+                          label: 'N° tracteur',
+                          widget: Expanded(
+                            child: Functions.getTextField(
+                              controller: _numtracteurController,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 5),
+                      Expanded(
+                        child: InfosColumn(
+                          opacity: 0.12,
+                          label: 'N° remorque',
+                          widget: Expanded(
+                            child: Functions.getTextField(
+                                controller: _numremorqueController),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            )
+          ],
+        ),
       );
 
   Container _colisSelector() => Container(
@@ -632,8 +637,9 @@ class _CreateDeliveryScreenState extends State<CreateDeliveryScreen> {
                     InfosColumn(
                       label: 'Email',
                       widget: Expanded(
-                        child: Functions.getTextField(
-                            controller: _emailController),
+                        child: AppText.medium(
+                          _emailController.text,
+                        ),
                       ),
                       // opacity: 0.12,
                     ),
@@ -645,8 +651,9 @@ class _CreateDeliveryScreenState extends State<CreateDeliveryScreen> {
                     InfosColumn(
                       label: 'n° CNI',
                       widget: Expanded(
-                        child: Functions.getTextField(
-                            controller: _idCardController),
+                        child: AppText.medium(
+                          _idCardController.text,
+                        ),
                       ),
                       // opacity: 0.12,
                     ),
@@ -730,7 +737,7 @@ class _CreateDeliveryScreenState extends State<CreateDeliveryScreen> {
                       color: Palette.separatorColor,
                     ),
                     InfosColumn(
-                      label: 'Motif de la visite',
+                      label: 'Type de colis',
                       widget: Expanded(
                         child: AppText.medium(_selectedColis),
                       ),
@@ -759,113 +766,122 @@ class _CreateDeliveryScreenState extends State<CreateDeliveryScreen> {
       );
 
   void showAdaptiveModalDialog(BuildContext context, String phone) {
-    showCupertinoModalPopup(
+    showDialog(
       context: context,
       builder: (BuildContext context) {
-        return WillPopScope(
-          onWillPop: () async => false,
-          child: Platform.isIOS
-              ? CupertinoAlertDialog(
-                  title: Text('Attention'),
-                  content: Column(
-                    children: [
-                      Text(
-                        'Veuillez renseigner le numéro de badget si le livreur en a réçu',
-                      ),
-                      const SizedBox(height: 5),
-                      CupertinoTextField(
-                        controller: _badgeController,
-                        /* onChanged: (value) {
+        return Platform.isIOS
+            ? CupertinoAlertDialog(
+                title: Text('Attention'),
+                content: Column(
+                  children: [
+                    Text(
+                      'Veuillez renseigner le numéro de badget si le livreur en a réçu',
+                    ),
+                    const SizedBox(height: 5),
+                    CupertinoTextField(
+                      controller: _badgeController,
+                      /* onChanged: (value) {
                           print(_badgeController.text);
                         }, */
-                      ),
-                    ],
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop(); // Close the dialog
-                      },
-                      child: AppText.medium(
-                        'Annuler',
-                        color: Color.fromARGB(255, 142, 4, 25),
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: () async {
-                        // Add your "Créer" button action here
-                        AgentModel? _agent = await Functions.fetchAgent();
-                        if (_agent == null) {
-                          Functions.showToast(
-                            msg: 'Veuillez une erreur s\'est produite',
-                            gravity: ToastGravity.TOP,
-                          );
-                          return;
-                        }
-                        _postVisit(agent: _agent);
-                      },
-                      child: AppText.medium(
-                        'Créer',
-                        color: Palette.primaryColor,
-                        fontWeight: FontWeight.w400,
-                      ),
                     ),
                   ],
-                )
-              : AlertDialog(
-                  title: Text('Attention'),
-                  content: Container(
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(); // Close the dialog
+                    },
+                    child: AppText.medium(
+                      'Annuler',
+                      color: Color.fromARGB(255, 142, 4, 25),
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () async {
+                      // Add your "Créer" button action here
+                      AgentModel? _agent = await Functions.fetchAgent();
+                      if (_agent == null) {
+                        Functions.showToast(
+                          msg: 'Veuillez une erreur s\'est produite',
+                          gravity: ToastGravity.TOP,
+                        );
+                        return;
+                      }
+                      _postVisit(agent: _agent);
+                    },
+                    child: AppText.medium(
+                      'Créer',
+                      color: Palette.primaryColor,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ],
+              )
+            : AlertDialog(
+                title: Text('Attention'),
+                content: Container(
+                  // Limiter la hauteur maximale du contenu
+                  constraints: BoxConstraints(
+                    maxHeight: MediaQuery.of(context).size.height * 0.5,
+                  ),
+                  child: SingleChildScrollView(
                     child: Column(
+                      mainAxisSize:
+                          MainAxisSize.min, // Ne prend que l'espace nécessaire
                       children: [
                         Text(
                           'Veuillez renseigner le numéro de badget si le livreur en a réçu',
                         ),
                         const SizedBox(height: 5),
                         InfosColumn(
+                          opacity: 0.12,
                           label: 'N° badget',
-                          widget: Functions.getTextField(
-                            controller: _badgeController,
+                          widget: Expanded(
+                            child: Functions.getTextField(
+                              controller: _badgeController,
+                            ),
                           ),
                         ),
                       ],
                     ),
                   ),
-                  actions: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop(); // Close the dialog
-                      },
-                      child: AppText.medium(
-                        'Annuler',
-                        color: Color.fromARGB(255, 142, 4, 25),
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: () async {
-                        // Add your "Créer" button action here
-                        AgentModel? _agent = await Functions.fetchAgent();
-                        if (_agent == null) {
-                          Functions.showToast(
-                            msg: 'Veuillez une erreur s\'est produite',
-                            gravity: ToastGravity.TOP,
-                          );
-                          return;
-                        }
-                        _postVisit(agent: _agent);
-                      },
-                      child: AppText.medium(
-                        'Créer',
-                        color: Palette.primaryColor,
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
-                  ],
                 ),
-        );
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(); // Close the dialog
+                    },
+                    child: AppText.medium(
+                      'Annuler',
+                      color: Color.fromARGB(255, 142, 4, 25),
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () async {
+                      // Add your "Créer" button action here
+                      AgentModel? _agent = await Functions.fetchAgent();
+                      if (_agent == null) {
+                        Functions.showToast(
+                          msg: 'Veuillez une erreur s\'est produite',
+                          gravity: ToastGravity.TOP,
+                        );
+                        return;
+                      }
+                      _postVisit(agent: _agent);
+                    },
+                    child: AppText.medium(
+                      'Créer',
+                      color: Palette.primaryColor,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ],
+              );
       },
     );
+    //
   }
 
   //
@@ -908,7 +924,7 @@ class _CreateDeliveryScreenState extends State<CreateDeliveryScreen> {
       print(response.body); */
       if (response.statusCode == 200 || response.statusCode == 201) {
         Functions.showToast(
-          msg: 'Visite enregistrée avec succès',
+          msg: 'Livraison enregistrée avec succès',
           gravity: ToastGravity.TOP,
         );
         // recuperer l'id dans response.body
