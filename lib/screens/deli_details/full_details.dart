@@ -1,8 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
+import 'package:scanner/screens/scanner/widgets/infos_column.dart';
 
 import '../../config/app_text.dart';
-import '../../model/tracteur_modal.dart';
+import '../../model/agl_livraison_model.dart';
 import 'icon_row.dart';
 
 class FullDetails extends StatelessWidget {
@@ -10,11 +11,11 @@ class FullDetails extends StatelessWidget {
     super.key,
     required this.deli,
   });
-  final DeliDetailsModel deli;
+  final AglLivraisonModel deli;
 
   @override
   Widget build(BuildContext context) {
-    bool isFinish = deli.livraison.status.trim().toLowerCase() == 'terminée';
+    bool isEntry = deli.mouvements == 'Entrée';
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -27,17 +28,22 @@ class FullDetails extends StatelessWidget {
         ),
         IconRow(
           icon: CupertinoIcons.person_fill,
-          title: '${deli.livraison.nom} ${deli.livraison.prenoms}',
-          subtitle: deli.livraison.telephone,
+          title: '${deli.nom} ${deli.prenoms}',
+          subtitle: "${deli.typePiece}  n°  ${deli.numeroPiece} ",
         ),
         IconRow(
           icon: CupertinoIcons.calendar,
           title: DateFormat("EEEE d MMMM yyyy", 'fr')
-              .format(deli.livraison.dateLivraison!),
-          subtitle: !isFinish
-              ? 'à ${deli.livraison.heureEntree}'
-              : 'De ${deli.livraison.heureEntree} à ${deli.livraison.heureSortie}',
+              .format(isEntry ? deli.dateEntree! : deli.DateSortie!),
+          subtitle: 'à ${isEntry ? deli.heureEntree : deli.heureSortie}',
         ),
+        const SizedBox(height: 20),
+        InfosColumn(
+          height: 250,
+          opacity: 0.12,
+          label: 'Note associée (observation)',
+          widget: AppText.medium(deli.observation),
+        )
       ],
     );
   }

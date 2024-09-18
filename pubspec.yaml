@@ -42,7 +42,7 @@ dependencies:
   intl: ^0.19.0
   double_back_to_close_app: ^2.1.0
   audioplayers: ^6.0.0
-  vibration: ^1.9.0
+  vibration: ^2.0.0
   http: ^0.13.6
   fluttertoast: ^8.2.6
   getwidget: ^3.1.1
@@ -63,6 +63,7 @@ dependencies:
   flutter_staggered_grid_view: ^0.7.0
   loading_animation_widget: ^1.2.1
   device_info_plus: ^10.1.1
+  flutter_dotenv: ^5.1.0
 
 dev_dependencies:
   flutter_test:
@@ -108,6 +109,7 @@ flutter:
     - assets/icons/menu/
     - assets/images/
     - assets/soung/
+    - .env
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

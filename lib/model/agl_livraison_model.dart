@@ -4,144 +4,207 @@
 
 import 'dart:convert';
 
-import 'package:scanner/model/localisation_model.dart';
+import 'package:get/get.dart';
+import 'package:scanner/local_service/local_service.dart';
 
-//List
-List<AglLivraisonModel> listAglLivraisonModelFromJson(String str) =>
-    List<AglLivraisonModel>.from(
-        json.decode(str).map((x) => AglLivraisonModel.fromJson(x)));
+import '../remote_service/remote_service.dart';
+import 'DeviceModel.dart';
 
-String listAglLivraisonModelToJson(List<AglLivraisonModel> data) =>
-    json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
-
-/// single
 AglLivraisonModel aglLivraisonModelFromJson(String str) =>
     AglLivraisonModel.fromJson(json.decode(str));
 
 String aglLivraisonModelToJson(AglLivraisonModel data) =>
     json.encode(data.toJson());
 
+///list
+List<AglLivraisonModel> aglLivraisonModelListFromJson(String str) =>
+    List<AglLivraisonModel>.from(
+        json.decode(str).map((x) => AglLivraisonModel.fromJson(x)));
+
 class AglLivraisonModel {
-  int id;
-  int userId;
-  int localisationId;
-  bool active;
-  String nom;
-  String prenoms;
-  String numeroRemorque;
-  String telephone;
-  String entreprise;
-  String typeColis;
-  bool statutLivraison;
-  DateTime dateVisite;
-  DateTime? dateLivraison;
-  String status;
-  String heureEntree;
-  String heureSortie;
-  LocalisationModel localisation;
+  final int id;
+  final int userId;
+  final int localisationId;
+  final String mouvements;
+  final String formatVehicule;
+  final bool active;
+  final String nom;
+  final String prenoms;
+  final String typePiece;
+  final String numeroPiece;
+  final String validitePiece;
+  final String numeroImmatriculation;
+  final String numeroRemorque;
+  final String numeroConteneur;
+  final String numeroPlomb;
+  final String etatConteneur;
+  final String tailleConteneur;
+  final String motif;
+  final String referenceDocument;
+  final String typeEngin;
+  final String marque;
+  final String telephone;
+  final String entreprise;
+  final DateTime dateVisite;
+  /*  final DateTime? dateLivraison; */
+  final DateTime? dateEntree;
+  final DateTime? DateSortie;
+  final String heureEntree;
+  final String heureSortie;
+  /* final String heure; */
+  final String observation;
+  final String designation;
 
   AglLivraisonModel({
     required this.id,
     required this.userId,
     required this.localisationId,
+    required this.mouvements,
+    required this.formatVehicule,
     required this.active,
     required this.nom,
     required this.prenoms,
+    required this.typePiece,
+    required this.numeroPiece,
+    required this.validitePiece,
+    required this.numeroImmatriculation,
     required this.numeroRemorque,
+    required this.numeroConteneur,
+    required this.numeroPlomb,
+    required this.etatConteneur,
+    required this.tailleConteneur,
+    required this.motif,
+    required this.referenceDocument,
+    required this.typeEngin,
+    required this.marque,
     required this.telephone,
     required this.entreprise,
-    required this.typeColis,
-    required this.statutLivraison,
     required this.dateVisite,
-    required this.dateLivraison,
-    required this.status,
+    /*   required this.dateLivraison,
+    required this.heure, */
+    required this.observation,
+    required this.designation,
+    required this.dateEntree,
+    required this.DateSortie,
     required this.heureEntree,
     required this.heureSortie,
-    required this.localisation,
   });
 
   factory AglLivraisonModel.fromJson(Map<String, dynamic> json) =>
       AglLivraisonModel(
-        id: json["id"] ?? 0,
+        id: json["id"],
         userId: json["user_id"] ?? 0,
         localisationId: json["localisation_id"] ?? 0,
-        active: json["active"] == 1 ? true : false,
+        mouvements: json["mouvements"] ?? "Entrée",
+        formatVehicule: json["format_vehicule"] ?? "Tracteur",
+        active: json["active"] == 0 ? false : true,
         nom: json["nom"] ?? "",
         prenoms: json["prenoms"] ?? "",
+        typePiece: json["type_piece"] ?? "",
+        numeroPiece: json["numero_piece"] ?? "",
+        validitePiece: json["validite_piece"] ?? "",
+        numeroImmatriculation: json["numero_immatriculation"] ?? "",
         numeroRemorque: json["numero_remorque"] ?? "",
+        numeroConteneur: json["numero_conteneur"] ?? "",
+        numeroPlomb: json["numero_plomb"] ?? "",
+        etatConteneur: json["etat_conteneur"] ?? "",
+        tailleConteneur: json["taille_conteneur"] ?? "",
+        motif: json["motif"] ?? "Livraison",
+        referenceDocument: json["reference_document"] ?? "",
+        typeEngin: json["type_engin"] ?? "",
+        marque: json["marque"] ?? "",
         telephone: json["telephone"] ?? "",
         entreprise: json["entreprise"] ?? "",
-        typeColis: json["type_colis"] ?? "",
-        statutLivraison: json["statut_livraison"] == 1 ? true : false,
-        dateVisite: DateTime.parse(json["date_visite"]) /* DateTime.now() */,
-        dateLivraison: json["date_livraison"] != null
+        dateVisite: json["date_visite"] != null
+            ? DateTime.parse(json["date_visite"])
+            : DateTime.now(),
+        /*  dateLivraison: json["date_livraison"] != null
             ? DateTime.parse(json["date_livraison"])
+            : null, */
+        dateEntree: json["date_entree"] != null
+            ? DateTime.parse(json["date_entree"])
             : null,
-        status: json["status"] ?? "",
+        DateSortie: json["date_sortie"] != null
+            ? DateTime.parse(json["date_sortie"])
+            : null,
         heureEntree: json["heure_entree"] ?? "",
         heureSortie: json["heure_sortie"] ?? "",
-        localisation: LocalisationModel.fromJson(json["localisation"]),
+        /*   heure: json["heure"] ?? "", */
+        observation: json["observation"] ?? "",
+        designation: json["designation"] ?? "",
       );
 
   Map<String, dynamic> toJson() => {
         "id": id,
         "user_id": userId,
         "localisation_id": localisationId,
+        "mouvements": mouvements,
+        "format_vehicule": formatVehicule,
         "active": active,
         "nom": nom,
         "prenoms": prenoms,
+        "type_piece": typePiece,
+        "numero_piece": numeroPiece,
+        "validite_piece": validitePiece,
+        "numero_immatriculation": numeroImmatriculation,
         "numero_remorque": numeroRemorque,
+        "numero_conteneur": numeroConteneur,
+        "numero_plomb": numeroPlomb,
+        "etat_conteneur": etatConteneur,
+        "taille_conteneur": tailleConteneur,
+        "motif": motif,
+        "reference_document": referenceDocument,
+        "type_engin": typeEngin,
+        "marque": marque,
         "telephone": telephone,
         "entreprise": entreprise,
-        "type_colis": typeColis,
-        "statut_livraison": statutLivraison,
         "date_visite":
             "${dateVisite.year.toString().padLeft(4, '0')}-${dateVisite.month.toString().padLeft(2, '0')}-${dateVisite.day.toString().padLeft(2, '0')}",
-        "date_livraison": dateLivraison,
-        "status": status,
-        "heure_entree": heureEntree,
-        "heure_sortie": heureSortie,
-        "localisation": localisation.toJson(),
+        /*  "date_livraison": dateLivraison,
+        "heure": heure, */
+        "observation": observation,
       };
 
-  /* copy with methode */
-  AglLivraisonModel copyWith({
-    int? id,
-    int? userId,
-    int? localisationId,
-    bool? active,
-    String? nom,
-    String? prenoms,
-    String? numeroRemorque,
-    String? telephone,
-    String? entreprise,
-    String? typeColis,
-    bool? statutLivraison,
-    DateTime? dateVisite,
-    DateTime? dateLivraison,
-    String? status,
-    String? heureEntree,
-    String? heureSortie,
-    LocalisationModel? localisation,
+  static List<AglLivraisonModel> livraisonList = [];
+
+  static Future<void> getTracteurListFromApi() async {
+    livraisonList = await RemoteService().getLivraisons();
+  }
+
+  static Future<List<AglLivraisonModel>> getDeli(
+      {required DateTime date}) async {
+    LocalService localService = LocalService();
+    DeviceModel? _device = await localService.getDevice();
+    if (_device == null) {
+      return [];
+    }
+    List<AglLivraisonModel> _list = await RemoteService().getLivraisons();
+    return _list
+        .where(
+          (element) =>
+              /* !element.active && */
+              element.localisationId == _device.localisationId &&
+              element.heureEntree.trim().isNotEmpty &&
+              element.dateEntree != null &&
+              element.dateVisite.isAtSameMomentAs(date),
+        )
+        .toList();
+  }
+
+  static AglLivraisonModel? findLivraison({
+    required String numMatricule,
+    required int localisationId,
+    required String mouvement,
   }) {
-    return AglLivraisonModel(
-      id: id ?? this.id,
-      userId: userId ?? this.userId,
-      localisationId: localisationId ?? this.localisationId,
-      active: active ?? this.active,
-      nom: nom ?? this.nom,
-      prenoms: prenoms ?? this.prenoms,
-      numeroRemorque: numeroRemorque ?? this.numeroRemorque,
-      telephone: telephone ?? this.telephone,
-      entreprise: entreprise ?? this.entreprise,
-      typeColis: typeColis ?? this.typeColis,
-      statutLivraison: statutLivraison ?? this.statutLivraison,
-      dateVisite: dateVisite ?? this.dateVisite,
-      dateLivraison: dateLivraison ?? this.dateLivraison,
-      status: status ?? this.status,
-      heureEntree: heureEntree ?? this.heureEntree,
-      heureSortie: heureSortie ?? this.heureSortie,
-      localisation: localisation ?? this.localisation,
-    );
+    return livraisonList.firstWhereOrNull((livraison) {
+      return (livraison.numeroImmatriculation.toUpperCase() ==
+              numMatricule.toUpperCase() &&
+          livraison.mouvements.toLowerCase() == mouvement.toLowerCase() &&
+          /* Functions.isToday(livraison.dateVisite) && */
+          livraison.active &&
+          livraison.localisationId == localisationId &&
+          livraison.DateSortie == null &&
+          livraison.heureSortie.trim().isEmpty);
+    });
   }
 }

@@ -54,7 +54,7 @@ class SheetHeader extends StatelessWidget {
             textOverflow: TextOverflow.ellipsis,
           ),
           AppText.small(
-            '${visite.motif.libelle.toLowerCase()}',
+            '${visite.typeVisiteur}',
             textOverflow: TextOverflow.fade,
           ),
           const SizedBox(

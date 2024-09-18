@@ -1,23 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_easyloading/flutter_easyloading.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:intl/intl.dart';
+import 'package:scanner/model/agl_livraison_model.dart';
 
 import '../../config/app_text.dart';
-import '../../config/functions.dart';
-import '../../config/palette.dart';
-import '../../model/agent_model.dart';
-import '../../model/tracteur_modal.dart';
-import '../../remote_service/remote_service.dart';
-import '../../widgets/custom_button.dart';
 import '../../widgets/sheet_closer.dart';
-import '../scanner/widgets/infos_column.dart';
 import 'full_details.dart';
 import 'row_box.dart';
 import 'shipping_info.dart';
 
 class DeliDetailSheet extends StatefulWidget {
-  final DeliDetailsModel deli;
+  final AglLivraisonModel deli;
   //final bool isFinish;
   const DeliDetailSheet({required this.deli, super.key});
 
@@ -26,22 +17,20 @@ class DeliDetailSheet extends StatefulWidget {
 }
 
 class _DeliDetailSheetState extends State<DeliDetailSheet> {
-  bool isRegisterProcess = false;
+  /* bool isRegisterProcess = false;
   TextEditingController _noteController = TextEditingController();
-  TextEditingController _badgeController = TextEditingController();
+  TextEditingController _badgeController = TextEditingController(); */
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    bool isFinish =
-        widget.deli.livraison.status.trim().toLowerCase() == 'terminée';
 
     return Scaffold(
       backgroundColor: Colors.transparent,
       resizeToAvoidBottomInset: true,
       body: Container(
-        margin: EdgeInsets.only(top: size.height - size.height / 1.4),
-        height: size.height / 1.4,
+        margin: EdgeInsets.only(top: size.height - size.height / 1.2),
+        height: size.height * 0.95,
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.only(
@@ -53,57 +42,37 @@ class _DeliDetailSheetState extends State<DeliDetailSheet> {
           children: [
             SheetCloser(),
             ShippingInfo(
-              tracteurNum: widget.deli.numeroTracteur,
-              remorqueNum: widget.deli.livraison.numeroRemorque,
+              tracteurNum: widget.deli.numeroImmatriculation,
+              remorqueNum: widget.deli.numeroRemorque,
+              conteneur: widget.deli.numeroConteneur,
             ),
             Expanded(
-              child: !isRegisterProcess
-                  ? Container(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 5,
-                        horizontal: 10,
-                      ),
-                      child: SingleChildScrollView(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 15),
-                              child: AppText.medium(
-                                'Colis, Entreprise & Lieu',
-                                color: Color.fromARGB(255, 40, 40, 40),
-                              ),
-                            ),
-                            SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: BoxRow(
-                                deli: widget.deli,
-                              ),
-                            ),
-                            const SizedBox(height: 5),
-                            FullDetails(deli: widget.deli),
-                            const SizedBox(height: 25),
-                            !isFinish
-                                ? CustomButton(
-                                    color: Palette.primaryColor,
-                                    width: double.infinity,
-                                    height: 35,
-                                    radius: 5,
-                                    text: 'Livraison terminée ?',
-                                    onPress: () {
-                                      setState(
-                                        () {
-                                          isRegisterProcess = true;
-                                        },
-                                      );
-                                    },
-                                  )
-                                : Container(),
-                          ],
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 5,
+                  horizontal: 10,
+                ),
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 15),
+                        child: AppText.medium(
+                          'Colis, Entreprise & Lieu',
+                          color: Color.fromARGB(255, 40, 40, 40),
                         ),
                       ),
-                    )
-                  : Container(
+                      BoxRow(
+                        deli: widget.deli,
+                      ),
+                      const SizedBox(height: 5),
+                      FullDetails(deli: widget.deli),
+                    ],
+                  ),
+                ),
+              )
+              /*  :Container(
                       padding: const EdgeInsets.symmetric(
                         vertical: 5,
                         horizontal: 10,
@@ -205,7 +174,8 @@ class _DeliDetailSheetState extends State<DeliDetailSheet> {
                           ],
                         ),
                       ),
-                    ),
+                    ) */
+              ,
             ),
           ],
         ),
@@ -213,7 +183,7 @@ class _DeliDetailSheetState extends State<DeliDetailSheet> {
     );
   }
 
-  ////
+/*   ////
   _handleDeliOut() async {
     Navigator.pop(context);
     EasyLoading.show();
@@ -224,7 +194,7 @@ class _DeliDetailSheetState extends State<DeliDetailSheet> {
     AgentModel? _agent = await Functions.fetchAgent();
     if (_agent == null) {
       Functions.showToast(
-        msg: 'Veuillez une erreur s\'est produite',
+        msg: 'Une erreur s\'est produite',
         gravity: ToastGravity.TOP,
       );
       return;
@@ -264,10 +234,10 @@ class _DeliDetailSheetState extends State<DeliDetailSheet> {
         );
         setState(() {
           //_widgetDeli!.statutLivraison = true;
-          widget.deli.livraison.status = 'Terminée';
+          // widget.deli.livraison.status = 'Terminée';
         });
         Navigator.pop(context);
       });
     });
-  }
+  } */
 }

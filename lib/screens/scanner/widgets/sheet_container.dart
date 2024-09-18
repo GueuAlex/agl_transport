@@ -6,10 +6,13 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 import 'package:intl/intl.dart';
+import 'package:scanner/local_service/local_service.dart';
+import 'package:scanner/model/members_model.dart';
 
 import '../../../config/app_text.dart';
 import '../../../config/functions.dart';
 import '../../../config/palette.dart';
+import '../../../model/DeviceModel.dart';
 import '../../../model/agent_model.dart';
 import '../../../model/user.dart';
 import '../../../model/visite_model.dart';
@@ -38,12 +41,17 @@ class _SheetContainerState extends State<SheetContainer> {
   ///mais je ne suis pas sûr de cette de methode
   ///a changer plutard
   bool isLoading = true;
+  String _idCardType = '';
+  String _membersIdCardType = '';
 
   ///////////////////
   final TextEditingController iDController = TextEditingController();
   final TextEditingController cariDController = TextEditingController();
   final TextEditingController cariDController2 = TextEditingController();
   final TextEditingController _badgeController = TextEditingController();
+  final TextEditingController _giletController = TextEditingController();
+  final TextEditingController _membersGiletController = TextEditingController();
+  final TextEditingController _membersBadgeController = TextEditingController();
   /////////////////////
   ///
   String alertCarIDValue = '';
@@ -54,6 +62,7 @@ class _SheetContainerState extends State<SheetContainer> {
   void initState() {
     iDController.text = widget.visite.numeroCni;
     cariDController.text = widget.visite.plaqueVehicule;
+    _idCardType = widget.visite.typePiece;
     super.initState();
   }
 
@@ -110,8 +119,8 @@ class _SheetContainerState extends State<SheetContainer> {
       backgroundColor: Colors.transparent,
       resizeToAvoidBottomInset: true,
       body: Container(
-        margin: EdgeInsets.only(top: size.height - (size.height / 1.3)),
-        height: size.height / 1.3,
+        margin: EdgeInsets.only(top: size.height - (size.height / 1.1)),
+        height: size.height / 1.1,
         width: double.infinity,
         decoration: const BoxDecoration(
           color: Colors.white,
@@ -155,6 +164,7 @@ class _SheetContainerState extends State<SheetContainer> {
     required VisiteModel visite,
   }) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(
           height: 15,
@@ -192,22 +202,57 @@ class _SheetContainerState extends State<SheetContainer> {
         const SizedBox(
           height: 20,
         ),
-        AppText.medium('Attention'),
+        SizedBox(
+          width: double.infinity,
+          child: AppText.medium(
+            'Attention',
+            textAlign: TextAlign.center,
+          ),
+        ),
         AppText.small(
-          'Rassurez vous que le visiteur a bien reçu un badge s\il s\'agit d\'une entrée ou s\'il a rendu son badge s\il s\'agit d\'une sortie',
+          "Rassurez-vous que le visiteur a bien reçu ses accessoires de visite (badge et/ou gilet) s'il s'agit d'une entrée ou s'il les a rendus s'il s'agit d'une sortie.",
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 10),
-        InfosColumn(
-          opacity: 0.12,
-          label: 'Entrer le n° du badge',
-          widget: Expanded(
-            child: Functions.getTextField(
-              controller: _badgeController,
+        Row(
+          children: [
+            Expanded(
+              child: InfosColumn(
+                opacity: 0.12,
+                label: 'Entrer le n° du badge',
+                widget: Expanded(
+                  child: Functions.getTextField(
+                    controller: _badgeController,
+                  ),
+                ),
+              ),
             ),
-          ),
+            const SizedBox(width: 5),
+            Expanded(
+              child: InfosColumn(
+                opacity: 0.12,
+                label: 'Entrer le n° du gilet',
+                widget: Expanded(
+                  child: Functions.getTextField(
+                    controller: _giletController,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 20),
+        if (visite.members.isNotEmpty)
+          AppText.medium(
+            'Personnes associées à la visite (${visite.members.length})',
+            fontSize: 16,
+            fontWeight: FontWeight.w400,
+          ),
+        if (visite.members.isNotEmpty)
+          _showMemberRow(
+            members: visite.members,
+          ),
+        const SizedBox(height: 10),
         CustomButton(
           color: Palette.primaryColor,
           width: double.infinity,
@@ -245,6 +290,7 @@ class _SheetContainerState extends State<SheetContainer> {
                   "scan_hour": hours,
                   "motif": "Entrée",
                   "numero_badge": _badgeController.text,
+                  "numero_gilet": _giletController.text,
                   "plaque_immatriculation": cariDController2.text,
                 };
                 upDateScanHistory(
@@ -270,7 +316,7 @@ class _SheetContainerState extends State<SheetContainer> {
           },
         ),
         const SizedBox(
-          height: 25,
+          height: 15,
         ),
         CustomButton(
           textColor: Palette.secondaryColor,
@@ -294,6 +340,7 @@ class _SheetContainerState extends State<SheetContainer> {
               "scan_hour": hours,
               "motif": "Sortie",
               "numero_badge": _badgeController.text,
+              "numero_gilet": _giletController.text,
               "plaque_immatriculation": cariDController2.text,
             };
             /*  setState(() {
@@ -365,6 +412,70 @@ class _SheetContainerState extends State<SheetContainer> {
       ],
     );
   }
+
+  Widget _showMemberRow({required List<Member> members}) =>
+      SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: members.map((member) {
+            return Container(
+              width: MediaQuery.of(context).size.width - 45,
+              margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+              padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(5),
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.3),
+                    blurRadius: 5,
+                    offset: const Offset(0, 3), // changes position of shadow
+                  ),
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.3),
+                    blurRadius: 5,
+                    offset: const Offset(0, 3), // changes position of shadow
+                  ),
+                ],
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: InfosColumn(
+                          label: 'Nom',
+                          widget: AppText.medium(member.nom),
+                        ),
+                      ),
+                      Expanded(
+                        child: InfosColumn(
+                          label: 'Prénoms',
+                          widget: AppText.medium(member.prenoms),
+                        ),
+                      )
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Expanded(
+                          child: InfosColumn(
+                        label: 'N° de la pièce',
+                        widget: AppText.medium(member.idCard),
+                      )),
+                      Expanded(
+                          child: InfosColumn(
+                        label: 'type de pièce',
+                        widget: AppText.medium(member.typePiece),
+                      ))
+                    ],
+                  )
+                ],
+              ),
+            );
+          }).toList(),
+        ),
+      );
 
   //Alert de sortie définitive
   Future<Null> alert1({
@@ -577,6 +688,590 @@ class _SheetContainerState extends State<SheetContainer> {
       DateTime.now().day,
     );
     String hours = DateFormat('HH:mm').format(DateTime.now());
+    final PageController _pageController = PageController();
+    final TextEditingController idCardController = TextEditingController();
+    //int firstIndex = 0;
+    if (visite.members.isEmpty)
+      return Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: InfosColumn(
+                  label: 'Date début',
+                  widget: AppText.medium(
+                    DateFormat(
+                      'dd MMM yyyy',
+                      'fr_FR',
+                    ).format(
+                      visite.dateVisite,
+                    ),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: InfosColumn(
+                  label: 'Heure d\'entrée',
+                  widget: AppText.medium(
+                    visite.heureVisite ?? '',
+                  ),
+                ),
+              ),
+            ],
+          ), //
+
+          Row(
+            children: [
+              Expanded(
+                child: InfosColumn(
+                  radius: 0,
+                  opacity: 0.12,
+                  label: 'n° de pièce',
+                  widget: Expanded(
+                    child: idTextField,
+                  ),
+                ),
+              ),
+              Expanded(
+                child: InfosColumn(
+                  radius: 0,
+                  opacity: 0.12,
+                  label: 'Type de pièce',
+                  widget: Expanded(
+                    child: InkWell(
+                      onTap: () => Functions.showBottomSheet(
+                        ctxt: context,
+                        widget: _idCardTypeSelector(),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(child: AppText.medium(_idCardType)),
+                          Icon(Icons.arrow_drop_down)
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: InfosColumn(
+                  radius: 0,
+                  opacity: 0.12,
+                  label: 'n° d\'immatriculation véhicule',
+                  widget: Expanded(
+                    child: cardIddTextField,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          //
+          Container(
+            width: double.infinity,
+            height: 0.8,
+            color: Palette.separatorColor,
+          ),
+          const SizedBox(
+            height: 10,
+          ),
+          AppText.medium(
+            'Accessoires de visite',
+            textAlign: TextAlign.center,
+          ),
+          AppText.small(
+            textAlign: TextAlign.center,
+            'Veuillez fournir au visiteur les accessoires de visite (badge et gilet) si necessaire',
+          ),
+          const SizedBox(
+            height: 5,
+          ),
+          Row(
+            children: [
+              Expanded(
+                child: InfosColumn(
+                  radius: 0,
+                  opacity: 0.12,
+                  label: 'Entrer le n° du badge',
+                  widget: Expanded(
+                    child: badgeTextField,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 5),
+              Expanded(
+                child: InfosColumn(
+                  radius: 0,
+                  opacity: 0.12,
+                  label: 'Entrer le n° du gilet',
+                  widget: Expanded(
+                    child: Functions.getTextField(controller: _giletController),
+                  ),
+                ),
+              )
+            ],
+          ),
+          const SizedBox(
+            height: 40,
+          ),
+
+          ///
+          CustomButton(
+            color: Palette.primaryColor,
+            width: double.infinity,
+            height: 35,
+            radius: 5,
+            text: 'Sauvegarder le scan',
+            //////////////////////////////////////////////////
+            ///on a besoin update le n° CNI et le n° d'immatricule du user
+            ///anisi l'attribut iSAlreadyScanned du qr code qu'on vient de scanné
+            onPress: () async {
+              LocalService localService = LocalService();
+              DeviceModel? _device = await localService.getDevice();
+              if (_device == null) {
+                Functions.showToast(
+                  msg: 'Une erreur s\'est produite',
+                  gravity: ToastGravity.TOP,
+                );
+                return;
+              }
+              if (_device.localisationId != visite.localisation.id) {
+                Functions.showToast(
+                  msg: 'Cette visite n\'a pas lieu ici !',
+                  gravity: ToastGravity.TOP,
+                );
+                return;
+              }
+              if (iDController.text.isEmpty) {
+                Functions.showToast(
+                  msg: 'Le n° de pièce d\'identité est obligatoire !',
+                  gravity: ToastGravity.TOP,
+                );
+                return;
+              }
+
+              ////////////////////////////////////////////////////////////
+              //préparation des données pour update les tables visiteurs et scan_history
+              ///
+              ///PUT VISITE DATA
+              Map<String, dynamic> visitData = {
+                "is_already_scanned": 1,
+                "numero_piece": iDController.text.toUpperCase(),
+                "heure_visite": hours,
+                "type_piece": _idCardType,
+                //"numero_piece": iDController.text.toUpperCase(),
+              };
+              /////////////////////////
+              ///
+
+              ////////////
+              ///SCAN HISTORY DATA
+              Map<String, dynamic> scanHistoryData = {
+                "visite_id": visite.id,
+                "user_id": widget.agent.id,
+                "scan_date": today.toIso8601String(),
+                "scan_hour": hours,
+                "motif": "Entrée",
+                "numero_badge": _badgeController.text.toUpperCase(),
+                "numero_gilet": _giletController.text.toUpperCase(),
+                "plaque_immatriculation": cariDController.text.toUpperCase(),
+              };
+
+              alert(
+                ctxt: context,
+                visite: visite,
+                confirm: () async {
+                  // Functions.showLoadingSheet(ctxt: context);
+                  EasyLoading.show(status: 'sauvegarde en cours...');
+                  await Functions.upDateVisit(
+                    data: visitData,
+                    visiteId: visite.id,
+                  ).whenComplete(() async {
+                    await RemoteService()
+                        .postData(
+                      endpoint: 'scanCounters',
+                      postData: scanHistoryData,
+                    )
+                        .then((res) {
+                      //visite.plaqueVehicule = cariDController.text;
+
+                      Future.delayed(const Duration(seconds: 2)).then(
+                        (_) {
+                          widget.visite.isAlreadyScanned = true;
+                          widget.visite.numeroCni = iDController.text;
+                          EasyLoading.dismiss();
+                          Navigator.pop(context);
+                          Navigator.pop(context);
+                          Functions.showToast(
+                            msg: 'Scan sauvegardé !',
+                            gravity: ToastGravity.TOP,
+                          );
+                        },
+                      );
+                    });
+                  });
+                },
+                cancel: () => Navigator.pop(context),
+              );
+            },
+          ),
+          const SizedBox(
+            height: 10,
+          ),
+          CustomButton(
+            color: Palette.secondaryColor,
+            width: double.infinity,
+            height: 35,
+            radius: 5,
+            text: 'Annuler',
+            onPress: () {
+              Navigator.pop(context);
+            },
+          ),
+        ],
+      );
+    else
+      return Container(
+        width: double.infinity,
+        height: MediaQuery.of(context).size.height * 0.55,
+        child: Column(
+          children: [
+            Expanded(
+              child: PageView.builder(
+                controller: _pageController,
+                physics: NeverScrollableScrollPhysics(),
+                itemCount:
+                    visite.members.length + 1, // +1 for the primary visitor
+                itemBuilder: (context, index) {
+                  if (index == 0) {
+                    // First page for the primary visitor
+                    return _primaryVisitorInfos(
+                      visite,
+                      idTextField,
+                      cardIddTextField,
+                      badgeTextField,
+                    );
+                  } else {
+                    // Pages for members
+                    final member = visite.members[index - 1];
+                    idCardController.text = member.idCard;
+                    _membersBadgeController.text = member.badge;
+                    _membersGiletController.text = member.gilet;
+                    _membersIdCardType = member.typePiece;
+
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        AppText.medium(
+                          'Personnes associées à la visite (${visite.members.length})',
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        const SizedBox(height: 15),
+                        AppText.medium(
+                          'Nom & Prénoms',
+                          fontWeight: FontWeight.w400,
+                        ),
+                        const SizedBox(height: 5),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: InfosColumn(
+                                opacity: 0.12,
+                                label: 'Nom',
+                                widget: AppText.medium(member.nom),
+                              ),
+                            ),
+                            const SizedBox(width: 5),
+                            Expanded(
+                              child: InfosColumn(
+                                opacity: 0.12,
+                                label: 'Prénoms',
+                                widget: AppText.medium(member.prenoms),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 15),
+                        AppText.medium(
+                          'Numéro de pièce et accessoires de visite',
+                          fontWeight: FontWeight.w400,
+                        ),
+                        const SizedBox(height: 5),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: InfosColumn(
+                                opacity: 0.12,
+                                label: 'Entrer le n° CNI',
+                                widget: Expanded(
+                                  child: Functions.getTextField(
+                                    controller: idCardController,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 5),
+                            Expanded(
+                              child: InfosColumn(
+                                opacity: 0.12,
+                                label: 'type de pièce',
+                                widget: InkWell(
+                                  onTap: () => Functions.showBottomSheet(
+                                    ctxt: context,
+                                    widget: _membersIdCardTypeSelector(),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child:
+                                            AppText.medium(_membersIdCardType),
+                                      ),
+                                      Icon(Icons.arrow_drop_down),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 5),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: InfosColumn(
+                                opacity: 0.12,
+                                label: 'Entrer le n° badge ',
+                                widget: Expanded(
+                                  child: Functions.getTextField(
+                                    controller: _membersBadgeController,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 5),
+                            Expanded(
+                              child: InfosColumn(
+                                opacity: 0.12,
+                                label: 'Entrer le n° gilet ',
+                                widget: Expanded(
+                                  child: Functions.getTextField(
+                                    controller: _membersGiletController,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        )
+                      ],
+                    );
+                  }
+                },
+              ),
+            ),
+
+            // suivant && précédent
+            Row(
+              children: [
+                Expanded(
+                  child: CustomButton(
+                    color: Palette.secondaryColor,
+                    width: double.infinity,
+                    height: 35,
+                    radius: 5,
+                    text: 'Précédent',
+                    onPress: () {
+                      if (_pageController.page! > 0) {
+                        _pageController.previousPage(
+                          duration: const Duration(milliseconds: 800),
+                          curve: Curves.easeInOut,
+                        );
+                      }
+                    },
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: CustomButton(
+                    color: Palette.primaryColor,
+                    width: double.infinity,
+                    height: 35,
+                    radius: 5,
+                    text: 'Suivant',
+                    onPress: () async {
+                      LocalService localService = LocalService();
+                      DeviceModel? _device = await localService.getDevice();
+                      if (_device == null) {
+                        Functions.showToast(
+                          msg: 'Une erreur s\'est produite',
+                          gravity: ToastGravity.TOP,
+                        );
+                        return;
+                      }
+                      if (_device.localisationId != visite.localisation.id) {
+                        Functions.showToast(
+                          msg: 'Cette visite n\'a pas lieu ici !',
+                          gravity: ToastGravity.TOP,
+                        );
+                        return;
+                      }
+                      final currentPage = _pageController.page!.toInt();
+                      // print(currentPage);
+
+                      // Si on est sur la première page (page du visiteur principal)
+                      if (currentPage == 0) {
+                        if (iDController.text.isEmpty) {
+                          // Si le champ iDController est vide, afficher un message d'erreur
+                          Functions.showToast(
+                            msg:
+                                'Le n° de pièce d\'identité est obligatoire pour le visiteur principal !',
+                            gravity: ToastGravity.TOP,
+                          );
+                          return;
+                        } else if (_badgeController.text.trim().isEmpty) {
+                          Functions.showToast(
+                            msg:
+                                'Le n° de badge  est obligatoire pour le visiteur principal !',
+                            gravity: ToastGravity.TOP,
+                          );
+                          return;
+                        } else {
+                          // Si iDController est rempli, passer à la page suivante
+                          _pageController.nextPage(
+                            duration: const Duration(milliseconds: 800),
+                            curve: Curves.easeInOut,
+                          );
+                        }
+                      }
+                      // Si on est sur une autre page (pages des membres)
+                      else {
+                        if (idCardController.text.isEmpty) {
+                          // Si le champ idCardController est vide, afficher un message d'erreur
+                          Functions.showToast(
+                            msg:
+                                'Le n° de pièce d\'identité est obligatoire pour ce membre !',
+                            gravity: ToastGravity.TOP,
+                          );
+                          return;
+                        } else {
+                          // Mettre à jour le numéro de pièce d'identité du membre
+                          //print(object)
+                          visite.members[currentPage - 1].idCard =
+                              idCardController.text;
+                          visite.members[currentPage - 1].badge =
+                              _membersBadgeController.text;
+                          visite.members[currentPage - 1].gilet =
+                              _membersGiletController.text;
+
+                          visite.members[currentPage - 1].typePiece =
+                              _membersIdCardType;
+
+                          // Si ce n'est pas la dernière page, passer à la page suivante
+                          if (currentPage < visite.members.length) {
+                            _pageController.nextPage(
+                              duration: const Duration(milliseconds: 800),
+                              curve: Curves.easeInOut,
+                            );
+                          } else {
+                            // Si c'est la dernière page, traiter tous les membres
+                            /*  Functions.showToast(
+                              msg: 'Tous les membres ont été scannés !',
+                              gravity: ToastGravity.TOP,
+                            ); */
+                            // print(listMemberToJson(visite.members));
+                            // Appeler la fonction finale de traitement des membres
+                            //_processAllMembers(visite.members);
+                            ////////////////////////////////////////////////////////////
+                            //préparation des données pour update les tables visiteurs et scan_history
+                            ///
+                            ///PUT VISITE DATA
+                            Map<String, dynamic> visitData = {
+                              "is_already_scanned": 1,
+                              "numero_cni": iDController.text,
+                              /* "heure_visite": hours, */
+                              "type_piece": _idCardType,
+                              "numero_piece": iDController.text.toUpperCase(),
+                              "membre_visites": visite.members
+                                  .map((member) => member.toJson())
+                                  .toList(),
+                            };
+                            /////////////////////////
+                            ///
+
+                            /* EasyLoading.dismiss();
+                            return; */
+
+                            ////////////
+                            ///SCAN HISTORY DATA
+                            Map<String, dynamic> scanHistoryData = {
+                              "visite_id": visite.id,
+                              "user_id": widget.agent.id,
+                              "scan_date": today.toIso8601String(),
+                              "scan_hour": hours,
+                              "motif": "Entrée",
+                              "numero_badge": _badgeController.text,
+                              "numero_gilet": _giletController.text,
+                              "plaque_immatriculation":
+                                  cariDController.text.toUpperCase(),
+                            };
+
+                            alert(
+                              ctxt: context,
+                              visite: visite,
+                              confirm: () async {
+                                // Functions.showLoadingSheet(ctxt: context);
+                                EasyLoading.show(
+                                    status: 'sauvegarde en cours...');
+                                await Functions.upDateVisit(
+                                  data: visitData,
+                                  visiteId: visite.id,
+                                ).whenComplete(() async {
+                                  await RemoteService()
+                                      .postData(
+                                          endpoint: 'scanCounters',
+                                          postData: scanHistoryData)
+                                      .then((res) {
+                                    //visite.plaqueVehicule = cariDController.text;
+
+                                    Future.delayed(const Duration(seconds: 2))
+                                        .then(
+                                      (_) {
+                                        widget.visite.isAlreadyScanned = true;
+                                        widget.visite.numeroCni =
+                                            iDController.text;
+                                        EasyLoading.dismiss();
+                                        Navigator.pop(context);
+                                        Navigator.pop(context);
+                                        Functions.showToast(
+                                          msg: 'Scan sauvegardé !',
+                                          gravity: ToastGravity.TOP,
+                                        );
+                                      },
+                                    );
+                                  });
+                                });
+                              },
+                              cancel: () => Navigator.pop(context),
+                            );
+                            //print(jsonEncode(visite.members));
+                          }
+                        }
+                      }
+                    },
+                  ),
+                )
+              ],
+            ),
+          ],
+        ),
+      );
+  }
+
+  Widget _primaryVisitorInfos(
+    VisiteModel visite,
+    Widget idTextField,
+    Widget cardIddTextField,
+    Widget badgeTextField,
+  ) {
     return Column(
       children: [
         Row(
@@ -598,12 +1293,12 @@ class _SheetContainerState extends State<SheetContainer> {
               child: InfosColumn(
                 label: 'Heure d\'entrée',
                 widget: AppText.medium(
-                  DateFormat('HH:mm').format(DateTime.now()),
+                  visite.heureVisite ?? '',
                 ),
               ),
             ),
           ],
-        ),
+        ), //
         Row(
           children: [
             Expanded(
@@ -620,6 +1315,27 @@ class _SheetContainerState extends State<SheetContainer> {
               child: InfosColumn(
                 radius: 0,
                 opacity: 0.12,
+                label: 'type de pièce',
+                widget: InkWell(
+                  onTap: () => Functions.showBottomSheet(
+                    ctxt: context,
+                    widget: _idCardTypeSelector(),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: AppText.medium(_idCardType),
+                      ),
+                      Icon(Icons.arrow_drop_down)
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Expanded(
+              child: InfosColumn(
+                radius: 0,
+                opacity: 0.12,
                 label: 'n° d\'immatriculation véhicule',
                 widget: Expanded(
                   child: cardIddTextField,
@@ -627,122 +1343,56 @@ class _SheetContainerState extends State<SheetContainer> {
               ),
             ),
           ],
-        ),
+        ), //
         Container(
           width: double.infinity,
           height: 0.8,
           color: Palette.separatorColor,
         ),
-        //const SizedBox(height: 4.0),
-        InfosColumn(
-          radius: 0,
-          opacity: 0.12,
-          label: 'Entrer le n° du badge',
-          widget: Expanded(
-            child: badgeTextField,
-          ),
+        const SizedBox(height: 10),
+        AppText.medium(
+          'Accessoires de visite',
+          textAlign: TextAlign.center,
+        ),
+        AppText.small(
+          textAlign: TextAlign.center,
+          'Veuillez fournir au visiteur les accessoires de visite (badge et gilet) si necessaire',
+        ),
+        const SizedBox(
+          height: 5,
+        ),
+        Row(
+          children: [
+            Expanded(
+              child: InfosColumn(
+                radius: 0,
+                opacity: 0.12,
+                label: 'Entrer le n° du badge',
+                widget: Expanded(
+                  child: badgeTextField,
+                ),
+              ),
+            ),
+            const SizedBox(
+              width: 5,
+            ),
+            Expanded(
+              child: InfosColumn(
+                radius: 0,
+                opacity: 0.12,
+                label: 'Entrer le n° du gilet',
+                widget: Expanded(
+                  child: Functions.getTextField(controller: _giletController),
+                ),
+              ),
+            ),
+          ],
         ),
         const SizedBox(
           height: 40,
         ),
-        CustomButton(
-          color: Palette.primaryColor,
-          width: double.infinity,
-          height: 35,
-          radius: 5,
-          text: 'Sauvegarder le scan',
-          //////////////////////////////////////////////////
-          ///on a besoin update le n° CNI et le n° d'immatricule du user
-          ///anisi l'attribut iSAlreadyScanned du qr code qu'on vient de scanné
-          onPress: () {
-            if (widget.agent.localisationId != visite.localisation.id) {
-              Functions.showToast(
-                msg: 'Cette visite n\'a pas lieu ici !',
-                gravity: ToastGravity.TOP,
-              );
-              return;
-            }
-            if (iDController.text.isEmpty) {
-              Functions.showToast(
-                msg: 'Le n° de pièce d\'identité est obligatoire !',
-                gravity: ToastGravity.TOP,
-              );
-              return;
-            }
 
-            ////////////////////////////////////////////////////////////
-            //préparation des données pour update les tables visiteurs et scan_history
-            ///
-            ///PUT VISITE DATA
-            Map<String, dynamic> visitData = {
-              "is_already_scanned": 1,
-              "numero_cni": iDController.text,
-              "heure_visite": hours
-            };
-            /////////////////////////
-            ///
-
-            ////////////
-            ///SCAN HISTORY DATA
-            Map<String, dynamic> scanHistoryData = {
-              "visite_id": visite.id,
-              "user_id": widget.agent.id,
-              "scan_date": today.toIso8601String(),
-              "scan_hour": hours,
-              "motif": "Entrée",
-              "numero_badge": _badgeController.text,
-              "plaque_immatriculation": cariDController.text,
-            };
-
-            alert(
-              ctxt: context,
-              visite: visite,
-              confirm: () async {
-                // Functions.showLoadingSheet(ctxt: context);
-                EasyLoading.show(status: 'sauvegarde en cours...');
-                await Functions.upDateVisit(
-                  data: visitData,
-                  visiteId: visite.id,
-                ).whenComplete(() async {
-                  await RemoteService()
-                      .postData(
-                          endpoint: 'scanCounters', postData: scanHistoryData)
-                      .then((res) {
-                    //visite.plaqueVehicule = cariDController.text;
-
-                    Future.delayed(const Duration(seconds: 2)).then(
-                      (_) {
-                        widget.visite.isAlreadyScanned = true;
-                        widget.visite.numeroCni = iDController.text;
-                        EasyLoading.dismiss();
-                        Navigator.pop(context);
-                        Navigator.pop(context);
-                        Functions.showToast(
-                          msg: 'Scan sauvegardé !',
-                          gravity: ToastGravity.TOP,
-                        );
-                      },
-                    );
-                  });
-                });
-              },
-              cancel: () => Navigator.pop(context),
-            );
-          },
-        ),
-        const SizedBox(
-          height: 10,
-        ),
-        CustomButton(
-          color: Palette.secondaryColor,
-          width: double.infinity,
-          height: 35,
-          radius: 5,
-          text: 'Annuler',
-          onPress: () {
-            Navigator.pop(context);
-          },
-        ),
+        ///
       ],
     );
   }
@@ -829,7 +1479,7 @@ class _SheetContainerState extends State<SheetContainer> {
             ),
           ),
           AppText.medium('Oops !'),
-          AppText.small('Votre Qr code est désactivé !'),
+          AppText.small('Cette visite n\'est pas encore active !'),
           const SizedBox(
             height: 20,
           ),
@@ -858,7 +1508,7 @@ class _SheetContainerState extends State<SheetContainer> {
   ///   4. si le qr code n'est pas actif
   ///
   ///
-  Widget getWidget({
+  /* Widget getWidget({
     required VisiteModel visite,
     required Widget idTextField,
     required Widget cardIddTextField,
@@ -917,6 +1567,181 @@ class _SheetContainerState extends State<SheetContainer> {
     ////////////////////////////////////////
     /// 4. si le qr code n'est pas actif
     return inactifQrCode();
+  } */
+
+  Widget getWidget({
+    required VisiteModel visite,
+    required Widget idTextField,
+    required Widget cardIddTextField,
+    required Widget badgeTextField,
+  }) {
+    // Date actuelle
+    DateTime today = DateTime.now();
+    //String currentDay = today.weekday.toString(); // Lundi = 1, Dimanche = 7
+    TimeOfDay currentHour = TimeOfDay.now(); // Heure actuelle
+
+    // Définir les plages horaires pour les prestataires et clients
+    TimeOfDay clientStartTime = TimeOfDay(hour: 6, minute: 0);
+    TimeOfDay clientEndTime = TimeOfDay(hour: 22, minute: 0);
+    TimeOfDay prestataireStartTime = TimeOfDay(hour: 7, minute: 0);
+    TimeOfDay prestataireEndTime = TimeOfDay(hour: 18, minute: 0);
+    TimeOfDay visiteurVisiteTime =
+        Functions.stringToTimeOfDay(visite.heureVisite ?? "23:00");
+
+    print(
+        '$clientStartTime\n$clientEndTime\n$prestataireStartTime\n$prestataireEndTime');
+
+    // Formatage de la date début et fin du QR code
+    DateTime dateDebut = DateTime(
+      visite.dateVisite.year,
+      visite.dateVisite.month,
+      visite.dateVisite.day,
+    );
+    /*  DateTime dateFin = DateTime(
+      visite.dateFinVisite.year,
+      visite.dateFinVisite.month,
+      visite.dateFinVisite.day,
+    ); */
+
+    ////////////////////////////////////////
+    /// 3. Si la date de visite est passée
+    ////////////////////////////////////////
+    /// 3. si la date visite est passée
+    if (visite.dateFinVisite != null) {
+      DateTime dateFin = DateTime(
+        visite.dateFinVisite!.year,
+        visite.dateFinVisite!.month,
+        visite.dateFinVisite!.day,
+      );
+      if (dateFin.isBefore(Functions.getToday())) {
+        return dateExpiree(dateFin: dateFin);
+      }
+    }
+
+    if (visite.typeVisiteur.toLowerCase() == "visiteur" &&
+        dateDebut.isBefore(Functions.getToday())) {
+      ////////////////////////////////////////
+      ///les visiteurs ont une date visite a validité unique
+      /// 1. Si  la date viste est passée
+
+      return dateExpiree(dateFin: dateDebut);
+    }
+
+    ////////////////////////////////////////
+    /// 1. Si la date de visite n'est pas encore arrivée
+    if (dateDebut.isAfter(Functions.getToday())) {
+      return dateException(dateDebut: dateDebut);
+    }
+
+    ////////////////////////////////////////
+    /// 4. Vérification des jours et heures d'accès pour les prestataires et clients
+    if (visite.typeVisiteur.toLowerCase() == "client") {
+      // Vérifier si c'est un jour de la semaine (lundi à vendredi)
+      if (today.weekday < 6) {
+        // Vérifier les heures d'accès pour le client
+        if (currentHour.hour >= clientStartTime.hour &&
+            currentHour.hour <= clientEndTime.hour) {
+          return checkQrCodeStatus(
+              visite, idTextField, cardIddTextField, badgeTextField);
+        } else {
+          //String date = DateFormat('EEEE dd yyyy', 'fr').format(visite.dateVisite);
+          return outsideAccessHours(
+              text:
+                  'Cette visite est autorisée uniquement du lundi au vendredi  entre ${clientStartTime.format(context)} et ${clientEndTime.format(context)}');
+        }
+      } else {
+        //String date = DateFormat('EEEE dd yyyy', 'fr').format(visite.dateVisite);
+        return outsideAccessHours(
+            text:
+                'Cette visite est autorisée uniquement du lundi au vendredi  entre ${clientStartTime.format(context)} et ${clientEndTime.format(context)}'); // Week-end
+      }
+    } else if (visite.typeVisiteur.toLowerCase() == "prestataire") {
+      //print('-------------------------> type is true');
+      // Vérifier si c'est un jour de la semaine (lundi à vendredi)
+      if (today.weekday < 6) {
+        // print('-------------------------> day is true');
+        // Vérifier les heures d'accès pour le prestataire
+        if (currentHour.hour >= prestataireStartTime.hour &&
+            currentHour.hour <= prestataireEndTime.hour) {
+          // print('-------------------------> hours is true');
+          return checkQrCodeStatus(
+              visite, idTextField, cardIddTextField, badgeTextField);
+        } else {
+          // String date = DateFormat('EEEE dd yyyy', 'fr').format(visite.dateVisite);
+          return outsideAccessHours(
+              text:
+                  'Cette visite est autorisée uniquement du lundi au vendredi  entre ${prestataireStartTime.format(context)} et ${prestataireEndTime.format(context)}');
+        }
+      } else {
+        return outsideAccessHours(
+            text:
+                'Cette visite est autorisée uniquement du lundi au vendredi  entre ${prestataireStartTime.format(context)} et ${prestataireEndTime.format(context)}'); // Week-end
+      }
+    } else if (visite.typeVisiteur.toLowerCase() == "visiteur") {
+      print("----------------------> is visiteur type");
+      print(visiteurVisiteTime);
+      if (currentHour.hour >= visiteurVisiteTime.hour) {
+        return checkQrCodeStatus(
+            visite, idTextField, cardIddTextField, badgeTextField);
+      } else {
+        String date =
+            DateFormat('EEEE dd yyyy', 'fr').format(visite.dateVisite);
+        return outsideAccessHours(
+            text:
+                'Cette visite est autorisée uniquement pour le $date à partir de ${visiteurVisiteTime.format(context)}');
+      }
+    }
+
+    ////////////////////////////////////////
+    /// Si le QR code n'est pas actif
+    return inactifQrCode();
+  }
+
+  Widget checkQrCodeStatus(VisiteModel visite, Widget idTextField,
+      Widget cardIddTextField, Widget badgeTextField) {
+    if (visite.isActive) {
+      if (!visite.isAlreadyScanned) {
+        return firstScanWidget(
+          idTextField: idTextField,
+          cardIddTextField: cardIddTextField,
+          visite: visite,
+          badgeTextField: badgeTextField,
+        );
+      } else {
+        return isAlreadyScanWidget(visite: visite);
+      }
+    } else {
+      return inactifQrCode();
+    }
+  }
+
+  Widget outsideAccessHours({required String text}) {
+    return Column(
+      children: [
+        Container(
+          width: 200,
+          height: 200,
+          padding: const EdgeInsets.symmetric(horizontal: 25),
+          child: Image.asset('assets/images/timer2.webp'),
+        ),
+        AppText.large('Oops !'),
+        Text(
+          'Accès non autorisé en dehors des horaires.\n----\n$text',
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(
+          height: 25,
+        ),
+        CustomButton(
+          color: Palette.primaryColor,
+          width: double.infinity,
+          height: 35,
+          radius: 5,
+          text: 'Retour',
+          onPress: () => Navigator.pop(context),
+        ),
+      ],
+    );
   }
 
   /////////////////::
@@ -937,6 +1762,138 @@ class _SheetContainerState extends State<SheetContainer> {
       decoration: InputDecoration(
         //label: AppText.medium(hintext),
         border: InputBorder.none,
+      ),
+    );
+  }
+
+  Container _idCardTypeSelector() {
+    List<String> _pieces = [
+      "CNI",
+      "Permis",
+      "Passeport",
+      "Attestation",
+    ];
+    return Container(
+      width: double.infinity,
+      height: MediaQuery.of(context).size.height * 0.35,
+      decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(5),
+            topRight: Radius.circular(5),
+          )),
+      child: Column(
+        children: [
+          AllSheetHeader(
+            opacity: 0,
+          ),
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                children: _pieces.map((piece) {
+                  return InkWell(
+                    onTap: () {
+                      setState(() {
+                        _idCardType = piece;
+                      });
+                      Navigator.pop(context);
+                    },
+                    child: Container(
+                      width: double.infinity,
+                      height: 40,
+                      margin: const EdgeInsets.symmetric(horizontal: 10),
+                      padding: const EdgeInsets.only(left: 10),
+                      alignment: Alignment.centerLeft,
+                      decoration: BoxDecoration(
+                        /*  color: piece == _idCardType
+                            ? Palette.primaryColor
+                            : Colors.white, */
+                        border: Border(
+                          left: BorderSide(
+                            width: 3,
+                            color: piece == _idCardType
+                                ? Palette.primaryColor
+                                : Colors.white,
+                          ),
+                        ),
+                      ),
+                      child: AppText.medium(
+                        piece.toUpperCase(),
+                        textAlign: TextAlign.left,
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  Container _membersIdCardTypeSelector() {
+    List<String> _pieces = [
+      "CNI",
+      "Permis",
+      "Passeport",
+      "Attestation",
+    ];
+    return Container(
+      width: double.infinity,
+      height: MediaQuery.of(context).size.height * 0.35,
+      decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(5),
+            topRight: Radius.circular(5),
+          )),
+      child: Column(
+        children: [
+          AllSheetHeader(
+            opacity: 0,
+          ),
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                children: _pieces.map((piece) {
+                  return InkWell(
+                    onTap: () {
+                      setState(() {
+                        _membersIdCardType = piece;
+                      });
+                      Navigator.pop(context);
+                    },
+                    child: Container(
+                      width: double.infinity,
+                      height: 40,
+                      margin: const EdgeInsets.symmetric(horizontal: 10),
+                      padding: const EdgeInsets.only(left: 10),
+                      alignment: Alignment.centerLeft,
+                      decoration: BoxDecoration(
+                        /*  color: piece == _idCardType
+                            ? Palette.primaryColor
+                            : Colors.white, */
+                        border: Border(
+                          left: BorderSide(
+                            width: 3,
+                            color: piece == _membersIdCardType
+                                ? Palette.primaryColor
+                                : Colors.white,
+                          ),
+                        ),
+                      ),
+                      child: AppText.medium(
+                        piece.toUpperCase(),
+                        textAlign: TextAlign.left,
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          )
+        ],
       ),
     );
   }

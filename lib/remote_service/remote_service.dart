@@ -1,21 +1,21 @@
 import 'dart:convert';
 
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 
+import '../model/agl_livraison_model.dart';
 import '../model/entreprise_model.dart';
 import '../model/livraison_model.dart';
 import '../model/motif_model.dart';
 import '../model/qr_code_model.dart';
 import '../model/scan_history_model.dart';
 import '../model/site_model.dart';
-import '../model/tracteur_modal.dart';
 import '../model/visite_model.dart';
 
 ///////////////// base uri//////////////
-//const baseUri = 'http://194.163.136.227:8087/api/';
-//const baseUri = 'https://agility.digifaz.com/api/';
-const baseUri = 'https://agility-app.com/api/';
-const testbaseUri = 'http://194.163.136.227:8079/api/';
+
+const baseUri = '';
+final testbaseUri = dotenv.env['BASE_URL']!;
 
 ///////////////////////////////////////
 ///
@@ -62,15 +62,15 @@ class RemoteService {
   ////////////////////////////////////////////////////////////
   /// get all qr code in our BD
   ///////
-  Future<List<TracteurModel>> getTracteurs() async {
-    var uri = Uri.parse(testbaseUri + 'tracteurs');
+  Future<List<AglLivraisonModel>> getLivraisons() async {
+    var uri = Uri.parse(testbaseUri + 'livraisons');
     var response = await client.get(uri);
     //print('my user Dans remote /////////////////////////// : ${response.body}');
     //print('Dans remote////////////////////////////// : ${response.statusCode}');
     if (response.statusCode == 200 || response.statusCode == 201) {
       var json = response.body;
-      //print(response.body);
-      List<TracteurModel> tracteurs = listTracteurFromJson(json);
+      print(response.body);
+      List<AglLivraisonModel> tracteurs = aglLivraisonModelListFromJson(json);
       //print('qr code list : ${tracteurs.length}');
       return tracteurs;
     }
@@ -270,9 +270,11 @@ class RemoteService {
   }) async {
     ////////// parse our url /////////////////////
     var url = Uri.parse(testbaseUri + api);
+
     //var postEmail = {"email": email};
     ///////////// encode email to json objet/////////
     var payload = jsonEncode(data);
+
     // http request headers
     var headers = {
       'Content-Type': 'application/json',

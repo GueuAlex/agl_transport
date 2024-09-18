@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:scanner/local_service/local_service.dart';
+import 'package:scanner/model/DeviceModel.dart';
 
 import '../../../config/app_text.dart';
 import '../../../config/functions.dart';
@@ -18,11 +20,19 @@ class TabBarViewBody extends StatelessWidget {
   final Size size;
 
   Future<List<VisiteModel>> _loadData() async {
+    LocalService localService = LocalService();
+    DeviceModel? device = await localService.getDevice();
+    if (device == null) {
+      return [];
+    }
     // Obtient la liste des ScanHistoryModel pour la date sélectionnée
     List<ScanHistoryModel> scanList =
         await Functions.getSelectedDateScanHistory(selectedDate: date);
     // Utilise cette liste pour obtenir les VisiteModel
-    return await Functions.getScannedQrCode(scanList: scanList);
+    return await Functions.getScannedVisites(
+      scanList: scanList,
+      localisationId: device.localisationId,
+    );
   }
 
   @override

@@ -10,9 +10,12 @@ import '../../config/app_text.dart';
 import '../../config/functions.dart';
 import '../../config/palette.dart';
 import '../../draggable_menu.dart';
+import '../../local_service/local_service.dart';
+import '../../model/DeviceModel.dart';
 import '../../model/agent_model.dart';
 import '../../model/motif_model.dart';
 import '../../remote_service/remote_service.dart';
+import '../../widgets/all_sheet_header.dart';
 import '../../widgets/custom_button.dart';
 import '../scanner/widgets/infos_column.dart';
 
@@ -37,10 +40,13 @@ class _AddVisiteScreenState extends State<AddVisiteScreen> {
   final _cardIdController = TextEditingController();
   //final _motifController = TextEditingController();
   final _entrepriseController = TextEditingController();
+  //final _badgeController = TextEditingController();
+  //final _giletController = TextEditingController();
 
   //
   DateTime _startDate = DateTime.now();
   DateTime _endDate = DateTime.now();
+  String _idCardType = 'CNI';
 
   MotifModel? _selectedMotif;
   // List<MotifModel> _motifs = [];
@@ -153,6 +159,8 @@ class _AddVisiteScreenState extends State<AddVisiteScreen> {
                           label: 'Date début',
                           widget: Expanded(
                             child: AppText.medium(
+                              maxLine: 1,
+                              textOverflow: TextOverflow.ellipsis,
                               DateFormat('EE dd MMM yyyy', 'fr')
                                   .format(_startDate),
                             ),
@@ -172,7 +180,7 @@ class _AddVisiteScreenState extends State<AddVisiteScreen> {
                     ],
                   ),
                   const SizedBox(height: 10),
-                  CustomButton(
+                  /*  CustomButton(
                     color: Palette.primaryColor.withOpacity(0.06),
                     textColor: Palette.primaryColor,
                     width: double.infinity,
@@ -185,7 +193,7 @@ class _AddVisiteScreenState extends State<AddVisiteScreen> {
                           'Veuillez contacter votre responsable pour la création d\'une visite planifiée',
                       gravity: ToastGravity.TOP,
                     ),
-                  )
+                  ) */
                 ],
               ),
             ),
@@ -194,7 +202,7 @@ class _AddVisiteScreenState extends State<AddVisiteScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  AppText.medium('Entreprise & motif'),
+                  AppText.medium('Entreprise, motif & accessoires'),
                   InfosColumn(
                     label: 'Entreprise',
                     opacity: 0.12,
@@ -232,7 +240,37 @@ class _AddVisiteScreenState extends State<AddVisiteScreen> {
                         ),
                       ),
                     ),
-                  )
+                  ),
+                  /* const SizedBox(height: 10),
+                  AppText.medium('Accessoires de visite'),
+                  AppText.small(
+                    'Veuillez fournir au visiteur les accessoires de visite (badge et gilet) si necessaire',
+                  ),
+                  const SizedBox(height: 5),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: InfosColumn(
+                          label: 'N° de badge',
+                          opacity: 0.12,
+                          widget: Expanded(
+                            child: Functions.getTextField(
+                                controller: _badgeController),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: InfosColumn(
+                          label: 'N° de gilet',
+                          opacity: 0.12,
+                          widget: Expanded(
+                            child: Functions.getTextField(
+                                controller: _giletController),
+                          ),
+                        ),
+                      )
+                    ],
+                  ), */
                 ],
               ),
             )
@@ -345,25 +383,49 @@ class _AddVisiteScreenState extends State<AddVisiteScreen> {
                   AppText.medium('Identifiants'),
                   const SizedBox(height: 10),
                   InfosColumn(
-                    label: 'n° CNI',
+                    label: 'N° de la piéce',
                     widget: Expanded(
                       child:
                           Functions.getTextField(controller: _idcardController),
                     ),
                     opacity: 0.12,
                   ),
-                  Container(
-                    width: double.infinity,
-                    height: 0.8,
-                    color: Palette.separatorColor,
-                  ),
-                  InfosColumn(
-                    label: 'Palaque d\'immatriculation',
-                    widget: Expanded(
-                      child:
-                          Functions.getTextField(controller: _cardIdController),
-                    ),
-                    opacity: 0.12,
+                  Row(
+                    children: [
+                      Expanded(
+                        child: InfosColumn(
+                          label: 'Type de pièce',
+                          widget: Expanded(
+                            child: InkWell(
+                              onTap: () => Functions.showBottomSheet(
+                                ctxt: context,
+                                widget: _idCardTypeSelector(),
+                              ),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: AppText.medium(_idCardType),
+                                  ),
+                                  Icon(
+                                    Icons.arrow_drop_down,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          opacity: 0.12,
+                        ),
+                      ),
+                      Expanded(
+                          child: InfosColumn(
+                        label: 'Palaque d\'immatriculation',
+                        widget: Expanded(
+                          child: Functions.getTextField(
+                              controller: _cardIdController),
+                        ),
+                        opacity: 0.12,
+                      ))
+                    ],
                   )
                 ],
               ),
@@ -569,6 +631,21 @@ class _AddVisiteScreenState extends State<AddVisiteScreen> {
                     );
                     return;
                   }
+                  if (_phoneController.text.trim().length != 10) {
+                    Functions.showToast(
+                      msg: 'Veuillez renseigner un numéro de téléphone valide',
+                      gravity: ToastGravity.TOP,
+                    );
+                    return;
+                  }
+
+                  if (_idcardController.text.trim().isEmpty) {
+                    Functions.showToast(
+                      msg: 'Veuillez renseigner le numéro de la piéce',
+                      gravity: ToastGravity.TOP,
+                    );
+                    return;
+                  }
                   _pageController.nextPage(
                     duration: Duration(milliseconds: 300),
                     curve: Curves.easeInOut,
@@ -604,7 +681,7 @@ class _AddVisiteScreenState extends State<AddVisiteScreen> {
 
   Container _recapSheet() => Container(
         width: double.infinity,
-        height: MediaQuery.of(context).size.height * 0.5,
+        height: MediaQuery.of(context).size.height * 0.7,
         padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -684,18 +761,6 @@ class _AddVisiteScreenState extends State<AddVisiteScreen> {
                     AppText.medium('Coordonnées'),
                     const SizedBox(height: 10),
                     InfosColumn(
-                      label: 'Email',
-                      widget: Expanded(
-                        child: AppText.medium(_emailController.text),
-                      ),
-                      // opacity: 0.12,
-                    ),
-                    Container(
-                      width: double.infinity,
-                      height: 0.8,
-                      color: Palette.separatorColor,
-                    ),
-                    InfosColumn(
                       label: 'n° de téléphone',
                       widget: Expanded(
                         child: AppText.medium(_phoneController.text),
@@ -707,14 +772,31 @@ class _AddVisiteScreenState extends State<AddVisiteScreen> {
                       height: 0.8,
                       color: Palette.separatorColor,
                     ),
-                    InfosColumn(
-                      label: 'n° CNI',
-                      widget: Expanded(
-                        child: AppText.medium(
-                          _idcardController.text,
+                    Row(
+                      children: [
+                        Expanded(
+                          child: InfosColumn(
+                            label: 'N° de la piéce',
+                            widget: Expanded(
+                              child: AppText.medium(
+                                _idcardController.text,
+                              ),
+                            ),
+                            //opacity: 0.12,
+                          ),
                         ),
-                      ),
-                      //opacity: 0.12,
+                        Expanded(
+                          child: InfosColumn(
+                            label: 'Type de la piéce',
+                            widget: Expanded(
+                              child: AppText.medium(
+                                _idCardType,
+                              ),
+                            ),
+                            //opacity: 0.12,
+                          ),
+                        )
+                      ],
                     ),
                     Container(
                       width: double.infinity,
@@ -762,23 +844,46 @@ class _AddVisiteScreenState extends State<AddVisiteScreen> {
                       height: 0.8,
                       color: Palette.separatorColor,
                     ),
-                    InfosColumn(
-                      label: 'Entreprise',
-                      widget: Expanded(
-                        child: AppText.medium(_entrepriseController.text),
-                      ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: InfosColumn(
+                            label: 'Entreprise',
+                            widget: Expanded(
+                              child: AppText.medium(_entrepriseController.text),
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: InfosColumn(
+                            label: 'Motif de la visite',
+                            widget: Expanded(
+                              child: AppText.medium(_selectedMotif!.libelle),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    Container(
-                      width: double.infinity,
-                      height: 0.8,
-                      color: Palette.separatorColor,
-                    ),
-                    InfosColumn(
-                      label: 'Motif de la visite',
-                      widget: Expanded(
-                        child: AppText.medium(_selectedMotif!.libelle),
-                      ),
-                    ),
+                    /*  Row(
+                      children: [
+                        Expanded(
+                          child: InfosColumn(
+                            label: 'N° de badge',
+                            widget: Expanded(
+                              child: AppText.medium(_badgeController.text),
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: InfosColumn(
+                            label: 'Motif de la visite',
+                            widget: Expanded(
+                              child: AppText.medium(_giletController.text),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ), */
                     const SizedBox(height: 20),
                   ],
                 ),
@@ -830,15 +935,24 @@ class _AddVisiteScreenState extends State<AddVisiteScreen> {
                     TextButton(
                       onPressed: () async {
                         // Add your "Créer" button action here
+                        LocalService localService = LocalService();
+                        DeviceModel? _device = await localService.getDevice();
                         AgentModel? _agent = await Functions.fetchAgent();
                         if (_agent == null) {
                           Functions.showToast(
-                            msg: 'Veuillez une erreur s\'est produite',
+                            msg: 'Une erreur s\'est produite',
                             gravity: ToastGravity.TOP,
                           );
                           return;
                         }
-                        _postVisit(agent: _agent);
+                        if (_device == null) {
+                          Functions.showToast(
+                            msg: 'Une erreur s\'est produite',
+                            gravity: ToastGravity.TOP,
+                          );
+                          return;
+                        }
+                        _postVisit(agent: _agent, device: _device);
                       },
                       child: AppText.medium(
                         'Créer',
@@ -866,15 +980,24 @@ class _AddVisiteScreenState extends State<AddVisiteScreen> {
                     TextButton(
                       onPressed: () async {
                         // Add your "Créer" button action here
+                        LocalService localService = LocalService();
+                        DeviceModel? _device = await localService.getDevice();
                         AgentModel? _agent = await Functions.fetchAgent();
                         if (_agent == null) {
                           Functions.showToast(
-                            msg: 'Veuillez une erreur s\'est produite',
+                            msg: 'Une erreur s\'est produite',
                             gravity: ToastGravity.TOP,
                           );
                           return;
                         }
-                        _postVisit(agent: _agent);
+                        if (_device == null) {
+                          Functions.showToast(
+                            msg: 'Une erreur s\'est produite',
+                            gravity: ToastGravity.TOP,
+                          );
+                          return;
+                        }
+                        _postVisit(agent: _agent, device: _device);
                       },
                       child: AppText.medium(
                         'Créer',
@@ -889,7 +1012,8 @@ class _AddVisiteScreenState extends State<AddVisiteScreen> {
     );
   }
 
-  void _postVisit({required AgentModel agent}) async {
+  void _postVisit(
+      {required AgentModel agent, required DeviceModel device}) async {
     // création d'une visite par un agent de sécurité
     String hour = DateFormat('HH:mm:ss').format(DateTime.now());
     var postData = {
@@ -902,26 +1026,37 @@ class _AddVisiteScreenState extends State<AddVisiteScreen> {
       "date_visite": _startDate.toString(),
       "heure_visite": hour,
       "date_fin_visite": _endDate.toString(),
-      "numero_cni": _idcardController.text,
-      /* "plaque_vehicule": _cardIdController.text, */
-      "email": _emailController.text,
+      "numero_piece": _idcardController.text.toUpperCase(),
+      "type_piece": _idCardType,
+      "type_visiteur": "Visiteur",
+      //"numero_badge": _badgeController.text,
+      // "numero_gilet": _giletController.text,
+      "plaque_vehicule": _cardIdController.text.toUpperCase(),
+      /* "email": _emailController.text, */
       "number": _phoneController.text,
       "motif_visite": _selectedMotif!.libelle,
       /* "code_visite": "AG-24-4781300", */
       "is_already_scanned": 0,
       "is_active": 1,
-      "localisation_id": agent.localisation.id,
+      "localisation_id": device.localisationId,
       "localisation": {
-        "id": agent.localisation.id,
-        "libelle": agent.localisation.libelle,
-        "site_id": agent.localisation.id,
+        "id": device.localisationId,
+        /*  "libelle": agent.localisation.libelle, */
+        "site_id": device.siteId,
       },
       "motif": {
         "id": _selectedMotif!.id,
         "libelle": _selectedMotif!.libelle,
       }
     };
+
+    /* print(postData);
+    EasyLoading.dismiss();
+    return; */
+    print(postData);
     Navigator.pop(context);
+    /* print(postData);
+    return; */
     EasyLoading.show(status: 'Envoie de la visite...');
     await RemoteService()
         .postData(
@@ -929,12 +1064,15 @@ class _AddVisiteScreenState extends State<AddVisiteScreen> {
       postData: postData,
     )
         .then((response) {
+      print(response.statusCode);
+      print(response.body);
       EasyLoading.dismiss();
       if (response.statusCode == 200 || response.statusCode == 201) {
         Functions.showToast(
           msg: 'Visite enregistrée avec succès',
           gravity: ToastGravity.TOP,
         );
+        EasyLoading.dismiss();
         _pageController.animateToPage(
           0,
           duration: Duration(seconds: 2),
@@ -960,5 +1098,71 @@ class _AddVisiteScreenState extends State<AddVisiteScreen> {
       _idcardController.clear();
       _cardIdController.clear();
     });
+  }
+
+  Container _idCardTypeSelector() {
+    List<String> _pieces = [
+      "CNI",
+      "Permis",
+      "Passeport",
+      "Attestation",
+    ];
+    return Container(
+      width: double.infinity,
+      height: MediaQuery.of(context).size.height * 0.35,
+      decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(5),
+            topRight: Radius.circular(5),
+          )),
+      child: Column(
+        children: [
+          AllSheetHeader(
+            opacity: 0,
+          ),
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                children: _pieces.map((piece) {
+                  return InkWell(
+                    onTap: () {
+                      setState(() {
+                        _idCardType = piece;
+                      });
+                      Navigator.pop(context);
+                    },
+                    child: Container(
+                      width: double.infinity,
+                      height: 40,
+                      margin: const EdgeInsets.symmetric(horizontal: 10),
+                      padding: const EdgeInsets.only(left: 10),
+                      alignment: Alignment.centerLeft,
+                      decoration: BoxDecoration(
+                        /*  color: piece == _idCardType
+                            ? Palette.primaryColor
+                            : Colors.white, */
+                        border: Border(
+                          left: BorderSide(
+                            width: 3,
+                            color: piece == _idCardType
+                                ? Palette.primaryColor
+                                : Colors.white,
+                          ),
+                        ),
+                      ),
+                      child: AppText.medium(
+                        piece.toUpperCase(),
+                        textAlign: TextAlign.left,
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          )
+        ],
+      ),
+    );
   }
 }

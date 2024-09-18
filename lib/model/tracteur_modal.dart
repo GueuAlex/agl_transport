@@ -1,4 +1,4 @@
-// To parse this JSON data, do
+/* // To parse this JSON data, do
 //
 //     final tracteur = tracteurFromJson(jsonString);
 import 'dart:convert';
@@ -70,7 +70,7 @@ class TracteurModel {
           if (livraison.status.trim().toLowerCase() ==
                   status.trim().toLowerCase() &&
               livraison.dateLivraison!.isAtSameMomentAs(date) &&
-              livraison.localisationId == device!.id) {
+              livraison.localisationId == device!.localisationId) {
             details.add(DeliDetailsModel(
               tracteurId: tracteur.id,
               numeroTracteur: tracteur.numeroTracteur,
@@ -82,7 +82,9 @@ class TracteurModel {
     }
     return details;
   }
-}
+} */
+
+import 'agl_livraison_model.dart';
 
 class DeliDetailsModel {
   // tracteur

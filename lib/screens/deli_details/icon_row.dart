@@ -40,12 +40,16 @@ class IconRow extends StatelessWidget {
                 AppText.medium(
                   title,
                   fontWeight: FontWeight.w500,
+                  maxLine: 1,
+                  textOverflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 5),
                 AppText.medium(
                   subtitle,
-                  fontWeight: FontWeight.w300,
-                  fontSize: 15,
+                  fontWeight: FontWeight.w400,
+                  maxLine: 1,
+                  textOverflow: TextOverflow.ellipsis,
+                  fontSize: 12,
                 ),
               ],
             ),

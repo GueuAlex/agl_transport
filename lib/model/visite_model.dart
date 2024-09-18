@@ -5,6 +5,7 @@ import 'dart:convert';
 
 import '../remote_service/remote_service.dart';
 import 'localisation_model.dart';
+import 'members_model.dart';
 import 'motif_model.dart';
 
 // list
@@ -29,8 +30,12 @@ class VisiteModel {
   String prenoms;
   String entreprise;
   DateTime dateVisite;
-  //DateTime? dateFinVisite;
+  String? heureVisite;
+  String? heureFinVisite;
+  String typeVisiteur;
+  DateTime? dateFinVisite;
   String numeroCni;
+  final String typePiece;
   String plaqueVehicule;
   String email;
   String number;
@@ -39,6 +44,7 @@ class VisiteModel {
   bool isActive;
   LocalisationModel localisation;
   MotifModel motif;
+  List<Member> members;
 
   VisiteModel({
     required this.id,
@@ -48,8 +54,9 @@ class VisiteModel {
     required this.prenoms,
     required this.entreprise,
     required this.dateVisite,
-    //required this.dateFinVisite,
+    required this.dateFinVisite,
     required this.numeroCni,
+    required this.typePiece,
     required this.plaqueVehicule,
     required this.email,
     required this.number,
@@ -58,6 +65,10 @@ class VisiteModel {
     required this.isActive,
     required this.localisation,
     required this.motif,
+    this.members = const [],
+    required this.heureFinVisite,
+    required this.heureVisite,
+    required this.typeVisiteur,
   });
 
   factory VisiteModel.fromJson(Map<String, dynamic> json) => VisiteModel(
@@ -68,8 +79,11 @@ class VisiteModel {
         prenoms: json["prenoms"] ?? "",
         entreprise: json["entreprise"] ?? "",
         dateVisite: DateTime.parse(json["date_visite"]) /* DateTime.now() */,
-        // dateFinVisite: DateTime.parse(json["date_fin_visite"]),
-        numeroCni: json["numero_cni"] ?? "",
+        dateFinVisite: json["date_fin_visite"] != null
+            ? DateTime.parse(json["date_fin_visite"])
+            : null,
+        numeroCni: json["numero_piece"] ?? "",
+        typePiece: json["type_piece"] ?? "",
         plaqueVehicule: json["plaque_vehicule"] ?? "",
         email: json["email"] ?? "",
         number: json["number"] ?? "",
@@ -78,6 +92,13 @@ class VisiteModel {
         isActive: json["is_active"] == 1 ? true : false,
         localisation: LocalisationModel.fromJson(json["localisation"]),
         motif: MotifModel.fromJson(json["motif"]),
+        members: List<Member>.from(
+          json["membre_visites"].map((x) => Member.fromJson(x)),
+        ),
+        heureFinVisite: json["heure_fin_visite"],
+        heureVisite: json["heure_visite"],
+        typeVisiteur: json["type_visiteur"] ?? '',
+        /*  members: Member.memberdata, */
       );
 
   Map<String, dynamic> toJson() => {

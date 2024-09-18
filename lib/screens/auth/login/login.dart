@@ -1,5 +1,5 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
-import 'package:path/path.dart';
 
 import 'package:double_back_to_close_app/double_back_to_close_app.dart';
 import 'package:flutter/material.dart';
@@ -7,7 +7,6 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sqflite/sqflite.dart';
 
 import '../../../config/app_text.dart';
 import '../../../config/functions.dart';
@@ -61,7 +60,7 @@ class _LoginScreenState extends State<LoginScreen> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.grey.withOpacity(0.2),
-        title: AppText.medium('Authentification'),
+        // title: AppText.medium('Authentification'),
       ),
       body: DoubleBackToCloseApp(
         snackBar: SnackBar(
@@ -96,15 +95,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       const SizedBox(
                         height: 4,
                       ),
-                      AppText.large('Bonjour'),
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.only(top: 10),
-                          child: AppText.small(
-                            'Veuillez renseigner votre numéro matricule',
-                          ),
-                        ),
-                      )
+                      AppText.medium('Authentification'),
                     ],
                   ),
                 ),
@@ -117,7 +108,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     children: [
                       Container(
                         width: double.infinity,
-                        height: 30,
+                        height: 20,
                         decoration: BoxDecoration(
                           color: Colors.grey.withOpacity(0.2),
                           borderRadius: const BorderRadius.only(
@@ -127,117 +118,82 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                       Expanded(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            const SizedBox(
-                              height: 70,
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(
-                                right: 25.0,
-                                left: 25.0,
-                                bottom: 15,
+                        child: SingleChildScrollView(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              const SizedBox(
+                                height: 70,
                               ),
-                              child: InfosColumn(
-                                opacity: 0.1,
-                                label: 'N° matricule',
-                                widget: Expanded(
-                                  child: loginTextField,
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                  right: 25.0,
+                                  left: 25.0,
+                                  bottom: 15,
+                                ),
+                                child: InfosColumn(
+                                  opacity: 0.1,
+                                  label: 'N° matricule',
+                                  widget: Expanded(
+                                    child: loginTextField,
+                                  ),
                                 ),
                               ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                              ),
-                              child: Row(
-                                children: [
-                                  Checkbox(
-                                    checkColor: Colors.white,
-                                    focusColor: Palette.primaryColor,
-                                    // activeColor: Palette.primaryColor,
-                                    side: BorderSide(
-                                      width: 1.5,
-                                      color: Palette.primaryColor,
-                                    ),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                ),
+                                child: Row(
+                                  children: [
+                                    Checkbox(
+                                      checkColor: Colors.white,
+                                      focusColor: Palette.primaryColor,
+                                      // activeColor: Palette.primaryColor,
+                                      side: BorderSide(
+                                        width: 1.5,
+                                        color: Palette.primaryColor,
+                                      ),
 
-                                    fillColor: WidgetStatePropertyAll(
-                                      Palette.primaryColor,
+                                      fillColor: WidgetStatePropertyAll(
+                                        Palette.primaryColor,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(3),
+                                      ),
+                                      value: isChecked,
+                                      onChanged: (value) {
+                                        setState(() {
+                                          isChecked = value!;
+                                        });
+                                      },
                                     ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(3),
-                                    ),
-                                    value: isChecked,
-                                    onChanged: (value) {
-                                      setState(() {
-                                        isChecked = value!;
-                                      });
-                                    },
-                                  ),
-                                  SizedBox(width: 5),
-                                  AppText.medium('Se souvenir de moi'),
-                                ],
+                                    SizedBox(width: 5),
+                                    AppText.medium('Se souvenir de moi'),
+                                  ],
+                                ),
                               ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(
-                                right: 25.0,
-                                left: 25.0,
-                              ),
-                              child: CustomButton(
-                                color: Palette.primaryColor,
-                                width: double.infinity,
-                                height: 40,
-                                radius: 5,
-                                text: 'Connexion',
-                                onPress: () async {
-                                  await validateMatricule(
-                                    context,
-                                    loginController.text,
-                                    isChecked,
-                                  );
-                                  //Functions.showLoadingSheet(ctxt: context);
-                                  /*  EasyLoading.showProgress(
-                                    0.3,
-                                    status: 'chargement...',
-                                  );
-
-                                  if (loginController.text.trim().isEmpty) {
-                                    Functions.showToast(
-                                        msg:
-                                            'Veuillez renseigner votre numéro matricule',
-                                        gravity: ToastGravity.TOP);
-                                    EasyLoading.dismiss();
-                                    return;
-                                  } else {
-                                    // fetching data from api
-                                    // response === ok
-                                    if (loginController.text == 'bonjour') {
-                                      final SharedPreferences prefs =
-                                          await SharedPreferences.getInstance();
-
-                                      if (isChecked) {
-                                        await prefs.setBool('isRemember', true);
-                                      }
-                                      Future.delayed(const Duration(seconds: 3))
-                                          .whenComplete(() {
-                                        EasyLoading.dismiss();
-                                        Get.offAllNamed(Home.routeName);
-                                      });
-                                    } else {
-                                      EasyLoading.dismiss();
-                                      //Get.back();
-                                      Functions.showToast(
-                                        msg: 'Matricule invalide',
-                                        gravity: ToastGravity.TOP,
-                                      );
-                                    }
-                                  } */
-                                },
-                              ),
-                            )
-                          ],
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                  right: 25.0,
+                                  left: 25.0,
+                                ),
+                                child: CustomButton(
+                                  color: Palette.primaryColor,
+                                  width: double.infinity,
+                                  height: 40,
+                                  radius: 5,
+                                  text: 'Connexion',
+                                  onPress: () async {
+                                    await validateMatricule(
+                                      context,
+                                      loginController.text,
+                                      isChecked,
+                                    );
+                                  },
+                                ),
+                              )
+                            ],
+                          ),
                         ),
                       ),
                     ],
@@ -264,10 +220,12 @@ Future<void> validateMatricule(
     0.3,
     status: 'chargement...',
   );
+  final baseUrl = dotenv.env['BASE_URL']!;
   final response = await http.get(
-    Uri.parse('http://194.163.136.227:8079/api/users/$matricule'),
+    Uri.parse('${baseUrl}users/$matricule'),
   );
-  print(response.statusCode);
+  /* print(response.statusCode);
+  print(response.body); */
 
   if (response.statusCode == 200 || response.statusCode == 201) {
     var json = response.body;
@@ -283,6 +241,8 @@ Future<void> validateMatricule(
     }
 
     int result = await LocalService().createLocalAgent(agent: agent);
+    //print(result);
+
     if (result != 0) {
       // if user set remember me to true
       final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -305,44 +265,4 @@ Future<void> validateMatricule(
       SnackBar(content: Text('Matricule invalide')),
     );
   }
-}
-
-Future<int> createLocalAgent({required AgentModel agent}) async {
-  final databasePath = await getDatabasesPath();
-  final path = join(databasePath, 'user_database.db');
-
-  final database =
-      await openDatabase(path, version: 1, onCreate: (db, version) async {
-    await db.execute('''
-    CREATE TABLE user(
-      id INTEGER PRIMARY KEY,
-      name TEXT,
-      email TEXT,
-      telephone TEXT,
-      actif INTEGER,
-      matricule TEXT,
-      localisation_id INTEGER,
-      avatar TEXT,
-      localisation_name TEXT
-    )
-  ''');
-  });
-
-  int result = await database.insert(
-    'user',
-    {
-      'id': agent.id,
-      'name': agent.name,
-      'email': agent.email,
-      'telephone': agent.telephone,
-      'actif': agent.actif ? 1 : 0,
-      'matricule': agent.matricule,
-      'localisation_id': agent.localisation.id,
-      'avatar': agent.avatar,
-      'localisation_name': agent.localisation.libelle,
-    },
-    conflictAlgorithm: ConflictAlgorithm.replace,
-  );
-
-  return result;
 }

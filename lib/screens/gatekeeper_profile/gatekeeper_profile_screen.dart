@@ -8,7 +8,6 @@ import 'package:path/path.dart';
 import '../../config/app_text.dart';
 import '../../config/palette.dart';
 import '../../model/agent_model.dart';
-import '../../model/localisation_model.dart';
 import '../../widgets/copy_rigtht.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/gate_keeper_tag.dart';
@@ -44,13 +43,13 @@ class _GatekeeperProfileScreenState extends State<GatekeeperProfileScreen> {
           telephone: userMap['telephone'],
           actif: userMap['actif'] == 1,
           matricule: userMap['matricule'],
-          localisationId: userMap['localisation_id'],
+          /* localisationId: userMap['localisation_id'], */
           avatar: userMap['avatar'],
-          localisation: LocalisationModel(
+          /* localisation: LocalisationModel(
             id: userMap['localisation_id'],
             siteId: userMap['localisation_id'],
             libelle: userMap['localisation_name'],
-          ),
+          ), */
         );
       });
     }
@@ -124,8 +123,7 @@ class _GatekeeperProfileScreenState extends State<GatekeeperProfileScreen> {
                                 color: Colors.white,
                               ),
                               image: DecorationImage(
-                                image: NetworkImage(
-                                    'http://194.163.136.227:8079/images/${_agent!.avatar}'),
+                                image: AssetImage('assets/images/security.jpg'),
                                 fit: BoxFit.cover,
                               ),
                             ),
@@ -169,7 +167,7 @@ class _GatekeeperProfileScreenState extends State<GatekeeperProfileScreen> {
                                   color: Color.fromARGB(255, 33, 33, 33),
                                 ),
                                 AppText.small(
-                                  'Agent & Team Leader @ AGL ${_agent!.localisation.libelle}',
+                                  'Agent & Team Leader @ AGL',
                                 ),
                                 SizedBox(height: 5),
                                 AppText.small(
@@ -343,7 +341,7 @@ class _GatekeeperProfileScreenState extends State<GatekeeperProfileScreen> {
                                 ],
                               ),
                             ),
-                            SizedBox(height: 15),
+                            /* SizedBox(height: 15),
                             Container(
                               height: 40,
                               decoration: BoxDecoration(
@@ -374,11 +372,12 @@ class _GatekeeperProfileScreenState extends State<GatekeeperProfileScreen> {
                                   SizedBox(width: 5),
                                   Expanded(
                                     child: AppText.medium(
-                                        _agent!.localisation.libelle),
+                                      '_agent!.localisation.libelle',
+                                    ),
                                   ),
                                 ],
                               ),
-                            ),
+                            ), */
                             SizedBox(height: 100),
                             CustomButton(
                               color: Colors.red.withOpacity(0.03),

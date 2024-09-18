@@ -2,37 +2,45 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
 import '../../config/app_text.dart';
-import '../../model/tracteur_modal.dart';
+import '../../model/agl_livraison_model.dart';
 
 class BoxRow extends StatelessWidget {
   const BoxRow({
     super.key,
     required this.deli,
   });
-  final DeliDetailsModel deli;
+  final AglLivraisonModel deli;
 
   @override
   Widget build(BuildContext context) {
+    final designation =
+        deli.designation.trim().isNotEmpty ? deli.designation : '-';
+
     return Row(
       children: [
-        _box(
-          title: 'Type de colis',
-          subtitle: deli.livraison.typeColis,
-          color: Color.fromARGB(255, 3, 152, 137),
-          asset: 'assets/icons/chargement-de-camion.svg',
+        Expanded(
+          child: _box(
+            title: 'Type de colis (Désignation)',
+            subtitle: '${designation}',
+            color: Color.fromARGB(255, 3, 152, 137),
+            asset: 'assets/icons/chargement-de-camion.svg',
+          ),
         ),
-        _box(
-          title: 'Entreprise',
-          subtitle: deli.livraison.entreprise,
-          color: Color.fromARGB(255, 19, 5, 112),
-          asset: 'assets/icons/construction-de-maison.svg',
+        const SizedBox(width: 10),
+        Expanded(
+          child: _box(
+            title: 'Entreprise',
+            subtitle: deli.entreprise,
+            color: Color.fromARGB(255, 19, 5, 112),
+            asset: 'assets/icons/construction-de-maison.svg',
+          ),
         ),
-        _box(
+        /*  _box(
           title: 'Localisation',
-          subtitle: deli.livraison.localisation.libelle,
+          subtitle: '${localisation}',
           color: Color.fromARGB(255, 168, 22, 200),
           asset: 'assets/icons/map-marker-home.svg',
-        ),
+        ), */
       ],
     );
   }
@@ -44,7 +52,7 @@ class BoxRow extends StatelessWidget {
     required String asset,
   }) =>
       Container(
-        margin: const EdgeInsets.only(right: 15),
+        //margin: const EdgeInsets.only(right: 15),
         padding: const EdgeInsets.symmetric(
           horizontal: 15,
           vertical: 10,
@@ -72,12 +80,16 @@ class BoxRow extends StatelessWidget {
             ),
             AppText.small(
               title,
+              maxLine: 1,
+              textOverflow: TextOverflow.ellipsis,
               color: Color.fromARGB(255, 160, 160, 160),
               fontWeight: FontWeight.w600,
             ),
             AppText.medium(
               subtitle,
               color: color,
+              maxLine: 1,
+              textOverflow: TextOverflow.ellipsis,
             )
           ],
         ),

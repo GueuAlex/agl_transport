@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 
 class AllSheetHeader extends StatelessWidget {
-  const AllSheetHeader({
-    super.key,
-  });
+  const AllSheetHeader({super.key, this.opacity = 0.3});
+  final double opacity;
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +13,7 @@ class AllSheetHeader extends StatelessWidget {
         height: 20,
         width: double.infinity,
         decoration: BoxDecoration(
-          color: Colors.grey.withOpacity(0.3),
+          color: Colors.grey.withOpacity(opacity),
           borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(15),
             topRight: Radius.circular(15),

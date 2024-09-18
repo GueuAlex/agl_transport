@@ -8,7 +8,6 @@ import '../../config/functions.dart';
 import '../../config/palette.dart';
 import '../../draggable_menu.dart';
 import '../add_delivering/add_deli_screen.dart';
-import '../in_process_delivery/in_process_delivery.dart';
 import '../search_by_date/deli_search_by_date_screen.dart';
 import '../side_bar/custom_side_bar.dart';
 import '../side_bar/open_side_dar.dart';
@@ -55,23 +54,6 @@ class _DeliveringScreenState extends State<DeliveringScreen> {
       length: 7,
       initialIndex: 0,
       child: Scaffold(
-        /* floatingActionButton: FloatingActionButton(
-          backgroundColor: Palette.primaryColor,
-          onPressed: () {
-            Functions.showBottomSheet(
-              ctxt: context,
-              widget: SearchBottomSheet(),
-            );
-          },
-          child: Center(
-            child: Icon(
-              CupertinoIcons.add,
-              color: Palette.whiteColor,
-              size: 20,
-            ),
-          ),
-        ), */
-        //
         drawer: const CustomSiderBar(),
         appBar: AppBar(
           elevation: 1,
@@ -106,11 +88,6 @@ class _DeliveringScreenState extends State<DeliveringScreen> {
                 color: Palette.greyColor,
               ),
               onPressed: () {
-                //print(today);
-                /* Functions.showSnackBar(
-                    ctxt: context,
-                    messeage: 'Selecteur de période',
-                  ); */
                 _dateSelector(context);
               },
             ),
@@ -138,7 +115,7 @@ class _DeliveringScreenState extends State<DeliveringScreen> {
                       7,
                       (index) => DeliTabBarViewBody(
                         size: size,
-                        status: 'terminée',
+                        /*  status: 'terminée', */
                         date: today.subtract(
                           Duration(days: index),
                         ),
@@ -188,11 +165,10 @@ class _DeliveringScreenState extends State<DeliveringScreen> {
                       onPressed: () {
                         // Navigation vers la page 2 avec la date sélectionnée
                         Navigator.pushNamed(
-                            context, DeliSearchByDateScreen.routeName,
-                            arguments: DeliSearchParams(
-                              date: _selectedDate,
-                              status: 'terminée',
-                            ));
+                          context,
+                          DeliSearchByDateScreen.routeName,
+                          arguments: _selectedDate,
+                        );
                       },
                       child: const Text(
                         'Voir',
@@ -242,10 +218,7 @@ class _DeliveringScreenState extends State<DeliveringScreen> {
         Navigator.pushNamed(
           context,
           DeliSearchByDateScreen.routeName,
-          arguments: DeliSearchParams(
-            date: _selectedDate,
-            status: 'terminée',
-          ),
+          arguments: _selectedDate,
         );
       }
     }

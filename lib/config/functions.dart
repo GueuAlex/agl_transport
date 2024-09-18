@@ -9,7 +9,6 @@ import '../local_service/local_service.dart';
 import '../model/agent_model.dart';
 import '../model/entreprise_model.dart';
 import '../model/livraison_model.dart';
-import '../model/localisation_model.dart';
 import '../model/scan_history_model.dart';
 import '../model/visite_model.dart';
 import '../remote_service/remote_service.dart';
@@ -144,16 +143,18 @@ class Functions {
 
 // Retourne une liste des visites où le QR code est déjà scanné en se basant
 // sur la liste des historiques de scan
-  static Future<List<VisiteModel>> getScannedQrCode({
+  static Future<List<VisiteModel>> getScannedVisites({
     required List<ScanHistoryModel> scanList,
+    required int localisationId,
   }) async {
     Set<VisiteModel> qrs = {};
     List<VisiteModel> allVisites = await VisiteModel.visites;
 
-    for (VisiteModel qrCodes in allVisites) {
+    for (VisiteModel visite in allVisites) {
       for (ScanHistoryModel element in scanList) {
-        if (qrCodes.id == element.visiteId) {
-          qrs.add(qrCodes);
+        if (visite.id == element.visiteId &&
+            localisationId == visite.localisation.id) {
+          qrs.add(visite);
         }
       }
     }
@@ -203,6 +204,7 @@ class Functions {
     required Map<String, dynamic> data,
     required int visiteId,
   }) async {
+    print('visite data dans function : ------------------> ${data}');
     await RemoteService().putSomethings(
       api: 'visiteurs/${visiteId}',
       data: data,
@@ -443,13 +445,7 @@ class Functions {
         telephone: userMap['telephone'],
         actif: userMap['actif'] == 1,
         matricule: userMap['matricule'],
-        localisationId: userMap['localisation_id'],
         avatar: userMap['avatar'],
-        localisation: LocalisationModel(
-          id: userMap['localisation_id'],
-          siteId: userMap['localisation_id'],
-          libelle: userMap['localisation_name'],
-        ),
       );
       return _agent;
     } else {
@@ -521,5 +517,13 @@ class Functions {
         },
       );
     }
+  }
+
+  static TimeOfDay stringToTimeOfDay(String heureVisite) {
+    final parsedTime = heureVisite
+        .split(':'); // Sépare la chaîne en heures, minutes et secondes
+    int hour = int.parse(parsedTime[0]); // Convertir les heures en int
+    int minute = int.parse(parsedTime[1]); // Convertir les minutes en int
+    return TimeOfDay(hour: hour, minute: minute); // Retourner un TimeOfDay
   }
 }

@@ -3,9 +3,7 @@ import 'package:flutter/material.dart';
 import '../screens/add_delivering/add_deli_screen.dart';
 import '../screens/delivering/deliverig_screen.dart';
 import '../screens/home/home.dart';
-import '../screens/in_process_delivery/in_process_delivery.dart';
 import '../screens/scanner/scan_screen.dart';
-import '../screens/stats_creen/stats_screen.dart';
 import '../screens/verify_by_code/verify_by_code_screen.dart';
 
 class DraggableMenuModel {
@@ -47,13 +45,13 @@ class DraggableMenuModel {
     ),
   ];
   static List<DraggableMenuModel> dragMenuList2 = [
-    DraggableMenuModel(
+    /*  DraggableMenuModel(
       title: 'Vos Stats',
       subTitle: 'Une vue d\'ensemble de vos statistiques',
       icon: 'assets/icons/menu/chart-histogram.svg',
       route: StatsScreen.routeName,
       color: Color.fromARGB(255, 0, 178, 163),
-    ),
+    ), */
     DraggableMenuModel(
       title: 'Visite',
       subTitle: 'Créer une nouvelle visite',
@@ -75,13 +73,13 @@ class DraggableMenuModel {
       route: 'CreateDeliveryScreen',
       color: Color.fromARGB(255, 255, 0, 221),
     ),
-    DraggableMenuModel(
+    /*  DraggableMenuModel(
       title: 'En cours',
       subTitle: 'Toutes les livraisons en cours',
       icon: 'assets/icons/menu/shipping-fast.svg',
       route: InProcessDelivery.routeName,
       color: Color(0xFF1f306e),
-    ),
+    ), */
     DraggableMenuModel(
       title: 'Livraisons',
       subTitle: 'Vos historique de livraisons',

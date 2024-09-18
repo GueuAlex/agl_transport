@@ -8,9 +8,11 @@ class ShippingInfo extends StatelessWidget {
     super.key,
     required this.tracteurNum,
     required this.remorqueNum,
+    required this.conteneur,
   });
   final String tracteurNum;
   final String remorqueNum;
+  final String conteneur;
 
   @override
   Widget build(BuildContext context) {
@@ -34,11 +36,30 @@ class ShippingInfo extends StatelessWidget {
             Expanded(
               child: Column(
                 children: [
-                  _rowColmun(title: 'Tracteur', subtitle: tracteurNum),
+                  _rowColmun(
+                      title: 'N° immatriculation/Tracteur',
+                      subtitle: tracteurNum),
                   const SizedBox(
                     height: 10,
                   ),
-                  _rowColmun(title: 'Remorque', subtitle: remorqueNum),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _rowColmun(
+                            title: 'Remorque',
+                            subtitle: remorqueNum.trim().isNotEmpty
+                                ? remorqueNum
+                                : '-'),
+                      ),
+                      Expanded(
+                        child: _rowColmun(
+                          title: 'Conteneur',
+                          subtitle:
+                              conteneur.trim().isNotEmpty ? conteneur : '-',
+                        ),
+                      )
+                    ],
+                  )
                 ],
               ),
             ),

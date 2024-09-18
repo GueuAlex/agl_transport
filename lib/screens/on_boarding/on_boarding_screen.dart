@@ -212,11 +212,12 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              AppText.medium('Assigner a un site'),
+                              AppText.medium('Assigner a une localisation'),
                               AppText.small(
-                                  'Veuillez selectionner le site pour le ce terminal est destiné'),
+                                'Veuillez selectionner la localisation pour laquelle ce terminal est destiné',
+                              ),
                               InfosColumn(
-                                label: 'Site',
+                                label: 'Localisation',
                                 opacity: 0.12,
                                 widget: Expanded(
                                   child: InkWell(
@@ -230,7 +231,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                                           child: AppText.medium(
                                             _selectedSite != null
                                                 ? _selectedSite!.libelle
-                                                : 'Selectionner un site',
+                                                : 'Selectionner une localisation',
                                           ),
                                         ),
                                         Icon(
@@ -268,7 +269,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
   void _handleDeviceRegistration() async {
     if (_selectedSite == null) {
       Functions.showToast(
-        msg: 'Veuillez selectionner un site',
+        msg: 'Veuillez selectionner une localisation',
         gravity: ToastGravity.TOP,
       );
       return;
@@ -305,7 +306,8 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
         };
       }
 
-      print(deviceData);
+      //print(deviceData);
+      //return;
 
       // Enregistre le device en local
       LocalService localService = LocalService();
@@ -493,10 +495,10 @@ class Intro extends StatelessWidget {
           ),
           itemBuilder: (context, index) {
             return Padding(
-              padding: const EdgeInsets.all(4.0),
+              padding: const EdgeInsets.all(1.0),
               child: ClipRRect(
                 child: Image.asset('assets/images/hub${index + 1}.jpg'),
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(0),
               ),
             );
           },

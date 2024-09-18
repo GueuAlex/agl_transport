@@ -136,7 +136,7 @@ class _InProcessDeliveryState extends State<InProcessDelivery> {
                       7,
                       (index) => DeliTabBarViewBody(
                         size: size,
-                        status: 'en cours',
+                        /* status: 'en cours', */
                         date: today.subtract(
                           Duration(days: index),
                         ),
@@ -186,13 +186,8 @@ class _InProcessDeliveryState extends State<InProcessDelivery> {
                       onPressed: () {
                         // Navigation vers la page 2 avec la date sélectionnée
                         Navigator.pushNamed(
-                          context,
-                          DeliSearchByDateScreen.routeName,
-                          arguments: DeliSearchParams(
-                            date: _selectedDate,
-                            status: 'en cours',
-                          ),
-                        );
+                            context, DeliSearchByDateScreen.routeName,
+                            arguments: _selectedDate);
                       },
                       child: const Text(
                         'Voir',
@@ -242,19 +237,9 @@ class _InProcessDeliveryState extends State<InProcessDelivery> {
         Navigator.pushNamed(
           context,
           DeliSearchByDateScreen.routeName,
-          arguments: DeliSearchParams(date: _selectedDate, status: 'en cours'),
+          arguments: _selectedDate,
         );
       }
     }
   }
-}
-
-class DeliSearchParams {
-  DateTime date;
-  String status;
-
-  DeliSearchParams({
-    required this.date,
-    required this.status,
-  });
 }

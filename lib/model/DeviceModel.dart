@@ -1,5 +1,5 @@
 class DeviceModel {
-  final int id;
+  final int localisationId;
   final int siteId;
   final String uid;
   final String model;
@@ -8,7 +8,7 @@ class DeviceModel {
   final String osVersion;
 
   DeviceModel({
-    required this.id,
+    required this.localisationId,
     required this.siteId,
     required this.uid,
     required this.model,
@@ -20,7 +20,7 @@ class DeviceModel {
   // Méthode pour convertir un Map en DeviceModel
   factory DeviceModel.fromMap(Map<String, dynamic> map) {
     return DeviceModel(
-      id: map['localisation_id'],
+      localisationId: map['localisation_id'],
       siteId: map['site_id'],
       uid: map['uid'],
       model: map['model'],
@@ -33,7 +33,7 @@ class DeviceModel {
   // Méthode pour convertir un DeviceModel en Map
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      'id': localisationId,
       'site_id': siteId,
       'uid': uid,
       'model': model,

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:scanner/model/agl_livraison_model.dart';
 
 import '../../../config/app_text.dart';
 import '../../../config/palette.dart';
-import '../../../model/tracteur_modal.dart';
 import 'deli_history_card.dart';
 
 class DeliTabBarViewBody extends StatelessWidget {
@@ -10,21 +10,21 @@ class DeliTabBarViewBody extends StatelessWidget {
     super.key,
     required this.size,
     required this.date,
-    required this.status,
+    /* required this.status, */
   });
 
   final DateTime date;
   final Size size;
-  final String status;
+  /* final String status; */
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<DeliDetailsModel>>(
-      future: TracteurModel.getLivraisonsDetails(status: status, date: date),
+    return FutureBuilder<List<AglLivraisonModel>>(
+      future: AglLivraisonModel.getDeli(date: date),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           // Afficher un indicateur de chargement pendant que les données sont en cours de chargement
-          return Center(child: CircularProgressIndicator());
+          return Center(child: CircularProgressIndicator.adaptive());
         } else if (snapshot.hasError) {
           // Afficher un message d'erreur si une erreur s'est produite lors du chargement des données
           print(snapshot.error);
@@ -44,7 +44,7 @@ class DeliTabBarViewBody extends StatelessWidget {
           );
         }
 
-        List<DeliDetailsModel> livraisons = snapshot.data!;
+        List<AglLivraisonModel> livraisons = snapshot.data!;
 
         return Container(
           height: size.height,

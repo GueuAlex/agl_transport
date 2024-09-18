@@ -3,18 +3,22 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get.dart';
+import 'package:scanner/screens/add_delivering/deli_verify.sucess.dart';
 import 'package:workmanager/workmanager.dart';
 
 import 'bloc/internet_bloc/internet_bloc.dart';
+import 'bloc/options_bloc/options_bloc.dart';
 import 'dependency_injection.dart';
 import 'screens/add_delivering/add_deli_screen.dart';
 import 'screens/add_visite_screen/add_visite_screen.dart';
 import 'screens/auth/login/login.dart';
 import 'screens/auth/pin_code_screen.dart';
 import 'screens/create_delivery/create_delivery_screen.dart';
+import 'screens/create_delivery/delivery.sucess.dart';
 import 'screens/delivering/deliverig_screen.dart';
 import 'screens/home/home.dart';
 import 'screens/in_process_delivery/in_process_delivery.dart';
@@ -43,6 +47,8 @@ void callbackDispatcher() {
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Charger les variables d'environnement
+  await dotenv.load(fileName: ".env");
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   await Workmanager().initialize(
     callbackDispatcher,
@@ -56,8 +62,15 @@ Future<void> main() async {
   }); */
 
   runApp(
-    BlocProvider(
-      create: (context) => InternetBloc(),
+    MultiBlocProvider(
+      providers: [
+        BlocProvider<DeliveryBloc>(
+          create: (context) => DeliveryBloc(),
+        ),
+        BlocProvider<InternetBloc>(
+          create: (context) => InternetBloc(),
+        ),
+      ],
       child: const MyApp(),
     ),
   );
@@ -121,6 +134,8 @@ class MyApp extends StatelessWidget {
         AddVisiteScreen.routeName: (ctxt) => const AddVisiteScreen(),
         CreateDeliveryScreen.routeName: (ctxt) => const CreateDeliveryScreen(),
         OnBoardingScreen.routeName: (ctxt) => const OnBoardingScreen(),
+        DeliverySucess.routeName: (ctxt) => const DeliverySucess(),
+        DeliveryVerifySucess.routeName: (ctxt) => const DeliveryVerifySucess(),
       },
       builder: EasyLoading.init(),
     );

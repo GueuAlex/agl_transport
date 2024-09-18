@@ -34,9 +34,7 @@ class LocalService {
             telephone TEXT,
             actif INTEGER,
             matricule TEXT,
-            localisation_id INTEGER,
-            avatar TEXT,
-            localisation_name TEXT
+            avatar TEXT
           )
         ''');
         await db.execute('''
@@ -78,13 +76,13 @@ class LocalService {
       {
         'id': agent.id,
         'name': agent.name,
-        'email': agent.email,
+        'email': /* agent.email */ "",
         'telephone': agent.telephone,
         'actif': agent.actif ? 1 : 0,
         'matricule': agent.matricule,
-        'localisation_id': agent.localisation.id,
-        'avatar': agent.avatar,
-        'localisation_name': agent.localisation.libelle,
+        //'localisation_id': agent.localisation.id,
+        'avatar': /* agent.avatar */ "",
+        //'localisation_name': agent.localisation.libelle,
       },
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
@@ -115,7 +113,7 @@ class LocalService {
 
     final List<Map<String, dynamic>> maps = await db.query('agl_device');
     if (maps.isNotEmpty) {
-      print(maps);
+      //print(maps);
       return DeviceModel.fromMap(maps.first);
     } else {
       return null;

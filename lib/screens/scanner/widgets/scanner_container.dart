@@ -82,7 +82,7 @@ class _ScannerContainerState extends State<ScannerContainer> {
               ////////////////
               /// code =  données que le qrcode continet
               String code = barcodes.rawValue ?? '...';
-              print('qr code value is : $code');
+              // print('qr code value is : $code');
               //////////////
               final codePattern = RegExp(r'^AGL-\d{2}-\d+$');
 
@@ -133,7 +133,7 @@ class _ScannerContainerState extends State<ScannerContainer> {
                         });
                       });
                     });
-                    ;
+
                     EasyLoading.dismiss();
                   } else {
                     print('object');
