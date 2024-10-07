@@ -64,6 +64,7 @@ dependencies:
   loading_animation_widget: ^1.2.1
   device_info_plus: ^10.1.1
   flutter_dotenv: ^5.1.0
+  toggle_switch: ^2.3.0
 
 dev_dependencies:
   flutter_test:
@@ -108,7 +109,6 @@ flutter:
     - assets/icons/
     - assets/icons/menu/
     - assets/images/
-    - assets/soung/
     - .env
 
   # An image asset can refer to one or more resolution-specific "variants", see

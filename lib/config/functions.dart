@@ -304,7 +304,7 @@ class Functions {
                   child: Text(
                     'Annuler',
                     style: TextStyle(
-                      fontWeight: FontWeight.w500,
+                      fontWeight: FontWeight.w400,
                       color: CupertinoColors.destructiveRed,
                     ),
                   ),
@@ -314,7 +314,7 @@ class Functions {
                   child: Text(
                     'Confirmer',
                     style: TextStyle(
-                      fontWeight: FontWeight.w500,
+                      fontWeight: FontWeight.w400,
                       color: CupertinoColors.activeBlue,
                     ),
                   ),
@@ -380,7 +380,7 @@ class Functions {
                   onPressed: cancel,
                   child: AppText.small(
                     'Annuler',
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w400,
                     color: const Color.fromARGB(255, 187, 49, 39),
                   ),
                 ),
@@ -388,7 +388,7 @@ class Functions {
                   onPressed: confirm,
                   child: AppText.small(
                     'Confirmer',
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w400,
                     color: Palette.primaryColor,
                   ),
                 ),

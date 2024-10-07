@@ -47,6 +47,12 @@ void callbackDispatcher() {
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  /* FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.presentError(details);
+    // Log l'erreur et la pile
+    debugPrint(details.exception.toString());
+    debugPrint(details.stack.toString());
+  }; */
   // Charger les variables d'environnement
   await dotenv.load(fileName: ".env");
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
@@ -54,12 +60,6 @@ Future<void> main() async {
     callbackDispatcher,
     isInDebugMode: true,
   );
-  /*  Timer.periodic(Duration(minutes: 1), (timer) {
-    Functions.getQrcodesFromApi();
-    Functions.getScanHistoriesFromApi();
-    Functions.allEntrepise();
-    Functions.allLivrason();
-  }); */
 
   runApp(
     MultiBlocProvider(
