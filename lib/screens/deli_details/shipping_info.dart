@@ -35,27 +35,39 @@ class ShippingInfo extends StatelessWidget {
           children: [
             Expanded(
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _rowColmun(
-                      title: 'N° immatriculation/Tracteur',
-                      subtitle: tracteurNum),
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: _rowColmun(
+                        title: 'N° immatriculation/Tracteur',
+                        subtitle: tracteurNum),
+                  ),
                   const SizedBox(
                     height: 10,
                   ),
                   Row(
+                    mainAxisSize: MainAxisSize.max,
                     children: [
                       Expanded(
-                        child: _rowColmun(
-                            title: 'Remorque',
-                            subtitle: remorqueNum.trim().isNotEmpty
-                                ? remorqueNum
-                                : '-'),
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: _rowColmun(
+                              title: 'Remorque',
+                              subtitle: remorqueNum.trim().isNotEmpty
+                                  ? remorqueNum
+                                  : '-'),
+                        ),
                       ),
+                      const SizedBox(width: 10),
                       Expanded(
-                        child: _rowColmun(
-                          title: 'Conteneur',
-                          subtitle:
-                              conteneur.trim().isNotEmpty ? conteneur : '-',
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: _rowColmun(
+                            title: 'Conteneur',
+                            subtitle:
+                                conteneur.trim().isNotEmpty ? conteneur : '-',
+                          ),
                         ),
                       )
                     ],
@@ -103,10 +115,14 @@ class ShippingInfo extends StatelessWidget {
                 title,
                 color: Color.fromARGB(255, 134, 134, 134),
                 fontWeight: FontWeight.w600,
+                maxLine: 1,
+                textOverflow: TextOverflow.ellipsis,
               ),
               AppText.medium(
                 subtitle,
                 fontWeight: FontWeight.w500,
+                maxLine: 1,
+                textOverflow: TextOverflow.ellipsis,
               ),
             ],
           )

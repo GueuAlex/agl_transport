@@ -27,4 +27,6 @@ class MotifModel {
         "id": id,
         "libelle": libelle,
       };
+
+  static List<MotifModel> glogalModitif = [];
 }

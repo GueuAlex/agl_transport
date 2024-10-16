@@ -1,7 +1,9 @@
 // widget retourné si un qr code a deja été scané
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:get/get_utils/get_utils.dart';
 import 'package:intl/intl.dart';
+import 'package:scanner/model/scan_history_model.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 
 import '../../../config/app_text.dart';
@@ -10,7 +12,6 @@ import '../../../config/palette.dart';
 import '../../../model/agent_model.dart';
 import '../../../model/visite_model.dart';
 import '../../../widgets/custom_button.dart';
-import 'get_textfield.dart';
 import 'infos_column.dart';
 import 'show_members_row.dart';
 import 'uddate_scan_history.dart';
@@ -42,96 +43,119 @@ class _IsAlreadyScanedState extends State<IsAlreadyScaned> {
   }
 
   @override
+  void initState() {
+    _initializeVisite();
+    super.initState();
+  }
+
+  _initializeVisite() {
+    // Récupère le premier scan où l'utilisateur est le visiteur principal
+    ScanHistoryModel? oldScan = widget.visite.scanHistories.firstWhereOrNull(
+      (scan) => scan.isPrimaryVisitor == true,
+    );
+
+    // Si un scan est trouvé, met à jour les contrôleurs correspondants
+    //print('____________________________________1');
+    if (oldScan != null) {
+      //print('____________________________________');
+      // print(oldScan.numeroBaget);
+      setState(() {
+        _cariDController2.text =
+            oldScan.carId; // Assurez-vous que carId n'est pas null
+        _badgeController.text =
+            oldScan.numeroBaget; // Vérifiez que numeroBaget n'est pas null
+        _giletController.text =
+            oldScan.numeroGilet; // Mettez également à jour le contrôleur gilet
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    bool isPermanet = widget.visite.typeVisiteur.toLowerCase() == 'permanent';
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         const SizedBox(
           height: 15,
         ),
-        Row(
-          children: [
-            Expanded(
-              child: InfosColumn(
-                label: 'Date',
-                widget: Expanded(
-                  child: AppText.medium(
-                    DateFormat(
-                      'EE dd MMM yyyy',
-                      'fr_FR',
-                    ).format(
-                      DateTime.now(),
-                    ),
-                    textOverflow: TextOverflow.fade,
+        if (!isPermanet)
+          Row(
+            children: [
+              Expanded(
+                child: InfosColumn(
+                  radius: 0,
+                  //opacity: 0.12,
+                  label: 'n° de pièce',
+                  widget: AppText.medium(widget.visite.numeroCni),
+                ),
+              ),
+              Expanded(
+                child: InfosColumn(
+                  radius: 0,
+                  //opacity: 0.12,
+                  label: 'Type de pièce',
+                  widget: Expanded(
+                    child: AppText.medium(widget.visite.typePiece),
                   ),
                 ),
               ),
-            ),
-            Expanded(
-              child: InfosColumn(
-                label: 'Heure',
-                widget: AppText.medium(
-                  DateFormat('HH:mm').format(
-                    DateTime.now(),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
+            ],
+          ),
         const SizedBox(height: 15),
-        ToggleSwitch(
-          cornerRadius: 7.0,
-          minWidth: 120,
-          minHeight: 40,
-          initialLabelIndex: _switchIndex,
-          totalSwitches: 2,
-          //labels: ['Avec baget', 'Sans baget'],
-          customWidgets: [
-            Container(
-              alignment: Alignment.center,
-              width: double.infinity,
-              height: 30,
-              decoration: BoxDecoration(
-                color: _switchIndex == 0
-                    ? Palette.primaryColor
-                    : Colors.transparent,
-                borderRadius: BorderRadius.circular(5),
+        if (!isPermanet)
+          ToggleSwitch(
+            cornerRadius: 7.0,
+            minWidth: 120,
+            minHeight: 40,
+            initialLabelIndex: _switchIndex,
+            totalSwitches: 2,
+            //labels: ['Avec baget', 'Sans baget'],
+            customWidgets: [
+              Container(
+                alignment: Alignment.center,
+                width: double.infinity,
+                height: 30,
+                decoration: BoxDecoration(
+                  color: _switchIndex == 0
+                      ? Palette.primaryColor
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                child: AppText.medium(
+                  'Avec badge',
+                  color: _switchIndex == 0 ? Colors.white : Colors.black87,
+                  fontWeight: FontWeight.w500,
+                  textAlign: TextAlign.center,
+                ),
               ),
-              child: AppText.medium(
-                'Avec badge',
-                color: _switchIndex == 0 ? Colors.white : Colors.black87,
-                fontWeight: FontWeight.w500,
-                textAlign: TextAlign.center,
+              Container(
+                alignment: Alignment.center,
+                width: double.infinity,
+                height: 30,
+                decoration: BoxDecoration(
+                  color: _switchIndex == 1
+                      ? Palette.primaryColor
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                child: AppText.medium(
+                  'Sans badge',
+                  color: _switchIndex == 1 ? Colors.white : Colors.black87,
+                  fontWeight: FontWeight.w500,
+                  textAlign: TextAlign.center,
+                ),
               ),
-            ),
-            Container(
-              alignment: Alignment.center,
-              width: double.infinity,
-              height: 30,
-              decoration: BoxDecoration(
-                color: _switchIndex == 1
-                    ? Palette.primaryColor
-                    : Colors.transparent,
-                borderRadius: BorderRadius.circular(5),
-              ),
-              child: AppText.medium(
-                'Sans badge',
-                color: _switchIndex == 1 ? Colors.white : Colors.black87,
-                fontWeight: FontWeight.w500,
-                textAlign: TextAlign.center,
-              ),
-            ),
-          ],
-          inactiveBgColor: Palette.separatorColor,
-          activeBgColor: [Palette.separatorColor],
-          onToggle: (index) {
-            //print('switched to: $index');
-            setState(() {
-              _switchIndex = index!;
-            });
-          },
-        ),
+            ],
+            inactiveBgColor: Palette.separatorColor,
+            activeBgColor: [Palette.separatorColor],
+            onToggle: (index) {
+              //print('switched to: $index');
+              setState(() {
+                _switchIndex = index!;
+              });
+            },
+          ),
         const SizedBox(
           height: 20,
         ),
@@ -220,10 +244,10 @@ class _IsAlreadyScanedState extends State<IsAlreadyScaned> {
             /// on affiche une alerte modale pour la
             /// confirmation
             Functions.IsAllRedyScanalert(
-              carIdField: getTextfiel(
+              /*  carIdField: getTextfiel(
                 controller: _cariDController2,
                 //hintext: user.plaqueVehicule,
-              ),
+              ), */
               ctxt: context,
               visite: widget.visite,
               confirm: () {
@@ -291,10 +315,10 @@ class _IsAlreadyScanedState extends State<IsAlreadyScaned> {
             /// on affiche une alerte modale pour la
             /// confirmation
             Functions.IsAllRedyScanalert(
-              carIdField: getTextfiel(
+              /*  carIdField: getTextfiel(
                 controller: _cariDController2,
                 // hintext: user.plaqueVehicule,
-              ),
+              ), */
               ctxt: context,
               isEntree: false,
               visite: widget.visite,

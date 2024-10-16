@@ -46,6 +46,9 @@ class _FirstScanWidgetState extends State<FirstScanWidget> {
 
   String _idCardType = '';
   int _switchIndex = 0;
+  int _pSwitchStatus = 0;
+  List<int> _mSwitchStatus = [];
+  List<int> _mSwitchIndex = [];
 
   DateTime _today = DateTime(
     DateTime.now().year,
@@ -66,6 +69,8 @@ class _FirstScanWidgetState extends State<FirstScanWidget> {
       _mBadgeControllers.add(TextEditingController(text: member.badge));
       _mGiletControllers.add(TextEditingController(text: member.gilet));
       _membersIdCardTypes.add(member.typePiece);
+      _mSwitchStatus.add(0);
+      _mSwitchIndex.add(0);
     }
   }
 
@@ -93,18 +98,18 @@ class _FirstScanWidgetState extends State<FirstScanWidget> {
         ? SingleVisitor(agent: widget.agent, visite: widget.visite)
         : Container(
             width: double.infinity,
-            height: MediaQuery.of(context).size.height * 0.55,
+            //height: MediaQuery.of(context).size.height / 1.5,
+            //color: Colors.red,
             child: Column(
               children: [
-                Expanded(
-                  child: IndexedStack(
-                    index: _currentIndex,
-                    children: [
-                      _buildPrimaryVisitor(), // For primary visitor
-                      ..._buildMembersPages(), // For members
-                    ],
-                  ),
+                IndexedStack(
+                  index: _currentIndex,
+                  children: [
+                    _buildPrimaryVisitor(), // For primary visitor
+                    ..._buildMembersPages(), // For members
+                  ],
                 ),
+                const SizedBox(height: 10),
                 _buildNavigationButtons(),
               ],
             ),
@@ -114,7 +119,7 @@ class _FirstScanWidgetState extends State<FirstScanWidget> {
   Widget _buildPrimaryVisitor() {
     return Column(
       children: [
-        Row(
+        /*  Row(
           children: [
             Expanded(
               child: InfosColumn(
@@ -132,20 +137,100 @@ class _FirstScanWidgetState extends State<FirstScanWidget> {
               ),
             ),
           ],
+        ), */
+
+        /////////////////////////////////
+        //const SizedBox(height: 10),
+        Container(
+          padding: const EdgeInsets.only(left: 8.0),
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: Palette.separatorColor,
+            borderRadius: BorderRadius.circular(5),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: AppText.medium('Status'),
+              ),
+              ToggleSwitch(
+                cornerRadius: 7.0,
+                minWidth: 120,
+                minHeight: 40,
+                initialLabelIndex: _pSwitchStatus,
+                totalSwitches: 2,
+                //labels: ['Avec baget', 'Sans baget'],
+                customWidgets: [
+                  Container(
+                    alignment: Alignment.center,
+                    width: double.infinity,
+                    height: 30,
+                    decoration: BoxDecoration(
+                      color: _pSwitchStatus == 0
+                          ? Palette.primaryColor
+                          : Colors.transparent,
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    child: AppText.medium(
+                      'Présent(e)',
+                      color:
+                          _pSwitchStatus == 0 ? Colors.white : Colors.black87,
+                      fontWeight: FontWeight.w500,
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  Container(
+                    alignment: Alignment.center,
+                    width: double.infinity,
+                    height: 30,
+                    decoration: BoxDecoration(
+                      color: _pSwitchStatus == 1
+                          ? Palette.primaryColor
+                          : Colors.transparent,
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    child: AppText.medium(
+                      'Absent(e)',
+                      color:
+                          _pSwitchStatus == 1 ? Colors.white : Colors.black87,
+                      fontWeight: FontWeight.w500,
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ],
+                inactiveBgColor: Palette.separatorColor,
+                activeBgColor: [Palette.separatorColor],
+                onToggle: (index) {
+                  //print('switched to: $index');
+                  setState(() {
+                    _pSwitchStatus = index!;
+                  });
+                },
+              ),
+            ],
+          ),
         ),
-        Row(
-          children: [
-            Expanded(
-              child: InfosColumn(
+        const SizedBox(height: 10),
+
+        ///
+        /////////////////////////////////
+        if (_pSwitchStatus == 0)
+          Column(
+            children: [
+              InfosColumn(
                 opacity: 0.12,
                 label: 'n° de pièce',
                 widget: Expanded(
                     child:
                         Functions.getTextField(controller: _idCardController)),
               ),
-            ),
-            Expanded(
-              child: InfosColumn(
+              Container(
+                width: double.infinity,
+                height: 0.8,
+                color: Palette.separatorColor,
+              ),
+
+              InfosColumn(
                 opacity: 0.12,
                 label: 'type de pièce',
                 widget: InkWell(
@@ -161,141 +246,325 @@ class _FirstScanWidgetState extends State<FirstScanWidget> {
                   ),
                 ),
               ),
-            ),
-            Expanded(
-              child: InfosColumn(
+              Container(
+                width: double.infinity,
+                height: 0.8,
+                color: Palette.separatorColor,
+              ),
+              InfosColumn(
                 opacity: 0.12,
                 label: 'n° d\'immatriculation véhicule',
                 widget: Expanded(
                     child:
                         Functions.getTextField(controller: _carIdController)),
               ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 10),
-        // Here, default theme colors are used for activeBgColor, activeFgColor, inactiveBgColor and inactiveFgColor
-        ToggleSwitch(
-          cornerRadius: 7.0,
-          minWidth: 120,
-          minHeight: 40,
-          initialLabelIndex: _switchIndex,
-          totalSwitches: 2,
-          //labels: ['Avec baget', 'Sans baget'],
-          customWidgets: [
-            Container(
-              alignment: Alignment.center,
-              width: double.infinity,
-              height: 30,
-              decoration: BoxDecoration(
-                color: _switchIndex == 0
-                    ? Palette.primaryColor
-                    : Colors.transparent,
-                borderRadius: BorderRadius.circular(5),
+              const SizedBox(height: 10),
+              // Here, default theme colors are used for activeBgColor, activeFgColor, inactiveBgColor and inactiveFgColor
+              Container(
+                padding: const EdgeInsets.only(left: 8.0),
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: Palette.separatorColor,
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(child: AppText.medium('Accessoires')),
+                    ToggleSwitch(
+                      cornerRadius: 7.0,
+                      minWidth: 120,
+                      minHeight: 40,
+                      initialLabelIndex: _switchIndex,
+                      totalSwitches: 2,
+                      //labels: ['Avec baget', 'Sans baget'],
+                      customWidgets: [
+                        Container(
+                          alignment: Alignment.center,
+                          width: double.infinity,
+                          height: 30,
+                          decoration: BoxDecoration(
+                            color: _switchIndex == 0
+                                ? Palette.primaryColor
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(5),
+                          ),
+                          child: AppText.medium(
+                            'Avec badge',
+                            color: _switchIndex == 0
+                                ? Colors.white
+                                : Colors.black87,
+                            fontWeight: FontWeight.w500,
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        Container(
+                          alignment: Alignment.center,
+                          width: double.infinity,
+                          height: 30,
+                          decoration: BoxDecoration(
+                            color: _switchIndex == 1
+                                ? Palette.primaryColor
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(5),
+                          ),
+                          child: AppText.medium(
+                            'Sans badge',
+                            color: _switchIndex == 1
+                                ? Colors.white
+                                : Colors.black87,
+                            fontWeight: FontWeight.w500,
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ],
+                      inactiveBgColor: Palette.separatorColor,
+                      activeBgColor: [Palette.separatorColor],
+                      onToggle: (index) {
+                        //print('switched to: $index');
+                        setState(() {
+                          _switchIndex = index!;
+                        });
+                      },
+                    ),
+                  ],
+                ),
               ),
-              child: AppText.medium(
-                'Avec badge',
-                color: _switchIndex == 0 ? Colors.white : Colors.black87,
-                fontWeight: FontWeight.w500,
-                textAlign: TextAlign.center,
-              ),
-            ),
-            Container(
-              alignment: Alignment.center,
-              width: double.infinity,
-              height: 30,
-              decoration: BoxDecoration(
-                color: _switchIndex == 1
-                    ? Palette.primaryColor
-                    : Colors.transparent,
-                borderRadius: BorderRadius.circular(5),
-              ),
-              child: AppText.medium(
-                'Sans badge',
-                color: _switchIndex == 1 ? Colors.white : Colors.black87,
-                fontWeight: FontWeight.w500,
-                textAlign: TextAlign.center,
-              ),
-            ),
-          ],
-          inactiveBgColor: Palette.separatorColor,
-          activeBgColor: [Palette.separatorColor],
-          onToggle: (index) {
-            //print('switched to: $index');
-            setState(() {
-              _switchIndex = index!;
-            });
-          },
-        ),
-        if (_switchIndex == 0)
-          _buildAccessoriesSection(_badgeController, _giletController)
+              if (_switchIndex == 0)
+                _buildAccessoriesSection(_badgeController, _giletController)
+            ],
+          )
       ],
     );
   }
 
   List<Widget> _buildMembersPages() {
-    return List.generate(widget.visite.members.length, (index) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          AppText.medium(
-              'Personnes associées à la visite (${widget.visite.members.length})'),
-          Row(
-            children: [
-              Expanded(
-                child: InfosColumn(
-                  label: 'Nom',
-                  widget: AppText.medium(widget.visite.members[index].nom),
-                ),
+    return List.generate(
+      widget.visite.members.length,
+      (index) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            AppText.medium(
+              'Personnes associées à la visite (${widget.visite.members.length})',
+            ),
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.only(left: 8.0),
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Palette.separatorColor,
+                borderRadius: BorderRadius.circular(5),
               ),
-              Expanded(
-                child: InfosColumn(
-                  label: 'Prénoms',
-                  widget: AppText.medium(widget.visite.members[index].prenoms),
-                ),
-              ),
-            ],
-          ),
-          Row(
-            children: [
-              Expanded(
-                child: InfosColumn(
-                  opacity: 0.12,
-                  label: 'N° de la pièce',
-                  widget: Expanded(
-                    child: Functions.getTextField(
-                        controller: _mIdCardControllers[index]),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: AppText.medium('Status'),
                   ),
-                ),
+                  ToggleSwitch(
+                    cornerRadius: 7.0,
+                    minWidth: 120,
+                    minHeight: 40,
+                    initialLabelIndex: _mSwitchStatus[index],
+                    totalSwitches: 2,
+                    //labels: ['Avec baget', 'Sans baget'],
+                    customWidgets: [
+                      Container(
+                        alignment: Alignment.center,
+                        width: double.infinity,
+                        height: 30,
+                        decoration: BoxDecoration(
+                          color: _mSwitchStatus[index] == 0
+                              ? Palette.primaryColor
+                              : Colors.transparent,
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        child: AppText.medium(
+                          'Présent(e)',
+                          color: _mSwitchStatus[index] == 0
+                              ? Colors.white
+                              : Colors.black87,
+                          fontWeight: FontWeight.w500,
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      Container(
+                        alignment: Alignment.center,
+                        width: double.infinity,
+                        height: 30,
+                        decoration: BoxDecoration(
+                          color: _mSwitchStatus[index] == 1
+                              ? Palette.primaryColor
+                              : Colors.transparent,
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        child: AppText.medium(
+                          'Absent(e)',
+                          color: _mSwitchStatus[index] == 1
+                              ? Colors.white
+                              : Colors.black87,
+                          fontWeight: FontWeight.w500,
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ],
+                    inactiveBgColor: Palette.separatorColor,
+                    activeBgColor: [Palette.separatorColor],
+                    onToggle: (toggleIndex) {
+                      //print('switched to: $index');
+                      setState(() {
+                        _mSwitchStatus[index] = toggleIndex!;
+                        widget.visite.members[index].status = toggleIndex;
+                      });
+                    },
+                  ),
+                ],
               ),
-              const SizedBox(width: 5),
-              Expanded(
-                child: InfosColumn(
-                  opacity: 0.12,
-                  label: 'type de pièce',
-                  widget: InkWell(
-                    onTap: () => Functions.showBottomSheet(
-                      ctxt: context,
-                      widget: _membersIdCardTypeSelector(index),
+            ),
+
+            ///
+            if (_mSwitchStatus[index] == 0)
+              Column(
+                children: [
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: InfosColumn(
+                          label: 'Nom',
+                          widget:
+                              AppText.medium(widget.visite.members[index].nom),
+                        ),
+                      ),
+                      Expanded(
+                        child: InfosColumn(
+                          label: 'Prénoms',
+                          widget: AppText.medium(
+                              widget.visite.members[index].prenoms),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: InfosColumn(
+                          opacity: 0.12,
+                          label: 'N° de la pièce',
+                          widget: Expanded(
+                            child: Functions.getTextField(
+                                controller: _mIdCardControllers[index]),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 5),
+                      Expanded(
+                        child: InfosColumn(
+                          opacity: 0.12,
+                          label: 'type de pièce',
+                          widget: InkWell(
+                            onTap: () => Functions.showBottomSheet(
+                              ctxt: context,
+                              widget: _membersIdCardTypeSelector(index),
+                            ),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                    child: AppText.medium(
+                                        _membersIdCardTypes[index])),
+                                Icon(Icons.arrow_drop_down),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  //
+                  const SizedBox(height: 15),
+                  Container(
+                    padding: const EdgeInsets.only(left: 8.0),
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: Palette.separatorColor,
+                      borderRadius: BorderRadius.circular(5),
                     ),
                     child: Row(
                       children: [
                         Expanded(
-                            child: AppText.medium(_membersIdCardTypes[index])),
-                        Icon(Icons.arrow_drop_down),
+                          child: AppText.medium('Accessoires'),
+                        ),
+                        ToggleSwitch(
+                          cornerRadius: 7.0,
+                          minWidth: 120,
+                          minHeight: 40,
+                          initialLabelIndex: _mSwitchStatus[index],
+                          totalSwitches: 2,
+                          //labels: ['Avec baget', 'Sans baget'],
+                          customWidgets: [
+                            Container(
+                              alignment: Alignment.center,
+                              width: double.infinity,
+                              height: 30,
+                              decoration: BoxDecoration(
+                                color: _mSwitchIndex[index] == 0
+                                    ? Palette.primaryColor
+                                    : Colors.transparent,
+                                borderRadius: BorderRadius.circular(5),
+                              ),
+                              child: AppText.medium(
+                                'Avec badge',
+                                color: _mSwitchIndex[index] == 0
+                                    ? Colors.white
+                                    : Colors.black87,
+                                fontWeight: FontWeight.w500,
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            Container(
+                              alignment: Alignment.center,
+                              width: double.infinity,
+                              height: 30,
+                              decoration: BoxDecoration(
+                                color: _mSwitchIndex[index] == 1
+                                    ? Palette.primaryColor
+                                    : Colors.transparent,
+                                borderRadius: BorderRadius.circular(5),
+                              ),
+                              child: AppText.medium(
+                                'Sans badge',
+                                color: _mSwitchIndex[index] == 1
+                                    ? Colors.white
+                                    : Colors.black87,
+                                fontWeight: FontWeight.w500,
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ],
+                          inactiveBgColor: Palette.separatorColor,
+                          activeBgColor: [Palette.separatorColor],
+                          onToggle: (toggleIndex) {
+                            //print('switched to: $index');
+                            setState(() {
+                              _mSwitchIndex[index] = toggleIndex!;
+                              widget.visite.members[index].withBadge =
+                                  toggleIndex;
+                            });
+                          },
+                        ),
                       ],
                     ),
                   ),
-                ),
-              ),
-            ],
-          ),
-          if (_switchIndex == 0)
-            _buildAccessoriesSection(
-                _mBadgeControllers[index], _mGiletControllers[index]),
-        ],
-      );
-    });
+                  if (_mSwitchIndex[index] == 0)
+                    _buildAccessoriesSection(
+                      _mBadgeControllers[index],
+                      _mGiletControllers[index],
+                    ),
+                ],
+              )
+          ],
+        );
+      },
+    );
   }
 
   Widget _buildAccessoriesSection(TextEditingController badgeController,
@@ -368,6 +637,44 @@ class _FirstScanWidgetState extends State<FirstScanWidget> {
             color: Palette.primaryColor,
             text: 'Suivant',
             onPress: () {
+              // Vérification des champs du visiteur principal
+              if (_currentIndex == 0) {
+                if (_idCardController.text.isEmpty) {
+                  Functions.showToast(
+                    msg: 'N° de pièce obligatoire pour le visiteur principal !',
+                    gravity: ToastGravity.TOP,
+                  );
+                  return;
+                }
+                if (_switchIndex == 0 && _badgeController.text.trim().isEmpty) {
+                  Functions.showToast(
+                    msg: 'Renseigner le n° de badge !',
+                    gravity: ToastGravity.TOP,
+                  );
+                  return;
+                }
+              }
+
+              if (_currentIndex > 0) {
+                // Valider chaque membre
+                if (_mIdCardControllers[_currentIndex - 1].text.isEmpty) {
+                  Functions.showToast(
+                    msg: 'N° de pièce  obligatoire pour ce membre !',
+                    gravity: ToastGravity.TOP,
+                  );
+                  return;
+                }
+                print(_mSwitchIndex[_currentIndex - 1]);
+                if (_mSwitchIndex[_currentIndex - 1] == 0 &&
+                    _mBadgeControllers[_currentIndex - 1].text.trim().isEmpty) {
+                  Functions.showToast(
+                    msg: 'Renseigner le n° de badge !',
+                    gravity: ToastGravity.TOP,
+                  );
+                  return;
+                }
+              }
+
               if (_currentIndex < widget.visite.members.length) {
                 setState(() {
                   _currentIndex++;
@@ -406,34 +713,9 @@ class _FirstScanWidgetState extends State<FirstScanWidget> {
       return;
     }
 
-    // Vérification des champs du visiteur principal
-    if (_idCardController.text.isEmpty) {
-      Functions.showToast(
-        msg:
-            'Le n° de pièce d\'identité est obligatoire pour le visiteur principal !',
-        gravity: ToastGravity.TOP,
-      );
-      return;
-    }
-    if (_switchIndex == 0 && _badgeController.text.trim().isEmpty) {
-      Functions.showToast(
-        msg: 'Renseigner le n° de badge !',
-        gravity: ToastGravity.TOP,
-      );
-      return;
-    }
     // Parcourir les membres associés pour vérifier les données et les ajouter
     for (int i = 0; i < widget.visite.members.length; i++) {
       //final member = widget.visite.members[i];
-
-      // Valider chaque membre
-      if (_mIdCardControllers[i].text.isEmpty) {
-        Functions.showToast(
-          msg: 'Le n° de pièce d\'identité est obligatoire pour ce membre !',
-          gravity: ToastGravity.TOP,
-        );
-        return;
-      }
 
       // Mettre à jour les informations du membre
       widget.visite.members[i].idCard = _mIdCardControllers[i].text;
@@ -445,9 +727,7 @@ class _FirstScanWidgetState extends State<FirstScanWidget> {
     // Préparer les données du visiteur principal
     Map<String, dynamic> visitData = {
       "is_already_scanned": 1,
-      /* "numero_cni": _idCardController.text.toUpperCase(), */
       "type_piece": _idCardType,
-      /* "heure_visite": _hours, */
       "numero_piece": _idCardController.text.toUpperCase(),
       "badge": _switchIndex == 0 ? 1 : 0,
       "membre_visites":
@@ -456,7 +736,7 @@ class _FirstScanWidgetState extends State<FirstScanWidget> {
     //print(visitData);
 
     ////////////
-    ///SCAN HISTORY DATA
+    ///SCAN HISTORY DATA FOR PRIMARY VISITOR
     Map<String, dynamic> scanHistoryData = {
       "visite_id": widget.visite.id,
       "user_id": widget.agent.id,
@@ -464,31 +744,54 @@ class _FirstScanWidgetState extends State<FirstScanWidget> {
       "scan_hour": _hours,
       "badge": _switchIndex == 0 ? 1 : 0,
       "motif": "Entrée",
+      "type_visiteur": 1,
       "numero_badge": _badgeController.text.toUpperCase(),
       "numero_gilet": _giletController.text.toUpperCase(),
       "plaque_immatriculation": _carIdController.text.toUpperCase(),
     };
 
-    //print(scanHistoryData);
-    //return;
+    //////// members scan history data
+    List<Map<String, dynamic>> membersScanHistoryData = [];
+    for (int i = 0; i < widget.visite.members.length; i++) {
+      final member = widget.visite.members[i];
+      if (member.status == 1) {
+        Map<String, dynamic> memberScanHistoryData = {
+          "visite_id": widget.visite.id,
+          "user_id": widget.agent.id,
+          "scan_date": _today.toIso8601String(),
+          "scan_hour": _hours,
+          "badge": _mSwitchIndex[i] == 0 ? 1 : 0,
+          "motif": "Entrée",
+          "type_visiteur": 0,
+          "numero_badge": _mBadgeControllers[i].text.toUpperCase(),
+          "numero_gilet": _mGiletControllers[i].text.toUpperCase(),
+        };
+        membersScanHistoryData.add(memberScanHistoryData);
+      }
+    }
+    print('$visitData\n');
+    print('$scanHistoryData\n');
+    membersScanHistoryData.forEach((element) {
+      print('$element\n');
+    });
+    EasyLoading.dismiss();
 
     alert(
       ctxt: context,
       visite: widget.visite,
       confirm: () async {
-        // Functions.showLoadingSheet(ctxt: context);
-        EasyLoading.show(status: 'sauvegarde en cours...');
-        await Functions.upDateVisit(
-          data: visitData,
-          visiteId: widget.visite.id,
-        ).whenComplete(() async {
-          await RemoteService()
-              .postData(
-            endpoint: 'scanCounters',
-            postData: scanHistoryData,
-          )
-              .then((res) {
+        if (_pSwitchStatus == 1) {
+          EasyLoading.show(status: 'sauvegarde en cours...');
+          await Functions.upDateVisit(
+            data: visitData,
+            visiteId: widget.visite.id,
+          ).whenComplete(() {
             //visite.plaqueVehicule = cariDController.text;
+
+            _postMembersScanHistoryData(membersScanHistoryData)
+                .whenComplete(() {
+              membersScanHistoryData.clear();
+            });
 
             Future.delayed(const Duration(seconds: 2)).then(
               (_) {
@@ -504,10 +807,55 @@ class _FirstScanWidgetState extends State<FirstScanWidget> {
               },
             );
           });
-        });
+        } else {
+          // Functions.showLoadingSheet(ctxt: context);
+          EasyLoading.show(status: 'sauvegarde en cours...');
+          await Functions.upDateVisit(
+            data: visitData,
+            visiteId: widget.visite.id,
+          ).whenComplete(() async {
+            await RemoteService()
+                .postData(
+              endpoint: 'scanCounters',
+              postData: scanHistoryData,
+            )
+                .then((res) {
+              //visite.plaqueVehicule = cariDController.text;
+
+              _postMembersScanHistoryData(membersScanHistoryData)
+                  .whenComplete(() {
+                membersScanHistoryData.clear();
+              });
+
+              Future.delayed(const Duration(seconds: 2)).then(
+                (_) {
+                  widget.visite.isAlreadyScanned = true;
+                  widget.visite.numeroCni = _idCardController.text;
+                  EasyLoading.dismiss();
+                  Navigator.pop(context);
+                  Navigator.pop(context);
+                  Functions.showToast(
+                    msg: 'Scan sauvegardé !',
+                    gravity: ToastGravity.TOP,
+                  );
+                },
+              );
+            });
+          });
+        }
       },
       cancel: () => Navigator.pop(context),
     );
+  }
+
+  Future<void> _postMembersScanHistoryData(
+      List<Map<String, dynamic>> data) async {
+    for (int i = 0; i < data.length; i++) {
+      await RemoteService().postData(
+        endpoint: 'scanCounters',
+        postData: data[i],
+      );
+    }
   }
 
   Container _idCardTypeSelector() {

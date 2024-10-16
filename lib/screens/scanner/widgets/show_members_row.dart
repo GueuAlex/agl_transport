@@ -51,15 +51,33 @@ Widget showMemberRow(
                 Row(
                   children: [
                     Expanded(
-                        child: InfosColumn(
-                      label: 'N° de la pièce',
-                      widget: AppText.medium(member.idCard),
-                    )),
+                      child: InfosColumn(
+                        label: 'N° de la pièce',
+                        widget: AppText.medium(member.idCard),
+                      ),
+                    ),
                     Expanded(
-                        child: InfosColumn(
-                      label: 'type de pièce',
-                      widget: AppText.medium(member.typePiece),
-                    ))
+                      child: InfosColumn(
+                        label: 'type de pièce',
+                        widget: AppText.medium(member.typePiece),
+                      ),
+                    )
+                  ],
+                ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: InfosColumn(
+                        label: 'Badge',
+                        widget: AppText.medium(member.badge),
+                      ),
+                    ),
+                    Expanded(
+                      child: InfosColumn(
+                        label: 'Gilet',
+                        widget: AppText.medium(member.gilet),
+                      ),
+                    )
                   ],
                 )
               ],

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 
+import '../model/agent_model.dart';
 import '../model/agl_livraison_model.dart';
 import '../model/entreprise_model.dart';
 import '../model/livraison_model.dart';
@@ -10,6 +11,7 @@ import '../model/motif_model.dart';
 import '../model/qr_code_model.dart';
 import '../model/scan_history_model.dart';
 import '../model/site_model.dart';
+import '../model/vehicule_model.dart';
 import '../model/visite_model.dart';
 
 ///////////////// base uri//////////////
@@ -35,6 +37,36 @@ class RemoteService {
       List<MotifModel> motifs = motifModelFromJson(json);
       print('motif list : ${motifs.length}');
       return motifs;
+    }
+    return [];
+  }
+
+  Future<List<VehiculeModel>> getVehicules() async {
+    var uri = Uri.parse(testbaseUri + 'vehicules');
+    var response = await client.get(uri);
+    //print('my user Dans remote /////////////////////////// : ${response.body}');
+    //print('Dans remote////////////////////////////// : ${response.statusCode}');
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      var json = response.body;
+      print(response.body);
+      List<VehiculeModel> vehicule = vehiculeModelFromJson(json);
+      print('vehicule list : ${vehicule.length}');
+      return vehicule;
+    }
+    return [];
+  }
+
+  Future<List<AgentModel>> getAdmins() async {
+    var uri = Uri.parse(testbaseUri + 'users');
+    var response = await client.get(uri);
+    //print('my user Dans remote /////////////////////////// : ${response.body}');
+    //print('Dans remote////////////////////////////// : ${response.statusCode}');
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      var json = response.body;
+      print(response.body);
+      List<AgentModel> admins = agentModelListFromJson(json);
+      print('admins : ${admins.length}');
+      return admins;
     }
     return [];
   }

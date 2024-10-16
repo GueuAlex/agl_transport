@@ -7,11 +7,13 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get.dart';
+import 'package:scanner/bloc/piece_bloc/piece_bloc.dart';
 import 'package:scanner/screens/add_delivering/deli_verify.sucess.dart';
-import 'package:workmanager/workmanager.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'bloc/internet_bloc/internet_bloc.dart';
 import 'bloc/options_bloc/options_bloc.dart';
+import 'config/functions.dart';
 import 'dependency_injection.dart';
 import 'screens/add_delivering/add_deli_screen.dart';
 import 'screens/add_visite_screen/add_visite_screen.dart';
@@ -30,7 +32,7 @@ import 'screens/search_by_date/search_by_date_screen.dart';
 import 'screens/splash/splash_screen.dart';
 import 'screens/stats_creen/stats_screen.dart';
 import 'screens/verify_by_code/verify_by_code_screen.dart';
-
+/* 
 @pragma('vm:entry-point')
 void callbackDispatcher() {
   Workmanager().executeTask((taskName, inputData) {
@@ -43,7 +45,7 @@ void callbackDispatcher() {
     }
     return Future.value(true);
   });
-}
+} */
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -55,11 +57,18 @@ Future<void> main() async {
   }; */
   // Charger les variables d'environnement
   await dotenv.load(fileName: ".env");
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  bool isVisiteModule = await prefs.getBool('isVisiteModule') ?? false;
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-  await Workmanager().initialize(
+  /*  await Workmanager().initialize(
     callbackDispatcher,
     isInDebugMode: true,
-  );
+  ); */
+  if (isVisiteModule) {
+    Timer.periodic(Duration(minutes: 2), (timer) {
+      Functions.getVisites();
+    });
+  }
 
   runApp(
     MultiBlocProvider(
@@ -70,6 +79,9 @@ Future<void> main() async {
         BlocProvider<InternetBloc>(
           create: (context) => InternetBloc(),
         ),
+        BlocProvider(
+          create: (context) => PieceBloc(),
+        )
       ],
       child: const MyApp(),
     ),

@@ -9,9 +9,9 @@ import '../../../config/palette.dart';
 import '../../../widgets/all_sheet_header.dart';
 import '../../../widgets/custom_button.dart';
 import '../../draggable_menu.dart';
+import '../../emails/emails_service.dart';
 import '../../model/agent_model.dart';
 import '../../model/visite_model.dart';
-import '../../remote_service/remote_service.dart';
 import '../scanner/widgets/error_sheet_container.dart';
 import '../scanner/widgets/infos_column.dart';
 import '../scanner/widgets/sheet_container.dart';
@@ -150,7 +150,7 @@ class _VerifyByCodeSheetState extends State<VerifyByCodeSheet> {
                                       status: 'Vérification en cours',
                                     );
                                     // fetch data
-                                    var postData = {
+                                    /*  var postData = {
                                       "code_visite":
                                           '$prefix${_codeController.text}',
                                     };
@@ -167,8 +167,12 @@ class _VerifyByCodeSheetState extends State<VerifyByCodeSheet> {
                                         VisiteModel visite =
                                             visiteModelFromJson(
                                           response.body,
-                                        );
+                                        ); */
 
+                                    VisiteModel.getVisite(code: code)
+                                        .then((visite) async {
+                                      //EasyLoading.dismiss();
+                                      if (visite != null) {
                                         // print(visite);
 
                                         await player.play(
@@ -183,7 +187,13 @@ class _VerifyByCodeSheetState extends State<VerifyByCodeSheet> {
                                         );
                                         EasyLoading.dismiss();
                                       } else {
-                                        print('object');
+                                        sendErrorEmail(
+                                          subject:
+                                              'Erreur lors d\'une vérification',
+                                          title:
+                                              'Un code de visite à été utilisé pour une vérification mais aucune visite trouvée\n\n',
+                                          errorDetails: 'Code: $code',
+                                        );
                                         EasyLoading.dismiss();
                                         _error(size: size);
                                       }

@@ -1,6 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:scanner/config/functions.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'config/app_text.dart';
 import 'config/palette.dart';
@@ -26,8 +29,10 @@ class _DraggableMenuState extends State<DraggableMenu> {
   //
   late double screenHeight;
   bool isMaxHeight = false;
+  bool _appIsVisiteModule = true;
   @override
   void initState() {
+    _setIsVisiteModule();
     super.initState();
     _scrollController.addListener(() {
       // print(_scrollController.size);
@@ -37,6 +42,17 @@ class _DraggableMenuState extends State<DraggableMenu> {
         isMaxHeight = currentExtent >= maxExtent * 0.8;
       });
     });
+  }
+
+  void _setIsVisiteModule() async {
+    final prefs = await SharedPreferences.getInstance();
+    bool? resul = prefs.getBool('isVisiteModule');
+    //print(resul);
+    if (resul != null) {
+      setState(() {
+        _appIsVisiteModule = resul;
+      });
+    }
   }
 
   @override
@@ -119,6 +135,7 @@ class _DraggableMenuState extends State<DraggableMenu> {
                   Container(
                     width: double.infinity,
                     height: 290,
+                    //color: Colors.red,
                     child: GridView.builder(
                       padding: const EdgeInsets.all(10.0),
                       gridDelegate:
@@ -168,14 +185,18 @@ class _DraggableMenuState extends State<DraggableMenu> {
 
   GestureDetector _menuCard(
       BuildContext context, DraggableMenuModel item, String contextRouteName) {
+    //// Comparer l'état du module de l'item avec celui de l'application
+
+    bool isNotAllowRout = item.isVisiteModule != _appIsVisiteModule;
     return GestureDetector(
       onTap: () {
-        /*  if (item.route == "add_deli_screen") {
-          Functions.showBottomSheet(
-            ctxt: context,
-            widget: _formSheet(),
+        if (isNotAllowRout) {
+          Functions.showToast(
+            msg: 'Non autorisé',
+            gravity: ToastGravity.TOP,
           );
-        } else  */
+          return;
+        }
         if (contextRouteName == item.route) {
           _setDraggableToMinSize();
         } else {
@@ -183,13 +204,11 @@ class _DraggableMenuState extends State<DraggableMenu> {
             if (item.title == 'En cours') {
               Navigator.of(context).pushNamed(
                 item.route,
-                // ModalRoute.withName('/'),
                 arguments: true,
               );
             } else {
               Navigator.of(context).pushNamed(
                 item.route,
-                // ModalRoute.withName('/delivering_screen'),
                 arguments: false,
               );
             }
@@ -203,19 +222,20 @@ class _DraggableMenuState extends State<DraggableMenu> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 10),
         decoration: BoxDecoration(
-          color: item.color.withOpacity(0.06),
+          color: isNotAllowRout
+              ? Colors.grey.withOpacity(0.3)
+              : item.color.withOpacity(0.06),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Utilisez une image ou une icône ici
             SvgPicture.asset(
               item.icon,
               height: 20,
               colorFilter: ColorFilter.mode(
-                item.color,
+                isNotAllowRout ? Colors.grey : item.color,
                 BlendMode.srcIn,
               ),
             ),
@@ -223,12 +243,9 @@ class _DraggableMenuState extends State<DraggableMenu> {
             Text(
               item.title,
               style: TextStyle(
-                color: const Color.fromARGB(
-                  255,
-                  65,
-                  65,
-                  65,
-                ),
+                color: isNotAllowRout
+                    ? Colors.grey
+                    : const Color.fromARGB(255, 65, 65, 65),
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -236,12 +253,9 @@ class _DraggableMenuState extends State<DraggableMenu> {
             Text(
               item.subTitle,
               style: TextStyle(
-                color: const Color.fromARGB(
-                  255,
-                  65,
-                  65,
-                  65,
-                ),
+                color: isNotAllowRout
+                    ? Colors.grey
+                    : const Color.fromARGB(255, 65, 65, 65),
                 fontSize: 12,
               ),
               textAlign: TextAlign.left,
@@ -251,92 +265,6 @@ class _DraggableMenuState extends State<DraggableMenu> {
       ),
     );
   }
-
-  // form sheet
-/* 
-  Container _formSheet() => Container(
-        width: double.infinity,
-        height: 270 + MediaQuery.of(context).viewInsets.bottom,
-        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(5),
-            topRight: Radius.circular(5),
-          ),
-        ),
-        child: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(),
-                Container(
-                  width: 35,
-                  height: 35,
-                  decoration: BoxDecoration(
-                    color: Palette.separatorColor,
-                    shape: BoxShape.circle,
-                  ),
-                  child: InkWell(
-                    onTap: () => Navigator.pop(context),
-                    child: Icon(
-                      Icons.close,
-                      size: 16,
-                      color: Color.fromARGB(255, 124, 124, 124),
-                    ),
-                  ),
-                )
-              ],
-            ),
-            //
-            const SizedBox(height: 25),
-            Expanded(
-              child: Column(
-                children: [
-                  AppText.small(
-                    'Veuillez renseigner le bon de commande pour  cette livraison.',
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 15),
-                  InfosColumn(
-                    opacity: 0.12,
-                    label: 'Nom de l\'entreprise',
-                    widget: Expanded(
-                      child: Functions.getTextField(
-                        controller: _bonCommandeController,
-                      ),
-                    ),
-                  )
-                ],
-              ),
-            ),
-            const SizedBox(height: 15),
-            SafeArea(
-              child: CustomButton(
-                  color: Palette.primaryColor,
-                  width: double.infinity,
-                  height: 35,
-                  radius: 5,
-                  text: 'Continuer',
-                  onPress: () {
-                    if (_entrepriseNameControler.text.trim().isEmpty) {
-                      Functions.showToast(
-                        msg: 'Veuillez renseigner le nom de l\'entreprise',
-                        gravity: ToastGravity.TOP,
-                      );
-                      return;
-                    }
-                    Navigator.pushNamed(
-                      context,
-                      AddDeliScree.routeName,
-                      arguments: _entrepriseNameControler.text,
-                    );
-                  }),
-            ),
-          ],
-        ),
-      ); */
 
   Column _minChild() {
     return Column(

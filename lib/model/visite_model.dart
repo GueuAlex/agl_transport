@@ -3,6 +3,9 @@
 //     final visiteModel = visiteModelFromJson(jsonString);
 import 'dart:convert';
 
+import 'package:get/get_utils/get_utils.dart';
+import 'package:scanner/model/scan_history_model.dart';
+
 import '../remote_service/remote_service.dart';
 import 'localisation_model.dart';
 import 'members_model.dart';
@@ -45,6 +48,7 @@ class VisiteModel {
   LocalisationModel localisation;
   MotifModel motif;
   List<Member> members;
+  List<ScanHistoryModel> scanHistories;
 
   VisiteModel({
     required this.id,
@@ -66,6 +70,7 @@ class VisiteModel {
     required this.localisation,
     required this.motif,
     this.members = const [],
+    this.scanHistories = const [],
     required this.heureFinVisite,
     required this.heureVisite,
     required this.typeVisiteur,
@@ -94,6 +99,11 @@ class VisiteModel {
         motif: MotifModel.fromJson(json["motif"]),
         members: List<Member>.from(
           json["membre_visites"].map((x) => Member.fromJson(x)),
+        ),
+        scanHistories: List<ScanHistoryModel>.from(
+          json['scan_counters'].map(
+            (x) => ScanHistoryModel.fromJson(x),
+          ),
         ),
         heureFinVisite: json["heure_fin_visite"],
         heureVisite: json["heure_visite"],
@@ -127,5 +137,12 @@ class VisiteModel {
   static Future<List<VisiteModel>> get visites async {
     final List<VisiteModel> visiteData = await RemoteService().getVisites();
     return visiteData;
+  }
+
+  static List<VisiteModel> globalVisites = [];
+
+  static Future<VisiteModel?> getVisite({required String code}) async {
+    return globalVisites.firstWhereOrNull(
+        (v) => v.codeVisite.toLowerCase() == code.toLowerCase());
   }
 }

@@ -28,8 +28,8 @@ class _SheetContainerState extends State<SheetContainer> {
       backgroundColor: Colors.transparent,
       resizeToAvoidBottomInset: true,
       body: Container(
-        margin: EdgeInsets.only(top: size.height - (size.height / 1.1)),
-        height: size.height / 1.1,
+        //margin: EdgeInsets.only(top: size.height - (size.height / 1.2)),
+        height: size.height,
         width: double.infinity,
         decoration: const BoxDecoration(
           color: Colors.white,

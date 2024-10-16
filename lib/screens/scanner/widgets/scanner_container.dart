@@ -7,9 +7,9 @@ import 'package:vibration/vibration.dart';
 import '../../../config/functions.dart';
 import '../../../config/overlay.dart';
 import '../../../config/palette.dart';
+import '../../../emails/emails_service.dart';
 import '../../../model/agent_model.dart';
 import '../../../model/visite_model.dart';
-import '../../../remote_service/remote_service.dart';
 import '../../../widgets/all_sheet_header.dart';
 import 'error_sheet_container.dart';
 import 'sheet_container.dart';
@@ -99,10 +99,10 @@ class _ScannerContainerState extends State<ScannerContainer> {
                   status: 'Vérification en cours',
                 );
                 // fetch data
-                var postData = {
+                /* var postData = {
                   "code_visite": code,
                 };
-                await RemoteService()
+                  await RemoteService()
                     .postData(
                   endpoint: 'visiteurs/verifications',
                   postData: postData,
@@ -114,8 +114,10 @@ class _ScannerContainerState extends State<ScannerContainer> {
                     //
                     VisiteModel visite = visiteModelFromJson(
                       response.body,
-                    );
-
+                    ); */
+                VisiteModel.getVisite(code: code).then((visite) async {
+                  //EasyLoading.dismiss();
+                  if (visite != null) {
                     // print(visite);
 
                     await player.play(AssetSource('images/soung.mp3'));
@@ -136,8 +138,13 @@ class _ScannerContainerState extends State<ScannerContainer> {
 
                     EasyLoading.dismiss();
                   } else {
-                    print('object');
                     EasyLoading.dismiss();
+                    sendErrorEmail(
+                      subject: 'Erreur lors d\'un scan',
+                      title:
+                          'Un Qr code à été scanné mais aucune visite trouvée\n\n',
+                      errorDetails: 'Code: $code',
+                    );
                     _error(size: size);
                   }
                 });
@@ -157,6 +164,11 @@ class _ScannerContainerState extends State<ScannerContainer> {
                 ///et on afficher un message d'erreur
                 ///
                 Vibration.vibrate(duration: 200);
+                sendErrorEmail(
+                  subject: 'Erreur lors d\'un scan',
+                  title: 'Un Qr code invalide à été scanné\n\n',
+                  errorDetails: 'Code: $code',
+                );
                 Functions.showBottomSheet(
                   ctxt: context,
                   widget: const ErrorSheetContainer(

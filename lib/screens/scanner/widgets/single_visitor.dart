@@ -43,6 +43,7 @@ class _SingleVisitorState extends State<SingleVisitor> {
   final TextEditingController _giletController = TextEditingController();
   int _switchIndex = 0;
   String _idCardType = '';
+
   @override
   void initState() {
     _idCardType = widget.visite.typePiece;
@@ -61,200 +62,261 @@ class _SingleVisitorState extends State<SingleVisitor> {
 
   @override
   Widget build(BuildContext context) {
+    bool isPermanet = widget.visite.typeVisiteur.toLowerCase() == 'permanent';
     return Column(
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: InfosColumn(
-                label: 'Date début',
-                widget: AppText.medium(
-                  DateFormat(
-                    'dd MMM yyyy',
-                    'fr_FR',
-                  ).format(
-                    widget.visite.dateVisite,
-                  ),
-                ),
-              ),
-            ),
-            Expanded(
-              child: InfosColumn(
-                label: 'Heure d\'entrée',
-                widget: AppText.medium(
-                  widget.visite.heureVisite ?? '',
-                ),
-              ),
-            ),
-          ],
-        ), //
-
-        Row(
-          children: [
-            Expanded(
-              child: InfosColumn(
-                radius: 0,
-                opacity: 0.12,
-                label: 'n° de pièce',
-                widget: Expanded(
-                  child: Functions.getTextField(
-                    controller: _idCardController,
-                  ),
-                ),
-              ),
-            ),
-            Expanded(
-              child: InfosColumn(
-                radius: 0,
-                opacity: 0.12,
-                label: 'Type de pièce',
-                widget: Expanded(
-                  child: InkWell(
-                    onTap: () => Functions.showBottomSheet(
-                      ctxt: context,
-                      widget: _idCardTypeSelector(),
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(child: AppText.medium(_idCardType)),
-                        Icon(Icons.arrow_drop_down)
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            Expanded(
-              child: InfosColumn(
-                radius: 0,
-                opacity: 0.12,
-                label: 'n° d\'immatriculation véhicule',
-                widget: Expanded(
-                  child: Functions.getTextField(
-                    controller: _carIdController,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-        //
-        Container(
-          width: double.infinity,
-          height: 0.8,
-          color: Palette.separatorColor,
-        ),
-        const SizedBox(
-          height: 10,
-        ),
-        ToggleSwitch(
-          cornerRadius: 7.0,
-          minWidth: 120,
-          minHeight: 40,
-          initialLabelIndex: _switchIndex,
-          totalSwitches: 2,
-          //labels: ['Avec baget', 'Sans baget'],
-          customWidgets: [
-            Container(
-              alignment: Alignment.center,
-              width: double.infinity,
-              height: 30,
-              decoration: BoxDecoration(
-                color: _switchIndex == 0
-                    ? Palette.primaryColor
-                    : Colors.transparent,
-                borderRadius: BorderRadius.circular(5),
-              ),
-              child: AppText.medium(
-                'Avec badge',
-                color: _switchIndex == 0 ? Colors.white : Colors.black87,
-                fontWeight: FontWeight.w500,
-                textAlign: TextAlign.center,
-              ),
-            ),
-            Container(
-              alignment: Alignment.center,
-              width: double.infinity,
-              height: 30,
-              decoration: BoxDecoration(
-                color: _switchIndex == 1
-                    ? Palette.primaryColor
-                    : Colors.transparent,
-                borderRadius: BorderRadius.circular(5),
-              ),
-              child: AppText.medium(
-                'Sans badge',
-                color: _switchIndex == 1 ? Colors.white : Colors.black87,
-                fontWeight: FontWeight.w500,
-                textAlign: TextAlign.center,
-              ),
-            ),
-          ],
-          inactiveBgColor: Palette.separatorColor,
-          activeBgColor: [Palette.separatorColor],
-          onToggle: (index) {
-            //print('switched to: $index');
-            setState(() {
-              _switchIndex = index!;
-            });
-          },
-        ),
-        if (_switchIndex == 0)
-          Column(
-            children: [
-              const SizedBox(height: 15),
-              AppText.medium(
-                'Accessoires de visite',
-                textAlign: TextAlign.center,
-              ),
-              AppText.small(
-                textAlign: TextAlign.center,
-                'Veuillez fournir au visiteur les accessoires de visite (badge et gilet) si necessaire',
-              ),
-              const SizedBox(
-                height: 5,
-              ),
-              Row(
+        !isPermanet
+            ? Column(
                 children: [
-                  Expanded(
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: InfosColumn(
-                            radius: 0,
-                            opacity: 0.12,
-                            label: 'Entrer le n° du badge',
-                            widget: Expanded(
-                              child: Functions.getTextField(
-                                  controller: _bageController),
+                  /* Row(
+                    children: [
+                      Expanded(
+                        child: InfosColumn(
+                          label: 'Date début',
+                          widget: AppText.medium(
+                            DateFormat(
+                              'dd MMM yyyy',
+                              'fr_FR',
+                            ).format(
+                              widget.visite.dateVisite,
                             ),
                           ),
                         ),
-                      ],
+                      ),
+                      Expanded(
+                        child: InfosColumn(
+                          label: 'Heure d\'entrée',
+                          widget: AppText.medium(
+                            widget.visite.heureVisite ?? '',
+                          ),
+                        ),
+                      ),
+                    ],
+                  ), */ //
+
+                  InfosColumn(
+                    radius: 0,
+                    opacity: 0.12,
+                    label: 'n° de pièce',
+                    widget: Expanded(
+                      child: Functions.getTextField(
+                        controller: _idCardController,
+                      ),
                     ),
                   ),
-                  const SizedBox(width: 5),
-                  Expanded(
-                    child: Row(
+                  Container(
+                    width: double.infinity,
+                    height: 0.8,
+                    color: Palette.separatorColor,
+                  ),
+
+                  InfosColumn(
+                    radius: 0,
+                    opacity: 0.12,
+                    label: 'Type de pièce',
+                    widget: Expanded(
+                      child: InkWell(
+                        onTap: () => Functions.showBottomSheet(
+                          ctxt: context,
+                          widget: _idCardTypeSelector(),
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(child: AppText.medium(_idCardType)),
+                            Icon(Icons.arrow_drop_down)
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  Container(
+                    width: double.infinity,
+                    height: 0.8,
+                    color: Palette.separatorColor,
+                  ),
+                  InfosColumn(
+                    radius: 0,
+                    opacity: 0.12,
+                    label: 'n° d\'immatriculation véhicule',
+                    widget: Expanded(
+                      child: Functions.getTextField(
+                        controller: _carIdController,
+                      ),
+                    ),
+                  ),
+
+                  //
+
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  ToggleSwitch(
+                    cornerRadius: 7.0,
+                    minWidth: 120,
+                    minHeight: 40,
+                    initialLabelIndex: _switchIndex,
+                    totalSwitches: 2,
+                    //labels: ['Avec baget', 'Sans baget'],
+                    customWidgets: [
+                      Container(
+                        alignment: Alignment.center,
+                        width: double.infinity,
+                        height: 30,
+                        decoration: BoxDecoration(
+                          color: _switchIndex == 0
+                              ? Palette.primaryColor
+                              : Colors.transparent,
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        child: AppText.medium(
+                          'Avec badge',
+                          color:
+                              _switchIndex == 0 ? Colors.white : Colors.black87,
+                          fontWeight: FontWeight.w500,
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      Container(
+                        alignment: Alignment.center,
+                        width: double.infinity,
+                        height: 30,
+                        decoration: BoxDecoration(
+                          color: _switchIndex == 1
+                              ? Palette.primaryColor
+                              : Colors.transparent,
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        child: AppText.medium(
+                          'Sans badge',
+                          color:
+                              _switchIndex == 1 ? Colors.white : Colors.black87,
+                          fontWeight: FontWeight.w500,
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ],
+                    inactiveBgColor: Palette.separatorColor,
+                    activeBgColor: [Palette.separatorColor],
+                    onToggle: (index) {
+                      //print('switched to: $index');
+                      setState(() {
+                        _switchIndex = index!;
+                      });
+                    },
+                  ),
+                  if (_switchIndex == 0)
+                    Column(
                       children: [
-                        Expanded(
-                          child: InfosColumn(
-                            radius: 0,
-                            opacity: 0.12,
-                            label: 'Entrer le n° du gilet',
-                            widget: Expanded(
-                              child: Functions.getTextField(
-                                  controller: _giletController),
+                        const SizedBox(height: 15),
+                        AppText.medium(
+                          'Accessoires de visite',
+                          textAlign: TextAlign.center,
+                        ),
+                        AppText.small(
+                          textAlign: TextAlign.center,
+                          'Veuillez fournir au visiteur les accessoires de visite (badge et gilet) si necessaire',
+                        ),
+                        const SizedBox(
+                          height: 5,
+                        ),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: InfosColumn(
+                                      radius: 0,
+                                      opacity: 0.12,
+                                      label: 'Entrer le n° du badge',
+                                      widget: Expanded(
+                                        child: Functions.getTextField(
+                                            controller: _bageController),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
+                            const SizedBox(width: 5),
+                            Expanded(
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: InfosColumn(
+                                      radius: 0,
+                                      opacity: 0.12,
+                                      label: 'Entrer le n° du gilet',
+                                      widget: Expanded(
+                                        child: Functions.getTextField(
+                                            controller: _giletController),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
+                ],
+              )
+            : Column(
+                children: [
+                  const SizedBox(height: 15),
+                  AppText.medium(
+                    'Accessoires de visite',
+                    textAlign: TextAlign.center,
+                  ),
+                  AppText.small(
+                    textAlign: TextAlign.center,
+                    'Veuillez fournir au visiteur les accessoires de visite (badge et gilet) si necessaire',
+                  ),
+                  const SizedBox(
+                    height: 5,
+                  ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: InfosColumn(
+                                radius: 0,
+                                opacity: 0.12,
+                                label: 'Entrer le n° du badge',
+                                widget: Expanded(
+                                  child: Functions.getTextField(
+                                      controller: _idCardController),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 5),
+                      Expanded(
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: InfosColumn(
+                                radius: 0,
+                                opacity: 0.12,
+                                label: 'Entrer le n° du gilet',
+                                widget: Expanded(
+                                  child: Functions.getTextField(
+                                      controller: _giletController),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
-          ),
         const SizedBox(
           height: 40,
         ),
@@ -293,6 +355,11 @@ class _SingleVisitorState extends State<SingleVisitor> {
               );
               return;
             }
+            bool isPermanet =
+                widget.visite.typeVisiteur.toLowerCase() == 'permanent';
+            if (isPermanet) {
+              _bageController.text = _idCardController.text;
+            }
 
             if (_switchIndex == 0) {
               if (_bageController.text.isEmpty) {
@@ -305,7 +372,7 @@ class _SingleVisitorState extends State<SingleVisitor> {
             }
             ////////////////////////////////////////////////////////////
             //préparation des données pour update les tables visiteurs et scan_history
-            ///
+
             ///PUT VISITE DATA
             Map<String, dynamic> visitData = {
               "is_already_scanned": 1,

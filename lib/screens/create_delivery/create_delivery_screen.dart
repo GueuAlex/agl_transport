@@ -1,20 +1,31 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
+import 'package:scanner/bloc/piece_bloc/piece_bloc.dart';
+import 'package:scanner/bloc/piece_bloc/piece_state.dart';
 import 'package:scanner/local_service/local_service.dart';
 import 'package:scanner/model/DeviceModel.dart';
+import 'package:scanner/model/vehicule_model.dart';
+import 'package:scanner/widgets/sheet_closer.dart';
 
+import '../../bloc/piece_bloc/piece_event.dart';
 import '../../config/app_text.dart';
 import '../../config/functions.dart';
 import '../../config/palette.dart';
 import '../../draggable_menu.dart';
+import '../../emails/emails_service.dart';
 import '../../model/agent_model.dart';
+import '../../model/logistic_agent_model.dart';
 import '../../remote_service/remote_service.dart';
 import '../../widgets/all_sheet_header.dart';
 import '../../widgets/custom_button.dart';
+import '../../widgets/text_middle.dart';
 import '../scanner/widgets/infos_column.dart';
 import 'delivery.sucess.dart';
+import 'widget/logistic_member.dart';
 
 class CreateDeliveryScreen extends StatefulWidget {
   static String routeName = 'CreateDeliveryScreen';
@@ -45,6 +56,13 @@ class _CreateDeliveryScreenState extends State<CreateDeliveryScreen> {
   final _marqueController = TextEditingController();
   final _pieceValidController = TextEditingController();
 
+  ///
+  final _logisticAgentFirstName = TextEditingController();
+  final _logisticAgentLastName = TextEditingController();
+  final _logisticAgentIdCard = TextEditingController();
+/*   final _logisticAgentIdCardType = TextEditingController();
+  final _logisticAgentIdCardValidity = TextEditingController(); */
+
   String? _containerState = null;
   String? _containerHeight = null;
   String _mouvement = 'Entrée';
@@ -53,6 +71,45 @@ class _CreateDeliveryScreenState extends State<CreateDeliveryScreen> {
   String _idCardType = 'CNI';
   DateTime _startDate = DateTime.now();
   bool _isWithTracteur = true;
+
+  List<LogisticAgent> _logisticAgents = [];
+  VehiculeModel? _selectedVehicule;
+  // type de piece pour les agents logistique.
+  String _selectedL = 'CNI';
+
+  Future<List<VehiculeModel>> _getVehicules() async {
+    final v = await RemoteService().getVehicules();
+    //print(motifs);
+    setState(() {
+      _selectedVehicule = v[0];
+    });
+    return v;
+  }
+
+  @override
+  void dispose() {
+    _entrepriseController.dispose();
+    _nameController.dispose();
+    _prenomsController.dispose();
+    _idCardController.dispose();
+    _phoneController.dispose();
+    _emailController.dispose();
+    _numtracteurController.dispose();
+    _numConteneurController.dispose();
+    _numremorqueController.dispose();
+    _commentaireController.dispose();
+    _badgeController.dispose();
+    _designationController.dispose();
+    _docRefController.dispose();
+    _numPlombController.dispose();
+    _typeEnginController.dispose();
+    _marqueController.dispose();
+    _pieceValidController.dispose();
+    _logisticAgentFirstName.dispose();
+    _logisticAgentLastName.dispose();
+    _logisticAgentIdCard.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -184,7 +241,12 @@ class _CreateDeliveryScreenState extends State<CreateDeliveryScreen> {
                         gravity: ToastGravity.TOP);
                     return;
                   }
-
+                  _pageController.nextPage(
+                    duration: Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                  );
+                }
+                if (activeIndex == 2) {
                   Functions.showBottomSheet(
                     ctxt: context,
                     widget: _recapSheet(),
@@ -203,7 +265,7 @@ class _CreateDeliveryScreenState extends State<CreateDeliveryScreen> {
       padding: const EdgeInsets.all(16.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: List.generate(2, (index) {
+        children: List.generate(3, (index) {
           return Container(
             width: index <= activeIndex ? 30 : 15,
             margin: const EdgeInsets.symmetric(horizontal: 4.0),
@@ -233,13 +295,54 @@ class _CreateDeliveryScreenState extends State<CreateDeliveryScreen> {
         children: [
           _deliGeneraleInfos(),
           _deliBoyInfos(),
-          /* const SizedBox(
-            height: 150,
-          ), */
+          _logisticMembers(),
         ],
       ),
     );
   }
+
+  SingleChildScrollView _logisticMembers() => SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: AppText.large(
+                    'Agents logistiques',
+                    textAlign: TextAlign.start,
+                  ),
+                ),
+                InkWell(
+                  onTap: () => Functions.showBottomSheet(
+                    ctxt: context,
+                    widget: _addLogisticMember(changeState: () {
+                      setState(() {});
+                    }),
+                  ),
+                  child: Container(
+                    padding: const EdgeInsets.all(3.5),
+                    decoration: BoxDecoration(
+                      color: Palette.primaryColor,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      CupertinoIcons.plus,
+                      size: 16,
+                      color: Colors.white,
+                    ),
+                  ),
+                )
+              ],
+            ),
+            AppText.small(
+              'Veuillez renseigner les informations de toute personne accompagnant le chauffeur',
+            ),
+            const SizedBox(height: 15),
+            LogisticMember(logisticMembers: _logisticAgents),
+          ],
+        ),
+      );
 
   SingleChildScrollView _deliBoyInfos() => SingleChildScrollView(
         child: Column(
@@ -449,22 +552,6 @@ class _CreateDeliveryScreenState extends State<CreateDeliveryScreen> {
                         )
                       ],
                     ),
-                    //const SizedBox(height: 10),
-                    /*  CustomButton(
-                      color: Palette.primaryColor.withOpacity(0.06),
-                      textColor: Palette.primaryColor,
-                      width: double.infinity,
-                      height: 35,
-                      radius: 5,
-                      text: 'Changer la date',
-                      // onPress: () => _pickDateRange(context),
-                      onPress: () => Functions.showToast(
-                        msg:
-                            'Veuillez contacter votre responsable pour la création d\'une livraison planifiée',
-                        gravity: ToastGravity.TOP,
-                      ),
-                    ), */
-                    // const SizedBox(height: 10),
                   ],
                 ),
               ),
@@ -511,8 +598,19 @@ class _CreateDeliveryScreenState extends State<CreateDeliveryScreen> {
                             opacity: 0.12,
                             label: "Immatriculation ou n° du tracteur",
                             widget: Expanded(
-                              child: Functions.getTextField(
-                                  controller: _numtracteurController),
+                              child: InkWell(
+                                  onTap: () => Functions.showBottomSheet(
+                                        ctxt: context,
+                                        widget: _vehiculeSelector(),
+                                      ),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                          child: AppText.medium(
+                                              _numtracteurController.text)),
+                                      Icon(Icons.arrow_drop_down),
+                                    ],
+                                  )),
                             ),
                           ),
                         )
@@ -759,23 +857,10 @@ class _CreateDeliveryScreenState extends State<CreateDeliveryScreen> {
                 ),
               ),
             ),
+            const SizedBox(height: 50),
           ],
         ),
       );
-
-  /*  void _pickDateRange(BuildContext context) async {
-    final dateRange = await showCustomDateRangePicker(context);
-    if (dateRange != null) {
-      /* print("Start Date: ${dateRange['start']}");
-      print("End Date: ${dateRange['end']}"); */
-      setState(() {
-        _startDate = dateRange['start']!;
-        _endDate = dateRange['end']!;
-      });
-    } else {
-      print("No date range selected");
-    }
-  } */
 
   Widget _cardContainer({required Widget child}) {
     return Container(
@@ -907,6 +992,8 @@ class _CreateDeliveryScreenState extends State<CreateDeliveryScreen> {
                             label: 'Validité de la pièce (jj/mm/aaaa)',
                             widget: Expanded(
                               child: AppText.medium(
+                                maxLine: 1,
+                                textOverflow: TextOverflow.ellipsis,
                                 _pieceValidController.text,
                               ),
                             ),
@@ -1091,6 +1178,18 @@ class _CreateDeliveryScreenState extends State<CreateDeliveryScreen> {
                         )
                       ],
                     ),
+                    if (_logisticAgents.isNotEmpty)
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 15),
+                          AppText.medium('Membres du convoyage'),
+                          LogisticMember(
+                            logisticMembers: _logisticAgents,
+                            shwoTrash: false,
+                          ),
+                        ],
+                      ),
                     InfosColumn(
                       label: 'Note (observation)',
                       widget: Expanded(
@@ -1139,13 +1238,121 @@ class _CreateDeliveryScreenState extends State<CreateDeliveryScreen> {
                     },
                     title: AppText.medium('Confirmation'),
                     content: AppText.small(
-                      'Veuillez confirmer l\'enregistrement de cette ${_mouvement}',
+                      'Veuillez confirmer l\'enregistrement de cette ${_mouvement.toLowerCase()}',
                     ),
                   );
                 },
               ),
             )
           ],
+        ),
+      );
+
+  Container _vehiculeSelector() => Container(
+        height: MediaQuery.of(context).size.height * 0.9,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(5),
+            topRight: Radius.circular(5),
+          ),
+        ),
+        child: FutureBuilder(
+          future: _getVehicules(),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              return Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 10),
+                    child: Row(
+                      children: [
+                        Expanded(child: Container()),
+                        Expanded(child: AppText.medium('Véhicule')),
+                        SheetCloser(paddingV: 0),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 15, vertical: 10),
+                    child: AppText.small(
+                      'Veuillez saisir ou sélectionner le numéro d\'immatriculation ou le numéro du tracteur',
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 15),
+                    child: InfosColumn(
+                      opacity: 0.12,
+                      label: 'Immatriculation ou n° du tracteur',
+                      widget: Expanded(
+                        child: Functions.getTextField(
+                          controller: _numtracteurController,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 65,
+                      vertical: 10,
+                    ),
+                    child: textMidleLine(text: 'ou'),
+                  ),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: snapshot.data!.length,
+                      itemBuilder: (context, index) {
+                        return ListTile(
+                          title:
+                              Text(snapshot.data![index].numeroImmatriculation),
+                          selected:
+                              _selectedVehicule!.id == snapshot.data![index].id,
+                          selectedColor: Palette.primaryColor,
+                          onTap: () {
+                            _setIfons(v: snapshot.data![index]);
+                            setState(() {
+                              _selectedVehicule = snapshot.data![index];
+                            });
+                            Navigator.pop(context);
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                  SafeArea(
+                    top: false,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 15,
+                        vertical: 10,
+                      ),
+                      child: CustomButton(
+                        color: Palette.primaryColor,
+                        width: double.infinity,
+                        height: 35,
+                        radius: 5,
+                        text: 'Continuer',
+                        onPress: () {
+                          setState(() {
+                            ///_selectedVehicule = _selectedVehicule;
+                          });
+                          Navigator.pop(context);
+                        },
+                      ),
+                    ),
+                  )
+                ],
+              );
+            } else {
+              return const Center(
+                child: CircularProgressIndicator.adaptive(),
+              );
+            }
+          },
         ),
       );
 
@@ -1185,11 +1392,13 @@ class _CreateDeliveryScreenState extends State<CreateDeliveryScreen> {
       "heure": hours,
       "observation": _commentaireController.text,
       "date_entree": DateTime.now().toIso8601String(),
-      "heure_entree": hours
+      "heure_entree": hours,
+      "membre_livraisons": _logisticAgents.map((e) => e.toJson()).toList(),
     };
     print(postData);
     //return;
     /* print(postData);
+    sendErrorEmail('ceci est un test ');
     EasyLoading.dismiss();
     return; */
     Navigator.pop(context);
@@ -1203,6 +1412,7 @@ class _CreateDeliveryScreenState extends State<CreateDeliveryScreen> {
       print(response.statusCode);
       print(response.body);
       if (response.statusCode == 200 || response.statusCode == 201) {
+        _logisticAgents.clear();
         Functions.showToast(
           msg: 'Livraison enregistrée avec succès',
           gravity: ToastGravity.TOP,
@@ -1229,6 +1439,13 @@ class _CreateDeliveryScreenState extends State<CreateDeliveryScreen> {
           arguments: _motif,
         );
       } else {
+        sendErrorEmail(
+          subject: 'Erreur d\'enregistrement de livraison',
+          title:
+              'Une erreur s\'est produite lors de l\'enregistrement d\'une livraison',
+          errorDetails:
+              '\n\nPosted data: $postData\n\nStatus code: ${response.statusCode}\n\nResponse body: ${response.body}',
+        );
         Functions.showToast(
           msg: 'Une erreur s\'est produite',
           gravity: ToastGravity.TOP,
@@ -1448,7 +1665,7 @@ class _CreateDeliveryScreenState extends State<CreateDeliveryScreen> {
     );
   }
 
-  _mouvementSelector() {
+  /* _mouvementSelector() {
     List<String> _mouvements = [
       "Entrée",
       "Sortie",
@@ -1508,7 +1725,7 @@ class _CreateDeliveryScreenState extends State<CreateDeliveryScreen> {
       ),
     );
   }
-
+ */
   _formatVehiculeSelector() {
     List<Map<String, dynamic>> _formatVehicules = [
       {
@@ -1652,5 +1869,181 @@ class _CreateDeliveryScreenState extends State<CreateDeliveryScreen> {
         ],
       ),
     );
+  }
+
+  _addLogisticMember({required VoidCallback changeState}) {
+    List<String> _pieces = [
+      "CNI",
+      "Permis",
+      "Passeport",
+      "Attestation",
+    ];
+    return BlocBuilder<PieceBloc, PieceState>(builder: (context, state) {
+      return Container(
+        width: double.infinity,
+        height: MediaQuery.of(context).size.height * 0.7,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(5),
+            topRight: Radius.circular(5),
+          ),
+        ),
+        child: Column(
+          children: [
+            SheetCloser(),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: InfosColumn(
+                            opacity: 0.12,
+                            label: 'Nom',
+                            widget: Expanded(
+                              child: Functions.getTextField(
+                                controller: _logisticAgentFirstName,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 5),
+                        Expanded(
+                          child: InfosColumn(
+                            opacity: 0.12,
+                            label: 'Prénoms',
+                            widget: Expanded(
+                              child: Functions.getTextField(
+                                controller: _logisticAgentLastName,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 5),
+                    InfosColumn(
+                      opacity: 0.12,
+                      label: 'N° de pièce',
+                      widget: Expanded(
+                        child: Functions.getTextField(
+                          controller: _logisticAgentIdCard,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 15),
+                    AppText.medium('Type de la pièce'),
+                    AppText.small(
+                      'Veuillez selectionner le type de la pièce fournie',
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      children: _pieces.map((type) {
+                        bool isSelected = type == _selectedL;
+                        return InkWell(
+                          onTap: () {
+                            context.read<PieceBloc>().add(
+                                  SelectPieceOption(type),
+                                );
+                            setState(() {
+                              _selectedL = type;
+                            });
+                            // print(_selectedL);
+                            // print(_searcheOptions);
+                          },
+                          child: Container(
+                            margin: const EdgeInsets.symmetric(
+                                horizontal: 5, vertical: 5),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? Palette.primaryColor
+                                  : Palette.separatorColor,
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                            child: Text(
+                              type,
+                              style: TextStyle(
+                                color: isSelected ? Colors.white : null,
+                              ),
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 25),
+                    CustomButton(
+                      color: Palette.primaryColor,
+                      width: double.infinity,
+                      height: 35,
+                      radius: 5,
+                      text: 'Ajouter l\'agent',
+                      onPress: () {
+                        if (_logisticAgentFirstName.text.isEmpty) {
+                          Functions.showToast(
+                            msg: 'Le nom est obligatoire',
+                            gravity: ToastGravity.TOP,
+                          );
+                          return;
+                        }
+                        if (_logisticAgentLastName.text.isEmpty) {
+                          Functions.showToast(
+                            msg: 'Le nom est obligatoire',
+                            gravity: ToastGravity.TOP,
+                          );
+                          return;
+                        }
+                        if (_logisticAgentIdCard.text.isEmpty) {
+                          Functions.showToast(
+                            msg: 'Le numéro de pièce est obligatoire',
+                            gravity: ToastGravity.TOP,
+                          );
+                          return;
+                        }
+                        final _logisticAgent = LogisticAgent(
+                          id: 0,
+                          nom: _logisticAgentFirstName.text,
+                          prenoms: _logisticAgentLastName.text,
+                          numeroCni: _logisticAgentIdCard.text,
+                          typePiece: _selectedL,
+                        );
+                        _logisticAgents.add(_logisticAgent);
+                        _logisticAgentFirstName.clear();
+                        _logisticAgentLastName.clear();
+                        _logisticAgentIdCard.clear();
+                        _selectedL = 'CNI';
+                        context.read<PieceBloc>().add(SelectPieceOption('CNI'));
+                        setState(() {});
+                        Navigator.pop(context);
+                      },
+                    )
+                  ],
+                ),
+              ),
+            )
+          ],
+        ),
+      );
+    });
+  }
+
+  void _setIfons({required VehiculeModel v}) {
+    setState(() {
+      _numtracteurController.text = v.numeroImmatriculation;
+      _nameController.text = v.nom ?? '';
+      _prenomsController.text = v.prenoms ?? '';
+      _idCardType = v.typePiece ?? 'CNI';
+      _idCardController.text = v.numeroPiece ?? '';
+      _pieceValidController.text = v.validitePiece?.toString() ?? '';
+      _numremorqueController.text = v.numeroRemorque ?? '';
+      _numConteneurController.text = v.numeroConteneur ?? '';
+      _typeEnginController.text = v.typeEngin ?? '';
+      _marqueController.text = v.marque ?? '';
+      _entrepriseController.text = v.entreprise ?? '';
+    });
   }
 }

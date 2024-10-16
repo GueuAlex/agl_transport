@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../config/app_text.dart';
 import '../../config/functions.dart';
@@ -34,6 +35,8 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
   String? deviceManufacturer;
   String? deviceOs;
   String? deviceOsVersion;
+
+  String _selectedModule = 'Visite';
 
   @override
   void initState() {
@@ -144,10 +147,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                       children: [
                         AppText.large('Mise en route du téléphone'),
                         AppText.small(
-                          'Nous collectons des informations essentielles sur votre appareil '
-                          'pour assurer une gestion optimale des activités. Les données recueillies '
-                          'incluent l\'identifiant unique, le modèle, le fabricant, et la version du système d\'exploitation. '
-                          'Ces informations nous aident à améliorer nos services et à garantir un suivi précis.',
+                          'Nous collectons des informations sur votre appareil (identifiant unique, modèle, fabricant, version du système d\'exploitation) pour optimiser la gestion des activités et améliorer nos services.',
                         ),
                         const SizedBox(height: 20),
                         _cardContainer(
@@ -245,6 +245,23 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                             ],
                           ),
                         ),
+                        const SizedBox(height: 10),
+                        _cardContainer(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              AppText.medium('Module à utiliser'),
+                              AppText.small(
+                                'Veuillez selectionner le module à utiliser sur ce terminal',
+                              ),
+                              // _genderSelector(module: 'Gestion de stock'),
+                              const SizedBox(height: 3),
+                              _genderSelector(module: 'Visite'),
+
+                              _genderSelector(module: 'Livraison'),
+                            ],
+                          ),
+                        ),
                         const SizedBox(
                           height: 35,
                         ),
@@ -265,6 +282,53 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
           ),
         ),
       );
+
+  Widget _genderSelector({required String module}) {
+    bool isSelected = _selectedModule == module;
+    return InkWell(
+      onTap: () {
+        setState(() {
+          _selectedModule = module;
+        });
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: 10,
+          vertical: 15,
+        ),
+        decoration: BoxDecoration(
+          color:
+              isSelected ? Palette.primaryColor.withOpacity(0.2) : Colors.white,
+          borderRadius: BorderRadius.circular(6.5),
+        ),
+        child: Row(
+          children: [
+            Container(
+              margin: const EdgeInsets.only(right: 8),
+              width: 20,
+              height: 20,
+              decoration: BoxDecoration(
+                border: Border.all(
+                  width: 5,
+                  color: isSelected
+                      ? Palette.primaryColor
+                      : Color.fromARGB(255, 185, 185, 185),
+                ),
+                color: Colors.white,
+                shape: BoxShape.circle,
+              ),
+            ),
+            AppText.medium(
+              module,
+              color: isSelected
+                  ? Palette.primaryColor
+                  : Color.fromARGB(255, 159, 159, 159),
+            )
+          ],
+        ),
+      ),
+    );
+  }
 
   void _handleDeviceRegistration() async {
     if (_selectedSite == null) {
@@ -311,7 +375,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
 
       // Enregistre le device en local
       LocalService localService = LocalService();
-      await localService.createDevice(deviceData).then((result) {
+      await localService.createDevice(deviceData).then((result) async {
         if (result == 0) {
           Functions.showToast(
             msg: 'Une erreur est survenue',
@@ -320,6 +384,8 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
 
           EasyLoading.dismiss();
         } else {
+          final pref = await SharedPreferences.getInstance();
+          pref.setBool('isVisiteModule', _selectedModule == 'Visite');
           Functions.showToast(
             msg: 'Terminal enregistré avec succès',
             gravity: ToastGravity.TOP,

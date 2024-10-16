@@ -14,6 +14,7 @@ import '../../../config/palette.dart';
 import '../../../local_service/local_service.dart';
 import '../../../model/agent_model.dart';
 import '../../../widgets/custom_button.dart';
+import '../../delivering/deliverig_screen.dart';
 import '../../home/home.dart';
 import '../../scanner/widgets/infos_column.dart';
 
@@ -30,6 +31,21 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController loginController = TextEditingController();
 
   bool isChecked = true;
+
+  @override
+  void initState() {
+    _initialise();
+    super.initState();
+  }
+
+  _initialise() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool isVisiteModule = await prefs.getBool('isVisiteModule') ?? false;
+    if (isVisiteModule) {
+      Functions.getVisites();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -224,8 +240,10 @@ Future<void> validateMatricule(
   final response = await http.get(
     Uri.parse('${baseUrl}users/$matricule'),
   );
-  /* print(response.statusCode);
-  print(response.body); */
+/*   print(response.statusCode);
+  print(response.body);
+  EasyLoading.dismiss();
+  return; */
 
   if (response.statusCode == 200 || response.statusCode == 201) {
     var json = response.body;
@@ -241,16 +259,21 @@ Future<void> validateMatricule(
     }
 
     int result = await LocalService().createLocalAgent(agent: agent);
+
     //print(result);
 
     if (result != 0) {
       // if user set remember me to true
       final SharedPreferences prefs = await SharedPreferences.getInstance();
+      bool isVisiteModule = await prefs.getBool('isVisiteModule') ?? false;
+
       if (isChecked) {
         await prefs.setBool('isRemember', true);
       }
       EasyLoading.dismiss();
-      Get.offAllNamed(Home.routeName);
+      Get.offAllNamed(
+        isVisiteModule ? Home.routeName : DeliveringScreen.routeName,
+      );
     } else {
       EasyLoading.dismiss();
       Functions.showToast(

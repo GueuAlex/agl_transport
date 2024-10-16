@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:scanner/model/motif_model.dart';
 
 import '../local_service/local_service.dart';
 import '../model/agent_model.dart';
@@ -243,9 +244,22 @@ class Functions {
     Entreprise.entrepriseList = await RemoteService().getEntrepriseList();
   }
 
+  static getMotifs() async {
+    MotifModel.glogalModitif = await RemoteService().getMotifList();
+  }
+
+  static getAdmin() async {
+    AgentModel.globalAgent = await RemoteService().getAdmins();
+  }
+
   //retourne la liste de toutes les entreprise
   static Future<void> allLivrason() async {
     Livraison.livraisonList = await RemoteService().getLivraisonList();
+  }
+
+  //retourne la liste de toutes les visites
+  static Future<void> getVisites() async {
+    VisiteModel.globalVisites = await RemoteService().getVisites();
   }
 
   /////////////////////////////////
@@ -257,7 +271,7 @@ class Functions {
     required Function() confirm,
     required Function() cancel,
     required VisiteModel visite,
-    required TextField carIdField,
+    //required TextField carIdField,
   }) async {
     return showDialog(
         barrierDismissible: false,
@@ -267,19 +281,19 @@ class Functions {
             return CupertinoAlertDialog(
               title: Text('Confirmation'),
               content: ConstrainedBox(
-                constraints: BoxConstraints.expand(height: isEntree ? 90 : 30),
+                constraints: BoxConstraints.expand(height: 30),
                 child: Column(
                   children: [
                     Expanded(
                       child: AppText.small(
                         isEntree
-                            ? 'Saisire la plaque d\'immatriculation si ${visite.nom} est véhiculé sinon laissez le champs vide'
+                            ? 'Veuillez confirmer l\'entrée de ${visite.nom}'
                             : 'Veuillez confirmer la sortie de ${visite.nom}',
                         textAlign: TextAlign.center,
                         fontSize: 10,
                       ),
                     ),
-                    isEntree
+                    /*  isEntree
                         ? Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 8,
@@ -294,7 +308,7 @@ class Functions {
                             ),
                             child: carIdField,
                           )
-                        : Container(),
+                        : Container(), */
                   ],
                 ),
               ),
@@ -341,13 +355,13 @@ class Functions {
                     Expanded(
                       child: AppText.small(
                         isEntree
-                            ? 'Saisire la plaque d\'immatriculation si ${visite.nom} est véhiculé sinon laissez le champs vide'
+                            ? 'Veuillez confirmer l\'entrée de ${visite.nom}'
                             : 'Veuillez confirmer la sortie de ${visite.nom}',
                         textAlign: TextAlign.center,
                         fontSize: 10,
                       ),
                     ),
-                    isEntree
+                    /*  isEntree
                         ? Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 8,
@@ -362,7 +376,7 @@ class Functions {
                             ),
                             child: carIdField,
                           )
-                        : Container(),
+                        : Container(), */
                   ],
                 ),
               ),

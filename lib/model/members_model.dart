@@ -20,6 +20,8 @@ class Member {
   String badge;
   String gilet;
   String typePiece;
+  int status;
+  int withBadge;
 
   Member({
     required this.id,
@@ -30,6 +32,8 @@ class Member {
     required this.badge,
     required this.gilet,
     required this.typePiece,
+    this.status = 1,
+    this.withBadge = 1,
   });
 
   factory Member.fromJson(Map<String, dynamic> json) => Member(

@@ -21,15 +21,12 @@ Widget getWidget({
   TimeOfDay currentHour = TimeOfDay.now(); // Heure actuelle
 
   // Définir les plages horaires pour les prestataires et clients
-  TimeOfDay clientStartTime = TimeOfDay(hour: 6, minute: 0);
-  TimeOfDay clientEndTime = TimeOfDay(hour: 22, minute: 0);
-  TimeOfDay prestataireStartTime = TimeOfDay(hour: 7, minute: 0);
-  TimeOfDay prestataireEndTime = TimeOfDay(hour: 18, minute: 0);
-  TimeOfDay visiteurVisiteTime =
-      Functions.stringToTimeOfDay(visite.heureVisite ?? "23:00");
-
-  print(
-      '$clientStartTime\n$clientEndTime\n$prestataireStartTime\n$prestataireEndTime');
+  /*  TimeOfDay clientStartTime = TimeOfDay(hour: 6, minute: 0);
+  TimeOfDay clientEndTime = TimeOfDay(hour: 22, minute: 0); */
+  //TimeOfDay prestataireStartTime = TimeOfDay(hour: 7, minute: 0);
+  //TimeOfDay prestataireEndTime = TimeOfDay(hour: 18, minute: 0);
+  TimeOfDay visiteStardTime =
+      Functions.stringToTimeOfDay(visite.heureVisite ?? "06:00");
 
   // Formatage de la date début et fin du QR code
   DateTime dateDebut = DateTime(
@@ -70,7 +67,7 @@ Widget getWidget({
 
   ////////////////////////////////////////
   /// 4. Vérification des jours et heures d'accès pour les prestataires et clients
-  if (visite.typeVisiteur.toLowerCase() == "client") {
+  /* if (visite.typeVisiteur.toLowerCase() == "client") {
     // Vérifier si c'est un jour de la semaine (lundi à vendredi)
     if (today.weekday < 6) {
       // Vérifier les heures d'accès pour le client
@@ -92,14 +89,18 @@ Widget getWidget({
           text:
               'Cette visite est autorisée uniquement du lundi au vendredi  entre ${clientStartTime.format(context)} et ${clientEndTime.format(context)}'); // Week-end
     }
-  } else if (visite.typeVisiteur.toLowerCase() == "prestataire") {
+  } else */
+  if (visite.typeVisiteur.toLowerCase() == "prestataire") {
     //print('-------------------------> type is true');
     // Vérifier si c'est un jour de la semaine (lundi à vendredi)
     if (today.weekday < 6) {
       // print('-------------------------> day is true');
       // Vérifier les heures d'accès pour le prestataire
-      if (currentHour.hour >= prestataireStartTime.hour &&
-          currentHour.hour <= prestataireEndTime.hour) {
+      if (currentHour.hour >=
+              visiteStardTime
+                  .hour /* &&
+          currentHour.hour <= prestataireEndTime.hour */
+          ) {
         // print('-------------------------> hours is true');
         return checkQrCodeStatus(
             visite: visite, agent: agent, context: context);
@@ -108,18 +109,18 @@ Widget getWidget({
         return outsideAccessHours(
             context: context,
             text:
-                'Cette visite est autorisée uniquement du lundi au vendredi  entre ${prestataireStartTime.format(context)} et ${prestataireEndTime.format(context)}');
+                'Cette visite est autorisée uniquement du lundi au vendredi  à partir de ${visiteStardTime.format(context)}');
       }
     } else {
       return outsideAccessHours(
           context: context,
           text:
-              'Cette visite est autorisée uniquement du lundi au vendredi  entre ${prestataireStartTime.format(context)} et ${prestataireEndTime.format(context)}'); // Week-end
+              'Cette visite est autorisée uniquement du lundi au vendredi à partir de ${visiteStardTime.format(context)}'); // Week-end
     }
   } else if (visite.typeVisiteur.toLowerCase() == "visiteur") {
     print("----------------------> is visiteur type");
-    print(visiteurVisiteTime);
-    if (currentHour.hour >= visiteurVisiteTime.hour) {
+    print(visiteStardTime);
+    if (currentHour.hour >= visiteStardTime.hour) {
       return checkQrCodeStatus(
         visite: visite,
         agent: agent,
@@ -130,7 +131,26 @@ Widget getWidget({
       return outsideAccessHours(
           context: context,
           text:
-              'Cette visite est autorisée uniquement pour le $date à partir de ${visiteurVisiteTime.format(context)}');
+              'Cette visite est autorisée uniquement pour le $date à partir de ${visiteStardTime.format(context)}');
+    }
+  } else if (visite.typeVisiteur.toLowerCase() == "permanent") {
+    /* TimeOfDay startHour =
+        Functions.stringToTimeOfDay(visite.heureVisite ?? "00:00"); */
+    TimeOfDay endHour =
+        Functions.stringToTimeOfDay(visite.heureFinVisite ?? "23:59");
+    // print('-------------------------> day is true');
+    // Vérifier les heures d'accès pour le prestataire
+
+    if (currentHour.hour >= visiteStardTime.hour &&
+        currentHour.hour <= endHour.hour) {
+      // print('-------------------------> hours is true');
+      return checkQrCodeStatus(visite: visite, agent: agent, context: context);
+    } else {
+      // String date = DateFormat('EEEE dd yyyy', 'fr').format(visite.dateVisite);
+      return outsideAccessHours(
+          context: context,
+          text:
+              'Cette visite est autorisée uniquement du lundi au vendredi  entre ${visiteStardTime.format(context)} et ${endHour.format(context)}');
     }
   }
 

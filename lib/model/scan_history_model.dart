@@ -32,17 +32,24 @@ class ScanHistoryModel {
   final String scanHour;
   final String motif;
   final String numeroBaget;
+  final String numeroGilet;
   String carId;
+  final bool isPrimaryVisitor;
+  final bool isPresente;
+  final bool withBadge;
 
-  ScanHistoryModel({
-    required this.id,
-    required this.visiteId,
-    required this.scandDate,
-    required this.scanHour,
-    required this.motif,
-    required this.numeroBaget,
-    this.carId = '',
-  });
+  ScanHistoryModel(
+      {required this.id,
+      required this.visiteId,
+      required this.scandDate,
+      required this.scanHour,
+      required this.motif,
+      required this.numeroBaget,
+      required this.numeroGilet,
+      this.carId = '',
+      this.isPresente = true,
+      this.isPrimaryVisitor = true,
+      this.withBadge = true});
 
   factory ScanHistoryModel.fromJson(Map<String, dynamic> json) =>
       ScanHistoryModel(
@@ -52,7 +59,11 @@ class ScanHistoryModel {
         scanHour: json["scan_hour"].substring(0, 5),
         motif: json["motif"],
         carId: json["plaque_immatriculation"] ?? '',
-        numeroBaget: json["numero_baget"] ?? '',
+        numeroBaget: json["numero_badge"] ?? '',
+        numeroGilet: json["numero_gilet"] ?? '',
+        isPrimaryVisitor: json["type_visiteur"] == 1 ? true : false,
+        isPresente: json["statut"] == 1 ? true : false,
+        withBadge: json["badge"] == 1 ? true : false,
       );
 
   Map<String, dynamic> toJson() => {

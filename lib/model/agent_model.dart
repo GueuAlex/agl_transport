@@ -53,4 +53,6 @@ class AgentModel {
         "avatar": avatar,
         //"localisation": localisation.toJson(),
       };
+
+  static List<AgentModel> globalAgent = [];
 }

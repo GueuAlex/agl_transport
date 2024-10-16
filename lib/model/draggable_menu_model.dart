@@ -12,6 +12,7 @@ class DraggableMenuModel {
   final String icon;
   final String route;
   final Color color;
+  final bool isVisiteModule;
 
   const DraggableMenuModel({
     required this.title,
@@ -19,6 +20,7 @@ class DraggableMenuModel {
     required this.route,
     required this.subTitle,
     required this.color,
+    this.isVisiteModule = true,
   });
 
   static List<DraggableMenuModel> dragMenuList1 = [
@@ -42,6 +44,7 @@ class DraggableMenuModel {
       icon: 'assets/icons/menu/controle-des-camions.svg',
       route: AddDeliScree.routeName,
       color: Color.fromARGB(255, 160, 0, 0),
+      isVisiteModule: false,
     ),
   ];
   static List<DraggableMenuModel> dragMenuList2 = [
@@ -72,6 +75,7 @@ class DraggableMenuModel {
       icon: 'assets/icons/menu/camion-medical.svg',
       route: 'CreateDeliveryScreen',
       color: Color.fromARGB(255, 255, 0, 221),
+      isVisiteModule: false,
     ),
     /*  DraggableMenuModel(
       title: 'En cours',
@@ -86,6 +90,7 @@ class DraggableMenuModel {
       icon: 'assets/icons/menu/boxes.svg',
       route: DeliveringScreen.routeName,
       color: Color.fromARGB(255, 0, 148, 178),
+      isVisiteModule: false,
     ),
   ];
 }

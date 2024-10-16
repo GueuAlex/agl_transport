@@ -1,4 +1,3 @@
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -429,7 +428,7 @@ class _StatsScreenState extends State<StatsScreen> {
   }
 }
 
-Widget _lineChart() {
+/* Widget _lineChart() {
   return LineChart(
     LineChartData(
       gridData: FlGridData(show: true),
@@ -475,4 +474,4 @@ Widget _lineChart() {
       ],
     ),
   );
-}
+} */

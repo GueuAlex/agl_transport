@@ -7,11 +7,12 @@ import 'package:flutter/services.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../config/functions.dart';
 import '../../config/palette.dart';
 import '../../local_service/local_service.dart';
-import '../auth/login/login.dart';
+import '../delivering/deliverig_screen.dart';
+import '../home/home.dart';
 import '../on_boarding/on_boarding_screen.dart';
-import '../scanner/scan_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   static String routeName = '/splashScreen';
@@ -78,10 +79,10 @@ class _SplashScreenState extends State<SplashScreen> {
 
     _connectivitySubscription =
         _connectivity.onConnectivityChanged.listen(_updateConnectionStatus);
-    /*  Functions.getQrcodesFromApi();
-    Functions.getScanHistoriesFromApi();
-    Functions.allEntrepise();
-    Functions.allLivrason(); */
+    /*    Functions.getQrcodesFromApi();
+    Functions.getScanHistoriesFromApi(); */
+    Functions.getMotifs();
+    Functions.getAdmin();
 
     Future.delayed(const Duration(seconds: 10)).then((_) async {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -94,18 +95,15 @@ class _SplashScreenState extends State<SplashScreen> {
           (route) => false,
         );
       } else {
-        bool? isFirstTime = await prefs.getBool('isRemember');
-        if (isFirstTime != null && isFirstTime) {
-          Navigator.of(context).pushNamedAndRemoveUntil(
-            ScanScreen.routeName,
-            (route) => false,
-          );
-        } else {
-          Navigator.of(context).pushNamedAndRemoveUntil(
-            LoginScreen.routeName,
-            (route) => false,
-          );
+        bool isVisiteModule = await prefs.getBool('isVisiteModule') ?? false;
+        if (isVisiteModule) {
+          Functions.getVisites();
         }
+
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          isVisiteModule ? Home.routeName : DeliveringScreen.routeName,
+          (route) => false,
+        );
       }
     });
 

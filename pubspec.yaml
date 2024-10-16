@@ -65,6 +65,7 @@ dependencies:
   device_info_plus: ^10.1.1
   flutter_dotenv: ^5.1.0
   toggle_switch: ^2.3.0
+  mailer: ^6.2.0
 
 dev_dependencies:
   flutter_test:

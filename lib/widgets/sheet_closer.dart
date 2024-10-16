@@ -2,12 +2,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class SheetCloser extends StatelessWidget {
-  const SheetCloser({super.key});
+  const SheetCloser({super.key, this.paddingV = 10});
+  final double paddingV;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      padding: EdgeInsets.symmetric(horizontal: 10, vertical: paddingV),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [

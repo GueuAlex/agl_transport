@@ -27,7 +27,10 @@ class SideBarItem extends StatelessWidget {
           leading: SvgPicture.asset(
             width: 20,
             asset,
-            color: isSeleted ? Palette.secondaryColor : Colors.black,
+            colorFilter: ColorFilter.mode(
+              isSeleted ? Palette.secondaryColor : Colors.black,
+              BlendMode.srcIn,
+            ),
           ),
           title: Text(
             title,

@@ -9,6 +9,7 @@ import 'package:scanner/local_service/local_service.dart';
 
 import '../remote_service/remote_service.dart';
 import 'DeviceModel.dart';
+import 'logistic_agent_model.dart';
 
 AglLivraisonModel aglLivraisonModelFromJson(String str) =>
     AglLivraisonModel.fromJson(json.decode(str));
@@ -54,6 +55,7 @@ class AglLivraisonModel {
   /* final String heure; */
   final String observation;
   final String designation;
+  final List<LogisticAgent> logisticAgents;
 
   AglLivraisonModel({
     required this.id,
@@ -88,6 +90,7 @@ class AglLivraisonModel {
     required this.DateSortie,
     required this.heureEntree,
     required this.heureSortie,
+    this.logisticAgents = const [],
   });
 
   factory AglLivraisonModel.fromJson(Map<String, dynamic> json) =>
@@ -132,6 +135,9 @@ class AglLivraisonModel {
         /*   heure: json["heure"] ?? "", */
         observation: json["observation"] ?? "",
         designation: json["designation"] ?? "",
+        logisticAgents: List<LogisticAgent>.from(
+          json["membre_livraisons"].map((x) => LogisticAgent.fromJson(x)),
+        ),
       );
 
   Map<String, dynamic> toJson() => {

@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
@@ -20,8 +21,11 @@ import '../../local_service/local_service.dart';
 import '../../model/DeviceModel.dart';
 import '../../model/agent_model.dart';
 import '../../model/agl_livraison_model.dart';
+import '../../model/logistic_agent_model.dart';
 import '../../remote_service/remote_service.dart';
 import '../../widgets/custom_button.dart';
+import '../../widgets/sheet_closer.dart';
+import '../create_delivery/widget/logistic_member.dart';
 import 'deli_verify.sucess.dart';
 
 class AddDeliScree extends StatefulWidget {
@@ -48,6 +52,11 @@ class _AddDeliScreeState extends State<AddDeliScree> {
   String _containerHeight = '';
   String _motif = '';
   String _selectedOption = '';
+  List<LogisticAgent> _logisticAgents = [];
+
+  final TextEditingController _logisticAgentFirstName = TextEditingController();
+  final TextEditingController _logisticAgentLastName = TextEditingController();
+  final TextEditingController _logisticAgentIdCard = TextEditingController();
   List<String> _searcheOptions = [
     'Entrée',
     'Sortie',
@@ -81,12 +90,16 @@ class _AddDeliScreeState extends State<AddDeliScree> {
     _telController.dispose();
     _pieceValidController.dispose();
     _idCardController.dispose();
+    _logisticAgentFirstName.dispose();
+    _logisticAgentLastName.dispose();
+    _logisticAgentIdCard.dispose();
     super.dispose();
   }
 
   @override
   void initState() {
     _initialActions();
+
     super.initState();
   }
 
@@ -131,10 +144,7 @@ class _AddDeliScreeState extends State<AddDeliScree> {
             ),
             padding: const EdgeInsets.all(0),
             child: InkWell(
-              onTap: () => Functions.showBottomSheet(
-                ctxt: context,
-                widget: _formSheet(),
-              ),
+              onTap: () => _initialActions(),
               child: Center(
                 child: Icon(
                   Icons.search,
@@ -183,7 +193,7 @@ class _AddDeliScreeState extends State<AddDeliScree> {
                                       radius: 5,
                                       text: 'Réessayer',
                                       textColor: Palette.primaryColor,
-                                      onPress: () => _showBonCommandeSheet(),
+                                      onPress: () => _initialActions(),
                                     ),
                                   ],
                                 ),
@@ -635,6 +645,57 @@ class _AddDeliScreeState extends State<AddDeliScree> {
                     ),
                   ),
                   const SizedBox(height: 10),
+                  _cardContainer(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  AppText.medium(
+                                    'Agents logistiques',
+                                    textAlign: TextAlign.start,
+                                  ),
+                                  AppText.small(
+                                    'Veuillez ajouter toues personnes accompagnant le chauffeur.',
+                                  )
+                                ],
+                              ),
+                            ),
+                            _widgetDeli!.mouvements == 'Entrée'
+                                ? InkWell(
+                                    onTap: () => Functions.showBottomSheet(
+                                      ctxt: context,
+                                      widget: _addLogisticMember(),
+                                    ),
+                                    child: Container(
+                                      padding: const EdgeInsets.all(3.5),
+                                      decoration: BoxDecoration(
+                                        color: Palette.primaryColor,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Icon(
+                                        CupertinoIcons.plus,
+                                        size: 16,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  )
+                                : SizedBox(),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        LogisticMember(
+                          logisticMembers: _logisticAgents,
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 10),
 
                   // entreprise et colis
                   _cardContainer(
@@ -866,6 +927,7 @@ class _AddDeliScreeState extends State<AddDeliScree> {
       "date_entree": DateTime.now().toIso8601String(),
       "heure_entree": hours,
       "observation": _commentaireController.text,
+      "membre_livraisons": _logisticAgents.map((e) => e.toJson()).toList(),
     };
 
     print(_payload);
@@ -946,6 +1008,7 @@ class _AddDeliScreeState extends State<AddDeliScree> {
       "date_sortie": DateTime.now().toIso8601String(),
       "heure_sortie": hours,
       "observation": _commentaireController.text,
+      "membre_livraisons": _logisticAgents.map((e) => e.toJson()).toList(),
     };
 
     print(_payload);
@@ -1165,6 +1228,7 @@ class _AddDeliScreeState extends State<AddDeliScree> {
                       EasyLoading.dismiss();
                       setState(() {
                         _widgetDeli = _livraison;
+                        _logisticAgents = _livraison.logisticAgents;
                         _idCardType = _livraison.typePiece;
                         _numTracteurController.text =
                             _livraison.numeroImmatriculation;
@@ -1217,6 +1281,115 @@ class _AddDeliScreeState extends State<AddDeliScree> {
         borderRadius: BorderRadius.circular(10),
       ),
       child: child,
+    );
+  }
+
+  _addLogisticMember() {
+    return Container(
+      width: double.infinity,
+      height: MediaQuery.of(context).size.height * 0.65,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(5),
+          topRight: Radius.circular(5),
+        ),
+      ),
+      child: Column(
+        children: [
+          SheetCloser(),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: InfosColumn(
+                          opacity: 0.12,
+                          label: 'Nom',
+                          widget: Expanded(
+                            child: Functions.getTextField(
+                              controller: _logisticAgentFirstName,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 5),
+                      Expanded(
+                        child: InfosColumn(
+                          opacity: 0.12,
+                          label: 'Prénoms',
+                          widget: Expanded(
+                            child: Functions.getTextField(
+                              controller: _logisticAgentLastName,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 5),
+                  InfosColumn(
+                    opacity: 0.12,
+                    label: 'N° de pièce',
+                    widget: Expanded(
+                      child: Functions.getTextField(
+                        controller: _logisticAgentIdCard,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 15),
+                  CustomButton(
+                    color: Palette.primaryColor,
+                    width: double.infinity,
+                    height: 35,
+                    radius: 5,
+                    text: 'Ajouter l\'agent',
+                    onPress: () {
+                      if (_logisticAgentFirstName.text.isEmpty) {
+                        Functions.showToast(
+                          msg: 'Le nom est obligatoire',
+                          gravity: ToastGravity.TOP,
+                        );
+                        return;
+                      }
+                      if (_logisticAgentLastName.text.isEmpty) {
+                        Functions.showToast(
+                          msg: 'Le nom est obligatoire',
+                          gravity: ToastGravity.TOP,
+                        );
+                        return;
+                      }
+                      if (_logisticAgentIdCard.text.isEmpty) {
+                        Functions.showToast(
+                          msg: 'Le numéro de pièce est obligatoire',
+                          gravity: ToastGravity.TOP,
+                        );
+                        return;
+                      }
+                      final _logisticAgent = LogisticAgent(
+                        id: 0,
+                        nom: _logisticAgentFirstName.text,
+                        prenoms: _logisticAgentLastName.text,
+                        numeroCni: _logisticAgentIdCard.text,
+                        typePiece: '',
+                      );
+                      _logisticAgents.add(_logisticAgent);
+                      _logisticAgentFirstName.clear();
+                      _logisticAgentLastName.clear();
+                      _logisticAgentIdCard.clear();
+                      setState(() {});
+                      Navigator.pop(context);
+                    },
+                  )
+                ],
+              ),
+            ),
+          )
+        ],
+      ),
     );
   }
 

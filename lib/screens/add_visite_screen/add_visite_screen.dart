@@ -5,11 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
+import 'package:scanner/widgets/sheet_closer.dart';
 
 import '../../config/app_text.dart';
 import '../../config/functions.dart';
 import '../../config/palette.dart';
 import '../../draggable_menu.dart';
+import '../../emails/emails_service.dart';
 import '../../local_service/local_service.dart';
 import '../../model/DeviceModel.dart';
 import '../../model/agent_model.dart';
@@ -30,7 +32,7 @@ class AddVisiteScreen extends StatefulWidget {
 class _AddVisiteScreenState extends State<AddVisiteScreen> {
   int activeIndex = 0;
   final PageController _pageController = PageController();
-  String _selectedGenre = 'Homme';
+  String _selectedGenre = 'Monsieur';
 
   final _nameController = TextEditingController();
   final _prenomsController = TextEditingController();
@@ -48,16 +50,26 @@ class _AddVisiteScreenState extends State<AddVisiteScreen> {
   DateTime _endDate = DateTime.now();
   String _idCardType = 'CNI';
 
-  MotifModel? _selectedMotif;
+  MotifModel _selectedMotif = MotifModel.glogalModitif[0];
+  AgentModel _selectedAmin = AgentModel.globalAgent[0];
   // List<MotifModel> _motifs = [];
-  Future<List<MotifModel>> _getMotifs() async {
+/*   Future<List<MotifModel>> _getMotifs() async {
     final motifs = await RemoteService().getMotifList();
     //print(motifs);
     setState(() {
       _selectedMotif = motifs[0];
     });
     return motifs;
-  }
+  } */
+
+  /*  Future<List<AgentModel>> _admins() async {
+    final admins = await RemoteService().getAdmins();
+    //print(motifs);
+    setState(() {
+      _selectedAmin = admins[0];
+    });
+    return admins;
+  } */
 
   @override
   Widget build(BuildContext context) {
@@ -230,10 +242,13 @@ class _AddVisiteScreenState extends State<AddVisiteScreen> {
                           children: [
                             Expanded(
                               child: AppText.medium(
-                                _selectedMotif != null
-                                    ? _selectedMotif!.libelle
-                                    : "Selectionner un motif",
-                              ),
+                                  maxLine: 1,
+                                  textOverflow: TextOverflow.ellipsis,
+                                  //_selectedMotif != null
+                                  //?
+                                  _selectedMotif.libelle
+                                  // : "Selectionner un motif",
+                                  ),
                             ),
                             Icon(Icons.arrow_drop_down),
                           ],
@@ -241,36 +256,46 @@ class _AddVisiteScreenState extends State<AddVisiteScreen> {
                       ),
                     ),
                   ),
-                  /* const SizedBox(height: 10),
-                  AppText.medium('Accessoires de visite'),
+                ],
+              ),
+            ),
+            const SizedBox(height: 10),
+            _cardContainer(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  AppText.medium('Qui autorise cette visite ?'),
                   AppText.small(
-                    'Veuillez fournir au visiteur les accessoires de visite (badge et gilet) si necessaire',
-                  ),
+                      'Vuillez indiquer l\'administrateur qui autorise la visite'),
                   const SizedBox(height: 5),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: InfosColumn(
-                          label: 'N° de badge',
-                          opacity: 0.12,
-                          widget: Expanded(
-                            child: Functions.getTextField(
-                                controller: _badgeController),
-                          ),
+                  InkWell(
+                    onTap: () => Functions.showBottomSheet(
+                      ctxt: context,
+                      widget: _adminSelector(),
+                    ),
+                    child: InfosColumn(
+                      // height: 80,
+                      label: 'Admin',
+                      opacity: 0.12,
+                      widget: Expanded(
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: AppText.medium(
+                                  maxLine: 1,
+                                  textOverflow: TextOverflow.ellipsis,
+                                  //_selectedAmin != null
+                                  //?
+                                  _selectedAmin.name
+                                  //: "Selectionner un admin",
+                                  ),
+                            ),
+                            Icon(Icons.arrow_drop_down),
+                          ],
                         ),
                       ),
-                      Expanded(
-                        child: InfosColumn(
-                          label: 'N° de gilet',
-                          opacity: 0.12,
-                          widget: Expanded(
-                            child: Functions.getTextField(
-                                controller: _giletController),
-                          ),
-                        ),
-                      )
-                    ],
-                  ), */
+                    ),
+                  ),
                 ],
               ),
             )
@@ -280,58 +305,73 @@ class _AddVisiteScreenState extends State<AddVisiteScreen> {
     );
   }
 
-  Container _motifSelector() => Container(
-        height: 250,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(5),
-            topRight: Radius.circular(5),
+  Container _adminSelector() => Container(
+      height: MediaQuery.of(context).size.height * 0.6,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(5),
+          topRight: Radius.circular(5),
+        ),
+      ),
+      child: Column(
+        children: [
+          SheetCloser(),
+          Expanded(
+            child: ListView.builder(
+              itemCount: AgentModel.globalAgent.length,
+              itemBuilder: (context, index) {
+                AgentModel agent = AgentModel.globalAgent[index];
+                return ListTile(
+                  title: Text(agent.name),
+                  selected: _selectedAmin.id == agent.id,
+                  selectedColor: Palette.primaryColor,
+                  onTap: () {
+                    setState(() {
+                      _selectedAmin = agent;
+                    });
+                    Navigator.pop(context);
+                  },
+                );
+              },
+            ),
           ),
-        ),
-        child: FutureBuilder(
-          future: _getMotifs(),
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              return ListView.builder(
-                itemCount: snapshot.data!.length,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    title: Text(snapshot.data![index].libelle),
-                    selected: _selectedMotif!.libelle ==
-                        snapshot.data![index].libelle,
-                    selectedColor: Palette.primaryColor,
-                    onTap: () {
-                      setState(() {
-                        _selectedMotif = snapshot.data![index];
-                      });
-                      Navigator.pop(context);
-                    },
-                  );
-                },
-              );
-            } else {
-              return const Center(
-                child: CircularProgressIndicator.adaptive(),
-              );
-            }
-          },
-        ),
-      );
+        ],
+      ));
 
-  /*  void _pickDateRange(BuildContext context) async {
-    final dateRange = await showCustomDateRangePicker(context);
-    if (dateRange != null) {
-      /* print("Start Date: ${dateRange['start']}");
-      print("End Date: ${dateRange['end']}"); */
-      setState(() {
-        _startDate = dateRange['start']!;
-        _endDate = dateRange['end']!;
-      });
-    } else {
-      print("No date range selected");
-    }
-  } */
+  Container _motifSelector() => Container(
+      height: MediaQuery.of(context).size.height * 0.45,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(5),
+          topRight: Radius.circular(5),
+        ),
+      ),
+      child: Column(
+        children: [
+          SheetCloser(),
+          Expanded(
+            child: ListView.builder(
+              itemCount: MotifModel.glogalModitif.length,
+              itemBuilder: (context, index) {
+                MotifModel motif = MotifModel.glogalModitif[index];
+                return ListTile(
+                  title: Text(motif.libelle),
+                  selected: _selectedMotif.libelle == motif.libelle,
+                  selectedColor: Palette.primaryColor,
+                  onTap: () {
+                    setState(() {
+                      _selectedMotif = motif;
+                    });
+                    Navigator.pop(context);
+                  },
+                );
+              },
+            ),
+          ),
+        ],
+      ));
 
   Padding _coordonnees() {
     return Padding(
@@ -453,8 +493,8 @@ class _AddVisiteScreenState extends State<AddVisiteScreen> {
                   children: [
                     AppText.medium('Genre'),
                     const SizedBox(height: 10),
-                    _genderSelector(genre: 'Homme'),
-                    _genderSelector(genre: 'Femme'),
+                    _genderSelector(genre: 'Monsieur'),
+                    _genderSelector(genre: 'Madame'),
                   ],
                 ),
               ),
@@ -659,13 +699,20 @@ class _AddVisiteScreenState extends State<AddVisiteScreen> {
                     );
                     return;
                   }
-                  if (_selectedMotif == null) {
+                  /* if (_selectedMotif == null) {
                     Functions.showToast(
                       msg: 'Veuillez sélectionner un motif de visite',
                       gravity: ToastGravity.TOP,
                     );
                     return;
                   }
+                  if (_selectedAmin == null) {
+                    Functions.showToast(
+                      msg: 'Veuillez sélectionner un admin',
+                      gravity: ToastGravity.TOP,
+                    );
+                    return;
+                  } */
                   Functions.showBottomSheet(
                     ctxt: context,
                     widget: _recapSheet(),
@@ -858,7 +905,7 @@ class _AddVisiteScreenState extends State<AddVisiteScreen> {
                           child: InfosColumn(
                             label: 'Motif de la visite',
                             widget: Expanded(
-                              child: AppText.medium(_selectedMotif!.libelle),
+                              child: AppText.medium(_selectedMotif.libelle),
                             ),
                           ),
                         ),
@@ -884,6 +931,12 @@ class _AddVisiteScreenState extends State<AddVisiteScreen> {
                         ),
                       ],
                     ), */
+                    InfosColumn(
+                      label: 'Visite autorisée par',
+                      widget: Expanded(
+                        child: AppText.medium(_selectedAmin.name),
+                      ),
+                    ),
                     const SizedBox(height: 20),
                   ],
                 ),
@@ -914,6 +967,7 @@ class _AddVisiteScreenState extends State<AddVisiteScreen> {
     showCupertinoModalPopup(
       context: context,
       builder: (BuildContext context) {
+        // ignore: deprecated_member_use
         return WillPopScope(
           onWillPop: () async => false,
           child: Platform.isIOS
@@ -952,7 +1006,11 @@ class _AddVisiteScreenState extends State<AddVisiteScreen> {
                           );
                           return;
                         }
-                        _postVisit(agent: _agent, device: _device);
+                        _postVisit(
+                          agent: _agent,
+                          device: _device,
+                          admin: _selectedAmin,
+                        );
                       },
                       child: AppText.medium(
                         'Créer',
@@ -997,7 +1055,10 @@ class _AddVisiteScreenState extends State<AddVisiteScreen> {
                           );
                           return;
                         }
-                        _postVisit(agent: _agent, device: _device);
+                        _postVisit(
+                            agent: _agent,
+                            device: _device,
+                            admin: _selectedAmin);
                       },
                       child: AppText.medium(
                         'Créer',
@@ -1013,13 +1074,16 @@ class _AddVisiteScreenState extends State<AddVisiteScreen> {
   }
 
   void _postVisit(
-      {required AgentModel agent, required DeviceModel device}) async {
+      {required AgentModel agent,
+      required AgentModel admin,
+      required DeviceModel device}) async {
     // création d'une visite par un agent de sécurité
     String hour = DateFormat('HH:mm:ss').format(DateTime.now());
     var postData = {
       "genre": _selectedGenre,
       "user_id": agent.id,
-      "motif_id": _selectedMotif!.id,
+      "admin_id": admin.id,
+      "motif_id": _selectedMotif.id,
       "nom": _nameController.text,
       "prenoms": _prenomsController.text,
       "entreprise": _entrepriseController.text,
@@ -1034,12 +1098,12 @@ class _AddVisiteScreenState extends State<AddVisiteScreen> {
       "plaque_vehicule": _cardIdController.text.toUpperCase(),
       /* "email": _emailController.text, */
       "number": _phoneController.text,
-      "motif_visite": _selectedMotif!.libelle,
+      "motif_visite": _selectedMotif.libelle,
       /* "code_visite": "AG-24-4781300", */
       "is_already_scanned": 0,
       "is_active": 1,
       "localisation_id": device.localisationId,
-      "localisation": {
+      /*  "localisation": {
         "id": device.localisationId,
         /*  "libelle": agent.localisation.libelle, */
         "site_id": device.siteId,
@@ -1047,7 +1111,7 @@ class _AddVisiteScreenState extends State<AddVisiteScreen> {
       "motif": {
         "id": _selectedMotif!.id,
         "libelle": _selectedMotif!.libelle,
-      }
+      } */
     };
 
     /* print(postData);
@@ -1057,6 +1121,7 @@ class _AddVisiteScreenState extends State<AddVisiteScreen> {
     Navigator.pop(context);
     /* print(postData);
     return; */
+
     EasyLoading.show(status: 'Envoie de la visite...');
     await RemoteService()
         .postData(
@@ -1080,6 +1145,13 @@ class _AddVisiteScreenState extends State<AddVisiteScreen> {
         );
         _clearControllers();
       } else {
+        sendErrorEmail(
+          subject: 'Erreur d\'enregistrement d\'une visite',
+          title:
+              'Une erreur s\'est produite lors de l\'enregistrement d\'une visite',
+          errorDetails:
+              '\n\nPosted data: $postData\n\nStatus code: ${response.statusCode}\n\nResponse body: ${response.body}',
+        );
         Functions.showToast(
           msg: 'Une erreur s\'est produite',
           gravity: ToastGravity.TOP,
