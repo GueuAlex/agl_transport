@@ -1,6 +1,10 @@
+import 'dart:async';
+
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:http/http.dart' as http;
 import 'package:vibration/vibration.dart';
 
 import '../../../config/app_text.dart';
@@ -12,6 +16,7 @@ import '../../draggable_menu.dart';
 import '../../emails/emails_service.dart';
 import '../../model/agent_model.dart';
 import '../../model/visite_model.dart';
+import '../../remote_service/remote_service.dart';
 import '../scanner/widgets/error_sheet_container.dart';
 import '../scanner/widgets/infos_column.dart';
 import '../scanner/widgets/sheet_container.dart';
@@ -135,85 +140,119 @@ class _VerifyByCodeSheetState extends State<VerifyByCodeSheet> {
                               radius: 5,
                               text: 'Vérifier',
                               onPress: () async {
+                                // Vérifier si le champ code est vide
                                 if (_codeController.text.trim().isEmpty) {
                                   Functions.showToast(
-                                    msg: 'Le champ code est obligatoire !',
+                                      msg: 'Le champ code est obligatoire !');
+                                  return;
+                                }
+
+                                final codePattern = RegExp(r'^AGL-\d{2}-\d+$');
+                                String code = '$prefix${_codeController.text}';
+
+                                // Vérifier si le code correspond au pattern attendu
+                                if (!codePattern.hasMatch(code)) {
+                                  // Code invalide, affichage d'un message d'erreur et vibration
+                                  EasyLoading.dismiss();
+                                  Vibration.vibrate(duration: 200);
+                                  Functions.showBottomSheet(
+                                    ctxt: context,
+                                    widget: const ErrorSheetContainer(
+                                        text: 'Code Invalide!'),
                                   );
-                                } else {
-                                  final codePattern =
-                                      RegExp(r'^AGL-\d{2}-\d+$');
-                                  String code =
-                                      '$prefix${_codeController.text}';
+                                  return;
+                                }
 
-                                  if (codePattern.hasMatch(code)) {
-                                    EasyLoading.show(
-                                      status: 'Vérification en cours',
-                                    );
-                                    // fetch data
-                                    /*  var postData = {
-                                      "code_visite":
-                                          '$prefix${_codeController.text}',
-                                    };
-                                    await RemoteService()
-                                        .postData(
-                                      endpoint: 'visiteurs/verifications',
-                                      postData: postData,
-                                    )
-                                        .then((response) async {
-                                      //EasyLoading.dismiss();
-                                      if (response.statusCode == 200 ||
-                                          response.statusCode == 201) {
-                                        //
-                                        VisiteModel visite =
-                                            visiteModelFromJson(
-                                          response.body,
-                                        ); */
+                                // Affichage du chargement
+                                EasyLoading.show();
 
-                                    VisiteModel.getVisite(code: code)
-                                        .then((visite) async {
-                                      //EasyLoading.dismiss();
-                                      if (visite != null) {
-                                        // print(visite);
+                                await player
+                                    .play(AssetSource('images/soung.mp3'));
 
-                                        await player.play(
-                                          AssetSource('images/soung.mp3'),
-                                        );
-                                        Functions.showBottomSheet(
-                                          ctxt: context,
-                                          widget: SheetContainer(
-                                            visite: visite,
-                                            agent: _agent!,
-                                          ),
-                                        );
-                                        EasyLoading.dismiss();
-                                      } else {
-                                        sendErrorEmail(
-                                          subject:
-                                              'Erreur lors d\'une vérification',
-                                          title:
-                                              'Un code de visite à été utilisé pour une vérification mais aucune visite trouvée\n\n',
-                                          errorDetails: 'Code: $code',
-                                        );
-                                        EasyLoading.dismiss();
-                                        _error(size: size);
-                                      }
-                                    });
-                                    //////////////
-                                    ///
-                                    EasyLoading.dismiss();
-                                  } else {
-                                    EasyLoading.dismiss();
-                                    ///////////////////////
-                                    ///sinon on fait vibrer le device
-                                    ///et on afficher un message d'erreur
-                                    ///
-                                    Vibration.vibrate(duration: 200);
+                                try {
+                                  // Récupération de la visite avec le code
+                                  VisiteModel? visite =
+                                      await VisiteModel.getVisite(code: code);
+
+                                  if (visite != null) {
+                                    // Visite trouvée, jouer le son et afficher le bottom sheet
+
                                     Functions.showBottomSheet(
                                       ctxt: context,
-                                      widget: const ErrorSheetContainer(
-                                          text: 'Code Invalide!'),
+                                      widget: SheetContainer(
+                                          visite: visite, agent: _agent!),
                                     );
+                                  } else {
+                                    // Si la visite n'est pas trouvée, envoyer une requête à l'API
+                                    var postData = {"code_visite": code};
+
+                                    http.Response r = await RemoteService()
+                                        .postData(
+                                            endpoint: 'visiteurs/verifications',
+                                            postData: postData)
+                                        .timeout(const Duration(seconds: 10));
+
+                                    if (r.statusCode == 200 ||
+                                        r.statusCode == 210) {
+                                      // Visite trouvée via l'API
+                                      VisiteModel visite =
+                                          visiteModelFromJson(r.body);
+                                      Functions.showBottomSheet(
+                                        ctxt: context,
+                                        widget: SheetContainer(
+                                            visite: visite, agent: _agent!),
+                                      );
+                                    } else {
+                                      // Erreur de réponse API, envoyer un email d'erreur et afficher une alerte
+                                      sendErrorEmail(
+                                        subject:
+                                            'Erreur lors d\'une vérification',
+                                        title:
+                                            'Un code de visite a été utilisé pour une vérification mais aucune visite trouvée\n\n',
+                                        errorDetails: 'Code: $code',
+                                      );
+                                      _error(size: size);
+                                    }
                                   }
+                                } on TimeoutException catch (t) {
+                                  // Gestion de l'exception Timeout
+                                  Functions.showToast(
+                                      msg: 'Problème de connexion internet',
+                                      gravity: ToastGravity.TOP);
+                                  sendErrorEmail(
+                                    subject: 'Erreur lors d\'une vérification',
+                                    title:
+                                        'Une requête a pris trop de temps dû une connexio lente\n\n',
+                                    errorDetails:
+                                        'Code: $code\n\nErreur: ${t.message.toString()}',
+                                  );
+                                } on http.ClientException catch (e) {
+                                  // Gestion des erreurs réseau
+                                  Functions.showToast(
+                                    msg: 'Problème de connexion internet',
+                                    gravity: ToastGravity.TOP,
+                                  );
+                                  sendErrorEmail(
+                                    subject: 'Erreur lors d\'une vérification',
+                                    title:
+                                        'Une requête a échoué dû une connexio lente\n\n',
+                                    errorDetails:
+                                        'Code: $code\n\nErreur: ${e.message.toString()}',
+                                  );
+                                } catch (e) {
+                                  // Gestion des autres exceptions
+                                  Functions.showToast(
+                                      msg: 'Problème de connexion internet',
+                                      gravity: ToastGravity.TOP);
+                                  sendErrorEmail(
+                                    subject: 'Erreur lors d\'une vérification',
+                                    title: 'Un problème est survenu\n\n',
+                                    errorDetails:
+                                        'Code: $code\n\nErreur: ${e.toString()}',
+                                  );
+                                } finally {
+                                  // Toujours arrêter EasyLoading
+                                  EasyLoading.dismiss();
                                 }
                               },
                             ),

@@ -107,7 +107,7 @@ class MyApp extends StatelessWidget {
         Locale('en'),
       ],
       locale: const Locale('eu', 'FR'),
-      title: 'Flutter Demo',
+      title: 'Secure Scan',
       theme: ThemeData(
         useMaterial3: false,
         scaffoldBackgroundColor: Colors.white,

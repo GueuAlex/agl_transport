@@ -78,6 +78,8 @@ class RemoteService {
     final url = Uri.parse('$testbaseUri$endpoint');
     print('$testbaseUri$endpoint');
 
+    //await Future.delayed(Duration(seconds: 15));
+
     final response = await client.post(
       url,
       headers: {
@@ -85,6 +87,26 @@ class RemoteService {
         'Accept': 'application/json',
       },
       body: jsonEncode(postData),
+    );
+    print(response.body);
+
+    return response;
+  }
+
+  Future<http.Response> postDataList({
+    required String endpoint,
+    required List<Map<String, dynamic>> postData,
+  }) async {
+    final url = Uri.parse('$testbaseUri$endpoint');
+    print('$testbaseUri$endpoint');
+
+    final response = await client.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: jsonEncode(postData), // Encoder la liste en JSON
     );
     print(response.body);
 

@@ -48,6 +48,9 @@ class _SingleVisitorState extends State<SingleVisitor> {
   void initState() {
     _idCardType = widget.visite.typePiece;
     _idCardController.text = widget.visite.numeroCni;
+    if (widget.visite.typeVisiteur.toLowerCase() == 'permanent') {
+      _bageController.text == widget.visite.numeroCni;
+    }
     super.initState();
   }
 
@@ -398,6 +401,10 @@ class _SingleVisitorState extends State<SingleVisitor> {
               "numero_gilet": _giletController.text.toUpperCase(),
               "plaque_immatriculation": _carIdController.text.toUpperCase(),
             };
+
+            /* print(scanHistoryData);
+            EasyLoading.dismiss();
+            return; */
 
             alert(
               ctxt: context,

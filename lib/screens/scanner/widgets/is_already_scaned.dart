@@ -1,7 +1,6 @@
 // widget retourné si un qr code a deja été scané
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:get/get_utils/get_utils.dart';
 import 'package:intl/intl.dart';
 import 'package:scanner/model/scan_history_model.dart';
 import 'package:toggle_switch/toggle_switch.dart';
@@ -48,26 +47,33 @@ class _IsAlreadyScanedState extends State<IsAlreadyScaned> {
     super.initState();
   }
 
-  _initializeVisite() {
-    // Récupère le premier scan où l'utilisateur est le visiteur principal
-    ScanHistoryModel? oldScan = widget.visite.scanHistories.firstWhereOrNull(
-      (scan) => scan.isPrimaryVisitor == true,
-    );
+  void _initializeVisite() {
+    ScanHistoryModel? oldScan;
 
-    // Si un scan est trouvé, met à jour les contrôleurs correspondants
-    //print('____________________________________1');
-    if (oldScan != null) {
-      //print('____________________________________');
-      // print(oldScan.numeroBaget);
-      setState(() {
-        _cariDController2.text =
-            oldScan.carId; // Assurez-vous que carId n'est pas null
-        _badgeController.text =
-            oldScan.numeroBaget; // Vérifiez que numeroBaget n'est pas null
-        _giletController.text =
-            oldScan.numeroGilet; // Mettez également à jour le contrôleur gilet
-      });
+    // Vérifie si 'scanHistories' est vide avant d'accéder à l'élément 'last' ou 'lastWhere'
+    if (widget.visite.scanHistories.isNotEmpty) {
+      if (widget.visite.members.isEmpty) {
+        oldScan = widget.visite.scanHistories.last;
+      } else {
+        oldScan = widget.visite.scanHistories
+            .lastWhere((scan) => scan.isPrimaryVisitor == true);
+      }
+    } else {
+      oldScan = null; // Ou toute autre valeur par défaut si nécessaire
     }
+
+    // Si un scan valide est trouvé, mettre à jour les contrôleurs
+
+    setState(() {
+      _cariDController2.text = oldScan!.carId; // Gérer les nullités
+      _giletController.text = oldScan.numeroGilet;
+      // Si le visiteur est de type permanent, utiliser le numéro CNI pour le badge
+      if (widget.visite.typeVisiteur.toLowerCase() == 'permanent') {
+        _badgeController.text = widget.visite.numeroCni;
+      } else {
+        _badgeController.text = oldScan.numeroBaget;
+      }
+    });
   }
 
   @override

@@ -62,6 +62,9 @@ class _FirstScanWidgetState extends State<FirstScanWidget> {
     super.initState();
     _idCardType = widget.visite.typePiece;
     _idCardController.text = widget.visite.numeroCni;
+    if (widget.visite.typeVisiteur.toLowerCase() == 'permanent') {
+      _badgeController.text == widget.visite.numeroCni;
+    }
 
     // Initialize controllers for each member
     for (var member in widget.visite.members) {
@@ -639,14 +642,16 @@ class _FirstScanWidgetState extends State<FirstScanWidget> {
             onPress: () {
               // Vérification des champs du visiteur principal
               if (_currentIndex == 0) {
-                if (_idCardController.text.isEmpty) {
+                if (_pSwitchStatus == 0 && _idCardController.text.isEmpty) {
                   Functions.showToast(
                     msg: 'N° de pièce obligatoire pour le visiteur principal !',
                     gravity: ToastGravity.TOP,
                   );
                   return;
                 }
-                if (_switchIndex == 0 && _badgeController.text.trim().isEmpty) {
+                if (_pSwitchStatus == 0 &&
+                    _switchIndex == 0 &&
+                    _badgeController.text.trim().isEmpty) {
                   Functions.showToast(
                     msg: 'Renseigner le n° de badge !',
                     gravity: ToastGravity.TOP,
@@ -657,7 +662,8 @@ class _FirstScanWidgetState extends State<FirstScanWidget> {
 
               if (_currentIndex > 0) {
                 // Valider chaque membre
-                if (_mIdCardControllers[_currentIndex - 1].text.isEmpty) {
+                if (_mSwitchStatus[_currentIndex - 1] == 0 &&
+                    _mIdCardControllers[_currentIndex - 1].text.isEmpty) {
                   Functions.showToast(
                     msg: 'N° de pièce  obligatoire pour ce membre !',
                     gravity: ToastGravity.TOP,
@@ -665,13 +671,18 @@ class _FirstScanWidgetState extends State<FirstScanWidget> {
                   return;
                 }
                 print(_mSwitchIndex[_currentIndex - 1]);
-                if (_mSwitchIndex[_currentIndex - 1] == 0 &&
-                    _mBadgeControllers[_currentIndex - 1].text.trim().isEmpty) {
-                  Functions.showToast(
-                    msg: 'Renseigner le n° de badge !',
-                    gravity: ToastGravity.TOP,
-                  );
-                  return;
+                if (_mSwitchStatus[_currentIndex - 1] == 0) {
+                  if (_mSwitchIndex[_currentIndex - 1] == 0 &&
+                      _mBadgeControllers[_currentIndex - 1]
+                          .text
+                          .trim()
+                          .isEmpty) {
+                    Functions.showToast(
+                      msg: 'Renseigner le n° de badge !',
+                      gravity: ToastGravity.TOP,
+                    );
+                    return;
+                  }
                 }
               }
 
@@ -769,17 +780,23 @@ class _FirstScanWidgetState extends State<FirstScanWidget> {
         membersScanHistoryData.add(memberScanHistoryData);
       }
     }
-    print('$visitData\n');
+    /*  print('$visitData\n');
     print('$scanHistoryData\n');
     membersScanHistoryData.forEach((element) {
       print('$element\n');
-    });
-    EasyLoading.dismiss();
+    }); */
+    /*  var data = jsonEncode(membersScanHistoryData);
+    print('---------> $data');
+
+    EasyLoading.dismiss(); */
 
     alert(
       ctxt: context,
       visite: widget.visite,
       confirm: () async {
+        /*  print(membersScanHistoryData.length);
+        EasyLoading.dismiss();
+        return; */
         if (_pSwitchStatus == 1) {
           EasyLoading.show(status: 'sauvegarde en cours...');
           await Functions.upDateVisit(
@@ -787,8 +804,9 @@ class _FirstScanWidgetState extends State<FirstScanWidget> {
             visiteId: widget.visite.id,
           ).whenComplete(() {
             //visite.plaqueVehicule = cariDController.text;
-
-            _postMembersScanHistoryData(membersScanHistoryData)
+            RemoteService()
+                .postDataList(
+                    endpoint: 'scanCounters', postData: membersScanHistoryData)
                 .whenComplete(() {
               membersScanHistoryData.clear();
             });
@@ -822,7 +840,10 @@ class _FirstScanWidgetState extends State<FirstScanWidget> {
                 .then((res) {
               //visite.plaqueVehicule = cariDController.text;
 
-              _postMembersScanHistoryData(membersScanHistoryData)
+              RemoteService()
+                  .postDataList(
+                      endpoint: 'scanCounters',
+                      postData: membersScanHistoryData)
                   .whenComplete(() {
                 membersScanHistoryData.clear();
               });
@@ -848,7 +869,7 @@ class _FirstScanWidgetState extends State<FirstScanWidget> {
     );
   }
 
-  Future<void> _postMembersScanHistoryData(
+  /*  Future<void> _postMembersScanHistoryData(
       List<Map<String, dynamic>> data) async {
     for (int i = 0; i < data.length; i++) {
       await RemoteService().postData(
@@ -856,7 +877,7 @@ class _FirstScanWidgetState extends State<FirstScanWidget> {
         postData: data[i],
       );
     }
-  }
+  } */
 
   Container _idCardTypeSelector() {
     List<String> _pieces = [

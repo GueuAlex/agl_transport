@@ -316,9 +316,7 @@ class _CreateDeliveryScreenState extends State<CreateDeliveryScreen> {
                 InkWell(
                   onTap: () => Functions.showBottomSheet(
                     ctxt: context,
-                    widget: _addLogisticMember(changeState: () {
-                      setState(() {});
-                    }),
+                    widget: _addLogisticMember(),
                   ),
                   child: Container(
                     padding: const EdgeInsets.all(3.5),
@@ -1871,7 +1869,7 @@ class _CreateDeliveryScreenState extends State<CreateDeliveryScreen> {
     );
   }
 
-  _addLogisticMember({required VoidCallback changeState}) {
+  _addLogisticMember() {
     List<String> _pieces = [
       "CNI",
       "Permis",

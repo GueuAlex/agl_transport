@@ -13,6 +13,9 @@ import 'package:scanner/widgets/all_sheet_header.dart';
 import '../../bloc/options_bloc/options_bloc.dart';
 import '../../bloc/options_bloc/options_event.dart';
 import '../../bloc/options_bloc/options_state.dart';
+import '../../bloc/piece_bloc/piece_bloc.dart';
+import '../../bloc/piece_bloc/piece_event.dart';
+import '../../bloc/piece_bloc/piece_state.dart';
 import '../../config/app_text.dart';
 import '../../config/functions.dart';
 import '../../config/palette.dart';
@@ -53,6 +56,7 @@ class _AddDeliScreeState extends State<AddDeliScree> {
   String _motif = '';
   String _selectedOption = '';
   List<LogisticAgent> _logisticAgents = [];
+  String _selectedL = 'CNI';
 
   final TextEditingController _logisticAgentFirstName = TextEditingController();
   final TextEditingController _logisticAgentLastName = TextEditingController();
@@ -1285,112 +1289,163 @@ class _AddDeliScreeState extends State<AddDeliScree> {
   }
 
   _addLogisticMember() {
-    return Container(
-      width: double.infinity,
-      height: MediaQuery.of(context).size.height * 0.65,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(5),
-          topRight: Radius.circular(5),
+    List<String> _pieces = [
+      "CNI",
+      "Permis",
+      "Passeport",
+      "Attestation",
+    ];
+    return BlocBuilder<PieceBloc, PieceState>(builder: (context, state) {
+      return Container(
+        width: double.infinity,
+        height: MediaQuery.of(context).size.height * 0.7,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(5),
+            topRight: Radius.circular(5),
+          ),
         ),
-      ),
-      child: Column(
-        children: [
-          SheetCloser(),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: InfosColumn(
-                          opacity: 0.12,
-                          label: 'Nom',
-                          widget: Expanded(
-                            child: Functions.getTextField(
-                              controller: _logisticAgentFirstName,
+        child: Column(
+          children: [
+            SheetCloser(),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: InfosColumn(
+                            opacity: 0.12,
+                            label: 'Nom',
+                            widget: Expanded(
+                              child: Functions.getTextField(
+                                controller: _logisticAgentFirstName,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 5),
-                      Expanded(
-                        child: InfosColumn(
-                          opacity: 0.12,
-                          label: 'Prénoms',
-                          widget: Expanded(
-                            child: Functions.getTextField(
-                              controller: _logisticAgentLastName,
+                        const SizedBox(width: 5),
+                        Expanded(
+                          child: InfosColumn(
+                            opacity: 0.12,
+                            label: 'Prénoms',
+                            widget: Expanded(
+                              child: Functions.getTextField(
+                                controller: _logisticAgentLastName,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 5),
-                  InfosColumn(
-                    opacity: 0.12,
-                    label: 'N° de pièce',
-                    widget: Expanded(
-                      child: Functions.getTextField(
-                        controller: _logisticAgentIdCard,
+                      ],
+                    ),
+                    const SizedBox(height: 5),
+                    InfosColumn(
+                      opacity: 0.12,
+                      label: 'N° de pièce',
+                      widget: Expanded(
+                        child: Functions.getTextField(
+                          controller: _logisticAgentIdCard,
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 15),
-                  CustomButton(
-                    color: Palette.primaryColor,
-                    width: double.infinity,
-                    height: 35,
-                    radius: 5,
-                    text: 'Ajouter l\'agent',
-                    onPress: () {
-                      if (_logisticAgentFirstName.text.isEmpty) {
-                        Functions.showToast(
-                          msg: 'Le nom est obligatoire',
-                          gravity: ToastGravity.TOP,
+                    const SizedBox(height: 15),
+                    AppText.medium('Type de la pièce'),
+                    AppText.small(
+                      'Veuillez selectionner le type de la pièce fournie',
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      children: _pieces.map((type) {
+                        bool isSelected = type == _selectedL;
+                        return InkWell(
+                          onTap: () {
+                            context.read<PieceBloc>().add(
+                                  SelectPieceOption(type),
+                                );
+                            setState(() {
+                              _selectedL = type;
+                            });
+                            // print(_selectedL);
+                            // print(_searcheOptions);
+                          },
+                          child: Container(
+                            margin: const EdgeInsets.symmetric(
+                                horizontal: 5, vertical: 5),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? Palette.primaryColor
+                                  : Palette.separatorColor,
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                            child: Text(
+                              type,
+                              style: TextStyle(
+                                color: isSelected ? Colors.white : null,
+                              ),
+                            ),
+                          ),
                         );
-                        return;
-                      }
-                      if (_logisticAgentLastName.text.isEmpty) {
-                        Functions.showToast(
-                          msg: 'Le nom est obligatoire',
-                          gravity: ToastGravity.TOP,
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 25),
+                    CustomButton(
+                      color: Palette.primaryColor,
+                      width: double.infinity,
+                      height: 35,
+                      radius: 5,
+                      text: 'Ajouter l\'agent',
+                      onPress: () {
+                        if (_logisticAgentFirstName.text.isEmpty) {
+                          Functions.showToast(
+                            msg: 'Le nom est obligatoire',
+                            gravity: ToastGravity.TOP,
+                          );
+                          return;
+                        }
+                        if (_logisticAgentLastName.text.isEmpty) {
+                          Functions.showToast(
+                            msg: 'Le nom est obligatoire',
+                            gravity: ToastGravity.TOP,
+                          );
+                          return;
+                        }
+                        if (_logisticAgentIdCard.text.isEmpty) {
+                          Functions.showToast(
+                            msg: 'Le numéro de pièce est obligatoire',
+                            gravity: ToastGravity.TOP,
+                          );
+                          return;
+                        }
+                        final _logisticAgent = LogisticAgent(
+                          id: 0,
+                          nom: _logisticAgentFirstName.text,
+                          prenoms: _logisticAgentLastName.text,
+                          numeroCni: _logisticAgentIdCard.text,
+                          typePiece: _selectedL,
                         );
-                        return;
-                      }
-                      if (_logisticAgentIdCard.text.isEmpty) {
-                        Functions.showToast(
-                          msg: 'Le numéro de pièce est obligatoire',
-                          gravity: ToastGravity.TOP,
-                        );
-                        return;
-                      }
-                      final _logisticAgent = LogisticAgent(
-                        id: 0,
-                        nom: _logisticAgentFirstName.text,
-                        prenoms: _logisticAgentLastName.text,
-                        numeroCni: _logisticAgentIdCard.text,
-                        typePiece: '',
-                      );
-                      _logisticAgents.add(_logisticAgent);
-                      _logisticAgentFirstName.clear();
-                      _logisticAgentLastName.clear();
-                      _logisticAgentIdCard.clear();
-                      setState(() {});
-                      Navigator.pop(context);
-                    },
-                  )
-                ],
+                        _logisticAgents.add(_logisticAgent);
+                        _logisticAgentFirstName.clear();
+                        _logisticAgentLastName.clear();
+                        _logisticAgentIdCard.clear();
+                        _selectedL = 'CNI';
+                        context.read<PieceBloc>().add(SelectPieceOption('CNI'));
+                        setState(() {});
+                        Navigator.pop(context);
+                      },
+                    )
+                  ],
+                ),
               ),
-            ),
-          )
-        ],
-      ),
-    );
+            )
+          ],
+        ),
+      );
+    });
   }
 
   _containerHeightSelector() {

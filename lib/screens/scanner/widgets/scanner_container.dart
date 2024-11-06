@@ -1,8 +1,12 @@
+import 'dart:async';
+
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:vibration/vibration.dart';
+import 'package:http/http.dart' as http;
 
 import '../../../config/functions.dart';
 import '../../../config/overlay.dart';
@@ -10,6 +14,7 @@ import '../../../config/palette.dart';
 import '../../../emails/emails_service.dart';
 import '../../../model/agent_model.dart';
 import '../../../model/visite_model.dart';
+import '../../../remote_service/remote_service.dart';
 import '../../../widgets/all_sheet_header.dart';
 import 'error_sheet_container.dart';
 import 'sheet_container.dart';
@@ -95,69 +100,107 @@ class _ScannerContainerState extends State<ScannerContainer> {
               /// son type
               // int? id = int.tryParse(code);
               if (codePattern.hasMatch(code)) {
-                EasyLoading.show(
-                  status: 'Vérification en cours',
-                );
-                // fetch data
-                /* var postData = {
-                  "code_visite": code,
-                };
-                  await RemoteService()
-                    .postData(
-                  endpoint: 'visiteurs/verifications',
-                  postData: postData,
-                )
-                    .then((response) async {
-                  //EasyLoading.dismiss();
-                  if (response.statusCode == 200 ||
-                      response.statusCode == 201) {
-                    //
-                    VisiteModel visite = visiteModelFromJson(
-                      response.body,
-                    ); */
-                VisiteModel.getVisite(code: code).then((visite) async {
-                  //EasyLoading.dismiss();
-                  if (visite != null) {
-                    // print(visite);
+                EasyLoading.show();
 
-                    await player.play(AssetSource('images/soung.mp3'));
+                await player.play(AssetSource('images/soung.mp3'));
+
+                try {
+                  // Récupération de la visite avec le code
+                  VisiteModel? visite = await VisiteModel.getVisite(code: code);
+
+                  if (visite != null) {
+                    // Visite trouvée, jouer le son et afficher le bottom sheet
 
                     Functions.showBottomSheet(
                       ctxt: context,
-                      widget: SheetContainer(
-                        visite: visite,
-                        agent: _agent!,
-                      ),
+                      widget: SheetContainer(visite: visite, agent: _agent!),
                     ).whenComplete(() {
-                      Future.delayed(const Duration(seconds: 3)).then((_) {
+                      //Future.delayed(const Duration(seconds: 3)).then((_) {
+                      setState(() {
+                        isScanCompleted = false;
+                      });
+                      //});
+                    });
+                  } else {
+                    // Si la visite n'est pas trouvée, envoyer une requête à l'API
+                    var postData = {"code_visite": code};
+
+                    http.Response r = await RemoteService()
+                        .postData(
+                            endpoint: 'visiteurs/verifications',
+                            postData: postData)
+                        .timeout(const Duration(seconds: 10));
+
+                    if (r.statusCode == 200 || r.statusCode == 210) {
+                      // Visite trouvée via l'API
+                      VisiteModel visite = visiteModelFromJson(r.body);
+                      Functions.showBottomSheet(
+                        ctxt: context,
+                        widget: SheetContainer(visite: visite, agent: _agent!),
+                      ).whenComplete(() {
+                        // Future.delayed(const Duration(seconds: 3)).then((_) {
                         setState(() {
                           isScanCompleted = false;
                         });
+                        //});
                       });
-                    });
-
-                    EasyLoading.dismiss();
-                  } else {
-                    EasyLoading.dismiss();
-                    sendErrorEmail(
-                      subject: 'Erreur lors d\'un scan',
-                      title:
-                          'Un Qr code à été scanné mais aucune visite trouvée\n\n',
-                      errorDetails: 'Code: $code',
-                    );
-                    _error(size: size);
+                    } else {
+                      // Erreur de réponse API, envoyer un email d'erreur et afficher une alerte
+                      sendErrorEmail(
+                        subject: 'Erreur lors d\'un scan',
+                        title:
+                            'Un qr code  a été scanné mais aucune visite trouvée\n\n',
+                        errorDetails: 'Code: $code',
+                      );
+                      await _error(size: size);
+                      setState(() {
+                        isScanCompleted = false;
+                      });
+                    }
                   }
-                });
-                //////////////
-                ///
-                EasyLoading.dismiss();
+                } on TimeoutException catch (t) {
+                  // Gestion de l'exception Timeout
+                  Functions.showToast(
+                      msg: 'Problème de connexion internet',
+                      gravity: ToastGravity.TOP);
+                  sendErrorEmail(
+                    subject: 'Erreur lors d\'une vérification',
+                    title:
+                        'Une requête a pris trop de temps dû une connexio lente\n\n',
+                    errorDetails:
+                        'Code: $code\n\nErreur: ${t.message.toString()}',
+                  );
+                } on http.ClientException catch (e) {
+                  // Gestion des erreurs réseau
+                  Functions.showToast(
+                    msg: 'Problème de connexion internet',
+                    gravity: ToastGravity.TOP,
+                  );
+                  sendErrorEmail(
+                    subject: 'Erreur lors d\'un scan',
+                    title: 'Une requête a échoué dû à une connexio lente\n\n',
+                    errorDetails:
+                        'Code: $code\n\nErreur: ${e.message.toString()}',
+                  );
+                } catch (e) {
+                  // Gestion des autres exceptions
+                  Functions.showToast(
+                      msg: 'Problème de connexion internet',
+                      gravity: ToastGravity.TOP);
+                  sendErrorEmail(
+                    subject: 'Erreur lors d\'un scan',
+                    title: 'Un problème est survenu\n\n',
+                    errorDetails: 'Code: $code\n\nErreur: ${e.toString()}',
+                  );
+                } finally {
+                  // Toujours arrêter EasyLoading
+                  EasyLoading.dismiss();
+                }
               }
 
               ///
               /////////////////////////////
-              ///id represente l'id du qrcode dans notre DB
-              /// si id n'est pas null, on envoie id
-              /// a SheetContainer .....
+
               else {
                 ///////////////////////
                 ///sinon on fait vibrer le device
@@ -175,11 +218,11 @@ class _ScannerContainerState extends State<ScannerContainer> {
                     text: 'Qr code invalide !',
                   ),
                 ).whenComplete(() {
-                  Future.delayed(const Duration(seconds: 5)).then((_) {
-                    setState(() {
-                      isScanCompleted = false;
-                    });
+                  // Future.delayed(const Duration(seconds: 5)).then((_) {
+                  setState(() {
+                    isScanCompleted = false;
                   });
+                  //});
                 });
               }
 
@@ -196,13 +239,13 @@ class _ScannerContainerState extends State<ScannerContainer> {
   }
 
   //
-  void _error({required Size size}) {
+  Future<void> _error({required Size size}) async {
     ///////////////////////
     ///sinon on fait vibrer le device
     ///et on afficher un message d'erreur
     ///
     Vibration.vibrate(duration: 200);
-    Functions.showBottomSheet(
+    return Functions.showBottomSheet(
       ctxt: context,
       widget: Container(
         height: MediaQuery.of(context).size.height / 2,
