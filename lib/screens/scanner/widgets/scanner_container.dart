@@ -110,6 +110,7 @@ class _ScannerContainerState extends State<ScannerContainer> {
 
                   if (visite != null) {
                     // Visite trouvée, jouer le son et afficher le bottom sheet
+                    EasyLoading.dismiss();
 
                     Functions.showBottomSheet(
                       ctxt: context,
@@ -133,6 +134,7 @@ class _ScannerContainerState extends State<ScannerContainer> {
 
                     if (r.statusCode == 200 || r.statusCode == 210) {
                       // Visite trouvée via l'API
+                      EasyLoading.dismiss();
                       VisiteModel visite = visiteModelFromJson(r.body);
                       Functions.showBottomSheet(
                         ctxt: context,
@@ -146,6 +148,7 @@ class _ScannerContainerState extends State<ScannerContainer> {
                       });
                     } else {
                       // Erreur de réponse API, envoyer un email d'erreur et afficher une alerte
+                      EasyLoading.dismiss();
                       sendErrorEmail(
                         subject: 'Erreur lors d\'un scan',
                         title:
@@ -160,6 +163,7 @@ class _ScannerContainerState extends State<ScannerContainer> {
                   }
                 } on TimeoutException catch (t) {
                   // Gestion de l'exception Timeout
+                  EasyLoading.dismiss();
                   Functions.showToast(
                       msg: 'Problème de connexion internet',
                       gravity: ToastGravity.TOP);
@@ -172,6 +176,7 @@ class _ScannerContainerState extends State<ScannerContainer> {
                   );
                 } on http.ClientException catch (e) {
                   // Gestion des erreurs réseau
+                  EasyLoading.dismiss();
                   Functions.showToast(
                     msg: 'Problème de connexion internet',
                     gravity: ToastGravity.TOP,
@@ -184,6 +189,7 @@ class _ScannerContainerState extends State<ScannerContainer> {
                   );
                 } catch (e) {
                   // Gestion des autres exceptions
+                  EasyLoading.dismiss();
                   Functions.showToast(
                       msg: 'Problème de connexion internet',
                       gravity: ToastGravity.TOP);

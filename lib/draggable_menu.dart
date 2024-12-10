@@ -190,13 +190,13 @@ class _DraggableMenuState extends State<DraggableMenu> {
     bool isNotAllowRout = item.isVisiteModule != _appIsVisiteModule;
     return GestureDetector(
       onTap: () {
-        if (isNotAllowRout) {
+        /*  if (isNotAllowRout) {
           Functions.showToast(
             msg: 'Non autorisé',
             gravity: ToastGravity.TOP,
           );
           return;
-        }
+        } */
         if (contextRouteName == item.route) {
           _setDraggableToMinSize();
         } else {

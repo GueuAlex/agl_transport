@@ -885,6 +885,9 @@ class _FirstScanWidgetState extends State<FirstScanWidget> {
       "Permis",
       "Passeport",
       "Attestation",
+      "Carte consulaire",
+      "Carte CMU",
+      "Carte professionnelle",
     ];
     return Container(
       width: double.infinity,
@@ -895,49 +898,51 @@ class _FirstScanWidgetState extends State<FirstScanWidget> {
             topLeft: Radius.circular(5),
             topRight: Radius.circular(5),
           )),
-      child: Column(
-        children: [
-          AllSheetHeader(
-            opacity: 0,
-          ),
-          Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                children: _pieces.map((piece) {
-                  return InkWell(
-                    onTap: () {
-                      setState(() {
-                        _idCardType = piece;
-                      });
-                      Navigator.pop(context);
-                    },
-                    child: Container(
-                      width: double.infinity,
-                      height: 40,
-                      margin: const EdgeInsets.symmetric(horizontal: 10),
-                      padding: const EdgeInsets.only(left: 10),
-                      alignment: Alignment.centerLeft,
-                      decoration: BoxDecoration(
-                        border: Border(
-                          left: BorderSide(
-                            width: 3,
-                            color: piece == _idCardType
-                                ? Palette.primaryColor
-                                : Colors.white,
+      child: SafeArea(
+        child: Column(
+          children: [
+            AllSheetHeader(
+              opacity: 0,
+            ),
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  children: _pieces.map((piece) {
+                    return InkWell(
+                      onTap: () {
+                        setState(() {
+                          _idCardType = piece;
+                        });
+                        Navigator.pop(context);
+                      },
+                      child: Container(
+                        width: double.infinity,
+                        height: 40,
+                        margin: const EdgeInsets.symmetric(horizontal: 10),
+                        padding: const EdgeInsets.only(left: 10),
+                        alignment: Alignment.centerLeft,
+                        decoration: BoxDecoration(
+                          border: Border(
+                            left: BorderSide(
+                              width: 3,
+                              color: piece == _idCardType
+                                  ? Palette.primaryColor
+                                  : Colors.white,
+                            ),
                           ),
                         ),
+                        child: AppText.medium(
+                          piece.toUpperCase(),
+                          textAlign: TextAlign.left,
+                        ),
                       ),
-                      child: AppText.medium(
-                        piece.toUpperCase(),
-                        textAlign: TextAlign.left,
-                      ),
-                    ),
-                  );
-                }).toList(),
+                    );
+                  }).toList(),
+                ),
               ),
-            ),
-          )
-        ],
+            )
+          ],
+        ),
       ),
     );
   }
@@ -948,6 +953,9 @@ class _FirstScanWidgetState extends State<FirstScanWidget> {
       "Permis",
       "Passeport",
       "Attestation",
+      "Carte consulaire",
+      "Carte CMU",
+      "Carte professionnelle",
     ];
 
     return Container(
@@ -960,52 +968,54 @@ class _FirstScanWidgetState extends State<FirstScanWidget> {
           topRight: Radius.circular(5),
         ),
       ),
-      child: Column(
-        children: [
-          AllSheetHeader(
-            opacity: 0,
-          ),
-          Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                children: _pieces.map((piece) {
-                  return InkWell(
-                    onTap: () {
-                      setState(() {
-                        // Met à jour le type de pièce du membre correspondant à l'index
-                        widget.visite.members[index].typePiece = piece;
-                        _membersIdCardTypes[index] = piece;
-                      });
-                      Navigator.pop(context);
-                    },
-                    child: Container(
-                      width: double.infinity,
-                      height: 40,
-                      margin: const EdgeInsets.symmetric(horizontal: 10),
-                      padding: const EdgeInsets.only(left: 10),
-                      alignment: Alignment.centerLeft,
-                      decoration: BoxDecoration(
-                        border: Border(
-                          left: BorderSide(
-                            width: 3,
-                            color:
-                                piece == widget.visite.members[index].typePiece
-                                    ? Palette.primaryColor
-                                    : Colors.white,
+      child: SafeArea(
+        child: Column(
+          children: [
+            AllSheetHeader(
+              opacity: 0,
+            ),
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  children: _pieces.map((piece) {
+                    return InkWell(
+                      onTap: () {
+                        setState(() {
+                          // Met à jour le type de pièce du membre correspondant à l'index
+                          widget.visite.members[index].typePiece = piece;
+                          _membersIdCardTypes[index] = piece;
+                        });
+                        Navigator.pop(context);
+                      },
+                      child: Container(
+                        width: double.infinity,
+                        height: 40,
+                        margin: const EdgeInsets.symmetric(horizontal: 10),
+                        padding: const EdgeInsets.only(left: 10),
+                        alignment: Alignment.centerLeft,
+                        decoration: BoxDecoration(
+                          border: Border(
+                            left: BorderSide(
+                              width: 3,
+                              color: piece ==
+                                      widget.visite.members[index].typePiece
+                                  ? Palette.primaryColor
+                                  : Colors.white,
+                            ),
                           ),
                         ),
+                        child: AppText.medium(
+                          piece.toUpperCase(),
+                          textAlign: TextAlign.left,
+                        ),
                       ),
-                      child: AppText.medium(
-                        piece.toUpperCase(),
-                        textAlign: TextAlign.left,
-                      ),
-                    ),
-                  );
-                }).toList(),
+                    );
+                  }).toList(),
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

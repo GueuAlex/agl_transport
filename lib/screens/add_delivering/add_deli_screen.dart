@@ -1294,6 +1294,9 @@ class _AddDeliScreeState extends State<AddDeliScree> {
       "Permis",
       "Passeport",
       "Attestation",
+      "Carte consulaire",
+      "Carte CMU",
+      "Carte professionnelle",
     ];
     return BlocBuilder<PieceBloc, PieceState>(builder: (context, state) {
       return Container(
@@ -1575,6 +1578,14 @@ class _AddDeliScreeState extends State<AddDeliScree> {
 
   _motifSelector() {
     List<String> _motifs = [
+      "Récuperation de conteneur",
+      "Récuperation de plateau",
+      "Sortie conteneur",
+      "Sortie plateau",
+      "Livraison marchandise",
+      "Sortie camion",
+      "Chargement de marchandises",
+      "Expédition de marchandises",
       "Livraison",
       "Recuperation",
     ];
@@ -1587,49 +1598,51 @@ class _AddDeliScreeState extends State<AddDeliScree> {
             topLeft: Radius.circular(5),
             topRight: Radius.circular(5),
           )),
-      child: Column(
-        children: [
-          AllSheetHeader(
-            opacity: 0,
-          ),
-          Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                children: _motifs.map((motif) {
-                  return InkWell(
-                    onTap: () {
-                      setState(() {
-                        _motif = motif;
-                      });
-                      Navigator.pop(context);
-                    },
-                    child: Container(
-                      width: double.infinity,
-                      height: 40,
-                      margin: const EdgeInsets.symmetric(horizontal: 10),
-                      padding: const EdgeInsets.only(left: 10),
-                      alignment: Alignment.centerLeft,
-                      decoration: BoxDecoration(
-                        border: Border(
-                          left: BorderSide(
-                            width: 3,
-                            color: motif == _motif
-                                ? Palette.primaryColor
-                                : Colors.white,
+      child: SafeArea(
+        child: Column(
+          children: [
+            AllSheetHeader(
+              opacity: 0,
+            ),
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  children: _motifs.map((motif) {
+                    return InkWell(
+                      onTap: () {
+                        setState(() {
+                          _motif = motif;
+                        });
+                        Navigator.pop(context);
+                      },
+                      child: Container(
+                        width: double.infinity,
+                        height: 40,
+                        margin: const EdgeInsets.symmetric(horizontal: 10),
+                        padding: const EdgeInsets.only(left: 10),
+                        alignment: Alignment.centerLeft,
+                        decoration: BoxDecoration(
+                          border: Border(
+                            left: BorderSide(
+                              width: 3,
+                              color: motif == _motif
+                                  ? Palette.primaryColor
+                                  : Colors.white,
+                            ),
                           ),
                         ),
+                        child: AppText.medium(
+                          motif,
+                          textAlign: TextAlign.left,
+                        ),
                       ),
-                      child: AppText.medium(
-                        motif,
-                        textAlign: TextAlign.left,
-                      ),
-                    ),
-                  );
-                }).toList(),
+                    );
+                  }).toList(),
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

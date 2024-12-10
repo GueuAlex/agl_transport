@@ -1178,6 +1178,9 @@ class _AddVisiteScreenState extends State<AddVisiteScreen> {
       "Permis",
       "Passeport",
       "Attestation",
+      "Carte consulaire",
+      "Carte CMU",
+      "Carte professionnelle",
     ];
     return Container(
       width: double.infinity,
@@ -1188,52 +1191,54 @@ class _AddVisiteScreenState extends State<AddVisiteScreen> {
             topLeft: Radius.circular(5),
             topRight: Radius.circular(5),
           )),
-      child: Column(
-        children: [
-          AllSheetHeader(
-            opacity: 0,
-          ),
-          Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                children: _pieces.map((piece) {
-                  return InkWell(
-                    onTap: () {
-                      setState(() {
-                        _idCardType = piece;
-                      });
-                      Navigator.pop(context);
-                    },
-                    child: Container(
-                      width: double.infinity,
-                      height: 40,
-                      margin: const EdgeInsets.symmetric(horizontal: 10),
-                      padding: const EdgeInsets.only(left: 10),
-                      alignment: Alignment.centerLeft,
-                      decoration: BoxDecoration(
-                        /*  color: piece == _idCardType
-                            ? Palette.primaryColor
-                            : Colors.white, */
-                        border: Border(
-                          left: BorderSide(
-                            width: 3,
-                            color: piece == _idCardType
-                                ? Palette.primaryColor
-                                : Colors.white,
+      child: SafeArea(
+        child: Column(
+          children: [
+            AllSheetHeader(
+              opacity: 0,
+            ),
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  children: _pieces.map((piece) {
+                    return InkWell(
+                      onTap: () {
+                        setState(() {
+                          _idCardType = piece;
+                        });
+                        Navigator.pop(context);
+                      },
+                      child: Container(
+                        width: double.infinity,
+                        height: 40,
+                        margin: const EdgeInsets.symmetric(horizontal: 10),
+                        padding: const EdgeInsets.only(left: 10),
+                        alignment: Alignment.centerLeft,
+                        decoration: BoxDecoration(
+                          /*  color: piece == _idCardType
+                              ? Palette.primaryColor
+                              : Colors.white, */
+                          border: Border(
+                            left: BorderSide(
+                              width: 3,
+                              color: piece == _idCardType
+                                  ? Palette.primaryColor
+                                  : Colors.white,
+                            ),
                           ),
                         ),
+                        child: AppText.medium(
+                          piece.toUpperCase(),
+                          textAlign: TextAlign.left,
+                        ),
                       ),
-                      child: AppText.medium(
-                        piece.toUpperCase(),
-                        textAlign: TextAlign.left,
-                      ),
-                    ),
-                  );
-                }).toList(),
+                    );
+                  }).toList(),
+                ),
               ),
-            ),
-          )
-        ],
+            )
+          ],
+        ),
       ),
     );
   }
