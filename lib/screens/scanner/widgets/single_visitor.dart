@@ -466,6 +466,9 @@ class _SingleVisitorState extends State<SingleVisitor> {
       "Permis",
       "Passeport",
       "Attestation",
+      "Carte consulaire",
+      "Carte CMU",
+      "Carte professionnelle",
     ];
     return Container(
       width: double.infinity,

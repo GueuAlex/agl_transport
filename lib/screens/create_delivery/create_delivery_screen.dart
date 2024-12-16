@@ -66,7 +66,7 @@ class _CreateDeliveryScreenState extends State<CreateDeliveryScreen> {
   String? _containerState = null;
   String? _containerHeight = null;
   String _mouvement = 'Entrée';
-  String _motif = 'Livraison';
+  String _motif = 'Récuperation de conteneur';
   String _formatVehicule = 'Tracteur';
   String _idCardType = 'CNI';
   DateTime _startDate = DateTime.now();
@@ -774,7 +774,7 @@ class _CreateDeliveryScreenState extends State<CreateDeliveryScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     AppText.medium(
-                      'Détails de la ${_motif.toLowerCase()}',
+                      'Détails',
                     ),
                     Row(
                       children: [
@@ -813,7 +813,12 @@ class _CreateDeliveryScreenState extends State<CreateDeliveryScreen> {
                                 ),
                                 child: Row(
                                   children: [
-                                    Expanded(child: AppText.medium(_motif)),
+                                    Expanded(
+                                        child: AppText.medium(
+                                      _motif,
+                                      maxLine: 1,
+                                      textOverflow: TextOverflow.ellipsis,
+                                    )),
                                     Icon(Icons.arrow_drop_down)
                                   ],
                                 ),
@@ -1612,8 +1617,6 @@ class _CreateDeliveryScreenState extends State<CreateDeliveryScreen> {
       "Sortie camion",
       "Chargement de marchandises",
       "Expédition de marchandises",
-      "Livraison",
-      "Recuperation",
     ];
     return Container(
       width: double.infinity,
@@ -1888,6 +1891,9 @@ class _CreateDeliveryScreenState extends State<CreateDeliveryScreen> {
       "Permis",
       "Passeport",
       "Attestation",
+      "Carte consulaire",
+      "Carte CMU",
+      "Carte professionnelle",
     ];
     return BlocBuilder<PieceBloc, PieceState>(builder: (context, state) {
       return Container(

@@ -9,6 +9,7 @@ import 'package:intl/intl.dart';
 import 'package:scanner/screens/scanner/widgets/infos_column.dart';
 import 'package:scanner/screens/side_bar/open_side_dar.dart';
 import 'package:scanner/widgets/all_sheet_header.dart';
+import 'package:scanner/widgets/text_middle.dart';
 
 import '../../bloc/options_bloc/options_bloc.dart';
 import '../../bloc/options_bloc/options_event.dart';
@@ -30,6 +31,7 @@ import '../../widgets/custom_button.dart';
 import '../../widgets/sheet_closer.dart';
 import '../create_delivery/widget/logistic_member.dart';
 import 'deli_verify.sucess.dart';
+import 'widgets/deli_row.dart';
 
 class AddDeliScree extends StatefulWidget {
   static String routeName = 'add_deli_screen';
@@ -49,6 +51,9 @@ class _AddDeliScreeState extends State<AddDeliScree> {
     "Permis",
     "Passeport",
     "Attestation",
+    "Carte consulaire",
+    "Carte CMU",
+    "Carte professionnelle",
   ];
 
   String _containerState = '';
@@ -120,6 +125,9 @@ class _AddDeliScreeState extends State<AddDeliScree> {
   void _showBonCommandeSheet() {
     showModalBottomSheet(
       context: context,
+      backgroundColor: Colors.transparent,
+      isDismissible: false,
+      enableDrag: false,
       isScrollControlled: true,
       builder: (BuildContext context) {
         return _formSheet();
@@ -369,10 +377,16 @@ class _AddDeliScreeState extends State<AddDeliScree> {
                             ),
                             Expanded(
                               child: InfosColumn(
+                                height: 50,
+                                opacity: 0.12,
                                 label: "Immatriculation ou n° du tracteur",
                                 widget: Expanded(
-                                  child: AppText.medium(
-                                    _widgetDeli!.numeroImmatriculation,
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(bottom: 4),
+                                    child: Functions.getTextField(
+                                      controller: _numTracteurController,
+                                      /* _widgetDeli!.numeroImmatriculation, */
+                                    ),
                                   ),
                                 ),
                               ),
@@ -903,6 +917,14 @@ class _AddDeliScreeState extends State<AddDeliScree> {
       _initialActions();
       return;
     }
+    if (_numTracteurController.text.trim().isEmpty) {
+      Functions.showToast(
+        msg:
+            'Renseigner le numéro du d\'immatriculation du véhicule ou du tracteur',
+        gravity: ToastGravity.TOP,
+      );
+      return;
+    }
 
     // UPDDATE LIVRAISON
     Map<String, dynamic> _payload = {
@@ -913,8 +935,7 @@ class _AddDeliScreeState extends State<AddDeliScree> {
       "type_piece": _idCardType.toUpperCase(),
       "numero_piece": _idCardController.text.toUpperCase(),
       "validite_piece": _pieceValidController.text.toUpperCase(),
-      "numero_immatriculation":
-          _widgetDeli!.numeroImmatriculation.toUpperCase(),
+      "numero_immatriculation": _numTracteurController.text.toUpperCase(),
       "numero_remorque": _numRemorqueController.text.toUpperCase(),
       "numero_conteneur": _numConteneurController.text.toUpperCase(),
       "numero_plomb": _numPlombController.text.toUpperCase(),
@@ -976,9 +997,18 @@ class _AddDeliScreeState extends State<AddDeliScree> {
       );
       return;
     }
+    if (_numTracteurController.text.trim().isEmpty) {
+      Functions.showToast(
+        msg:
+            'Renseigner le numéro du d\'immatriculation du véhicule ou du tracteur',
+        gravity: ToastGravity.TOP,
+      );
+      return;
+    }
     // UPDDATE LIVRAISON
     Map<String, dynamic> _payload = {
       "active": 0,
+      "numero_immatriculation": _numTracteurController.text.toUpperCase(),
       /*  "date_sortie": DateTime.now().toIso8601String(),
       "heure_sortie": hours, */
     };
@@ -994,8 +1024,7 @@ class _AddDeliScreeState extends State<AddDeliScree> {
       "type_piece": _idCardType.toUpperCase(),
       "numero_piece": _idCardController.text.toUpperCase(),
       "validite_piece": _pieceValidController.text.toUpperCase(),
-      "numero_immatriculation":
-          _widgetDeli!.numeroImmatriculation.toUpperCase(),
+      "numero_immatriculation": _numTracteurController.text.toUpperCase(),
       "numero_remorque": _numRemorqueController.text.toUpperCase(),
       "numero_conteneur": _numConteneurController.text.toUpperCase(),
       "numero_plomb": _numPlombController.text.toUpperCase(),
@@ -1053,7 +1082,7 @@ class _AddDeliScreeState extends State<AddDeliScree> {
     return BlocBuilder<DeliveryBloc, DeliveryState>(builder: (context, state) {
       return Container(
         width: double.infinity,
-        height: MediaQuery.of(context).size.height * 0.45,
+        height: MediaQuery.of(context).size.height * 0.90,
         padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
         margin: EdgeInsets.only(
           bottom: MediaQuery.of(context).viewInsets.bottom,
@@ -1094,89 +1123,109 @@ class _AddDeliScreeState extends State<AddDeliScree> {
               ],
             ),
             const SizedBox(height: 25),
-            Expanded(
-              child: Column(
-                children: [
-                  AppText.small(
-                    'Veuillez indiquer le mouvement du véhicule/tracteur et renseigner son numéro  d\'immatriculation.',
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 15),
-                  Row(
-                    children: _searcheOptions.map(
-                      (option) {
-                        return Expanded(
-                          child: InkWell(
-                            onTap: () {
-                              context.read<DeliveryBloc>().add(
-                                    SelectDeliveryOption(option),
-                                  );
-                              setState(() {
-                                _selectedOption = option;
-                              });
-                              print(_selectedOption);
-                              // print(_searcheOptions);
-                            },
-                            child: Container(
-                              margin: const EdgeInsets.symmetric(horizontal: 5),
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 10),
-                              height: 45,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(5),
-                                border: Border.all(
-                                  color: state.selectedOption == option
-                                      ? Palette.primaryColor
-                                      : Palette.separatorColor,
-                                  width: 3.5,
-                                ),
-                              ),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 20,
-                                    height: 20,
-                                    decoration: BoxDecoration(
-                                      color: state.selectedOption == option
-                                          ? Palette.primaryColor
-                                          : Palette.separatorColor,
-                                      shape: BoxShape.circle,
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: Center(
-                                      child: AppText.medium(
-                                        option,
-                                        color: state.selectedOption == option
-                                            ? Palette.primaryColor
-                                            : const Color.fromARGB(
-                                                255, 134, 134, 134),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    ).toList(),
-                  ),
-                  const SizedBox(height: 20),
-                  InfosColumn(
-                    opacity: 0.12,
-                    label: 'Immatriculation véhicule/tracteur',
-                    widget: Expanded(
-                      child: Functions.getTextField(
-                        controller: _numTracteurController,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+            AppText.small(
+              'Veuillez indiquer le mouvement du véhicule/tracteur et renseigner son numéro  d\'immatriculation.',
+              textAlign: TextAlign.center,
             ),
             const SizedBox(height: 15),
+            Row(
+              children: _searcheOptions.map(
+                (option) {
+                  return Expanded(
+                    child: InkWell(
+                      onTap: () {
+                        context.read<DeliveryBloc>().add(
+                              SelectDeliveryOption(option),
+                            );
+                        setState(() {
+                          _selectedOption = option;
+                        });
+                        print(_selectedOption);
+                        // print(_searcheOptions);
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 5),
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        height: 45,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(5),
+                          border: Border.all(
+                            color: state.selectedOption == option
+                                ? Palette.primaryColor
+                                : Palette.separatorColor,
+                            width: 3.5,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 20,
+                              height: 20,
+                              decoration: BoxDecoration(
+                                color: state.selectedOption == option
+                                    ? Palette.primaryColor
+                                    : Palette.separatorColor,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            Expanded(
+                              child: Center(
+                                child: AppText.medium(
+                                  option,
+                                  color: state.selectedOption == option
+                                      ? Palette.primaryColor
+                                      : const Color.fromARGB(
+                                          255, 134, 134, 134),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ).toList(),
+            ),
+            const SizedBox(height: 20),
+            InfosColumn(
+              opacity: 0.12,
+              label: 'Immatriculation véhicule/tracteur',
+              widget: Expanded(
+                child: Functions.getTextField(
+                  controller: _numTracteurController,
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+              child: textMidleLine(text: 'Véhicules sur site'),
+            ),
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  children: AglLivraisonModel.avalaibleDeli.map((deli) {
+                    return GestureDetector(
+                      onTap: () {
+                        if (_selectedOption.trim().isEmpty) {
+                          Functions.showToast(
+                            msg:
+                                'Indiquer le mouvement du véhicule ou du tracteur svp',
+                            gravity: ToastGravity.TOP,
+                          );
+                          return;
+                        }
+                        _setDeliState(deli);
+                        Navigator.pop(context);
+                      },
+                      child: DeliRow(deli: deli),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ),
+            const SizedBox(height: 25),
             SafeArea(
               child: CustomButton(
                   color: Palette.primaryColor,
@@ -1230,31 +1279,7 @@ class _AddDeliScreeState extends State<AddDeliScree> {
                       return;
                     } else {
                       EasyLoading.dismiss();
-                      setState(() {
-                        _widgetDeli = _livraison;
-                        _logisticAgents = _livraison.logisticAgents;
-                        _idCardType = _livraison.typePiece;
-                        _numTracteurController.text =
-                            _livraison.numeroImmatriculation;
-                        _numRemorqueController.text = _livraison.numeroRemorque;
-                        _nomController.text = _livraison.nom;
-                        _prenomsController.text = _livraison.prenoms;
-                        _telController.text = _livraison.telephone;
-                        _idCardController.text = _livraison.numeroPiece;
-                        _numConteneurController.text =
-                            _livraison.numeroConteneur;
-                        _pieceValidController.text = _livraison.validitePiece;
-                        _containerState = _livraison.etatConteneur;
-                        _containerHeight = _livraison.tailleConteneur;
-                        _numPlombController.text = _livraison.numeroPlomb;
-                        _docRefController.text = _livraison.referenceDocument;
-                        _designationController.text = _livraison.designation;
-                        _typeEnginController.text = _livraison.typeEngin;
-                        _marqueController.text = _livraison.marque;
-                        _motif = _livraison.motif;
-                        _commentaireController.text = _livraison.observation;
-                        ;
-                      });
+                      _setDeliState(_livraison);
                       Navigator.pop(context);
                     }
                   }),
@@ -1586,8 +1611,6 @@ class _AddDeliScreeState extends State<AddDeliScree> {
       "Sortie camion",
       "Chargement de marchandises",
       "Expédition de marchandises",
-      "Livraison",
-      "Recuperation",
     ];
     return Container(
       width: double.infinity,
@@ -1645,6 +1668,32 @@ class _AddDeliScreeState extends State<AddDeliScree> {
         ),
       ),
     );
+  }
+
+  void _setDeliState(AglLivraisonModel livraison) {
+    setState(() {
+      _widgetDeli = livraison;
+      _logisticAgents = livraison.logisticAgents;
+      _idCardType = livraison.typePiece;
+      _numTracteurController.text = livraison.numeroImmatriculation;
+      _numRemorqueController.text = livraison.numeroRemorque;
+      _nomController.text = livraison.nom;
+      _prenomsController.text = livraison.prenoms;
+      _telController.text = livraison.telephone;
+      _idCardController.text = livraison.numeroPiece;
+      _numConteneurController.text = livraison.numeroConteneur;
+      _pieceValidController.text = livraison.validitePiece;
+      _containerState = livraison.etatConteneur;
+      _containerHeight = livraison.tailleConteneur;
+      _numPlombController.text = livraison.numeroPlomb;
+      _docRefController.text = livraison.referenceDocument;
+      _designationController.text = livraison.designation;
+      _typeEnginController.text = livraison.typeEngin;
+      _marqueController.text = livraison.marque;
+      _motif = livraison.motif;
+      _commentaireController.text = livraison.observation;
+      ;
+    });
   }
 
   ///

@@ -172,9 +172,16 @@ class AglLivraisonModel {
       };
 
   static List<AglLivraisonModel> livraisonList = [];
+  static List<AglLivraisonModel> avalaibleDeli = [];
 
   static Future<void> getTracteurListFromApi() async {
+    avalaibleDeli = [];
     livraisonList = await RemoteService().getLivraisons();
+    livraisonList.forEach((deli) {
+      if (deli.active && deli.DateSortie == null) {
+        avalaibleDeli.add(deli);
+      }
+    });
   }
 
   static Future<List<AglLivraisonModel>> getDeli(
